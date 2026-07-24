@@ -14,7 +14,11 @@ export function baseOptions(): BaseLayoutProps {
             alt="TMA Cloud"
             width={26}
             height={26}
-            style={{ borderRadius: '50%' }}
+            style={{
+              borderRadius: '50%',
+              objectFit: 'cover',
+              backgroundColor: '#1c1c1c',
+            }}
           />
           <span style={{ fontWeight: 600 }}>{appName}</span>
         </>
