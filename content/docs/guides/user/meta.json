@@ -1,0 +1,10 @@
+{
+  "title": "User Guides",
+  "pages": [
+    "upload-files",
+    "manage-folders",
+    "share-files",
+    "starred-files",
+    "trash-restore"
+  ]
+}

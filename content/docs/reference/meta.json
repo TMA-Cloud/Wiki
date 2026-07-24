@@ -1,0 +1,12 @@
+{
+  "title": "Reference",
+  "pages": [
+    "environment-variables",
+    "database-schema",
+    "audit-events",
+    "error-codes",
+    "rate-limits",
+    "cli-commands",
+    "glossary"
+  ]
+}

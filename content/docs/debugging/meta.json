@@ -1,0 +1,13 @@
+{
+  "title": "Debugging",
+  "pages": [
+    "overview",
+    "common-errors",
+    "auth-issues",
+    "upload-issues",
+    "audit-issues",
+    "redis-issues",
+    "docker-issues",
+    "onlyoffice-issues"
+  ]
+}

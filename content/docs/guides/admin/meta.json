@@ -1,0 +1,10 @@
+{
+  "title": "Admin Guides",
+  "pages": [
+    "user-management",
+    "storage-limits",
+    "signup-control",
+    "mfa-management",
+    "share-base-url"
+  ]
+}

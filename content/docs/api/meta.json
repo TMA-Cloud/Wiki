@@ -1,0 +1,15 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "overview",
+    "authentication",
+    "sessions",
+    "files",
+    "sharing",
+    "users",
+    "onlyoffice",
+    "monitoring",
+    "errors",
+    "examples"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Documentation",
+  "root": true,
+  "pages": [
+    "index",
+    "gallery",
+    "getting-started",
+    "concepts",
+    "guides",
+    "api",
+    "debugging",
+    "reference",
+    "changelog"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Operations",
+  "pages": [
+    "audit-logs",
+    "logging",
+    "background-workers",
+    "monitoring",
+    "backups"
+  ]
+}
