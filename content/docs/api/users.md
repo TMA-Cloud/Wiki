@@ -560,9 +560,127 @@ Update the password change setting (admin only). When enabled, users can change 
 }
 ```
 
+## Orphaned Files
+
+First user (admin) only. Any other caller receives `403 Only the first user can review orphaned files`, and the attempt is audited.
+
+### GET `/api/user/orphans`
+
+Scan storage and the database for orphans. Read-only; nothing is deleted.
+
+**Query Parameters:**
+
+- `graceMinutes`: Optional. Integer between 60 and 525600 (1 year). Defaults to 1440 (24 hours). Items younger than this are held back on both sides so in-flight uploads are never reported.
+
+**Response:**
+
+```json
+{
+  "scannedAt": "2026-08-12T14:05:00.000Z",
+  "graceMinutes": 1440,
+  "driver": "s3",
+  "totals": {
+    "storedObjects": 12043,
+    "databaseRows": 12038,
+    "skippedTooRecent": 3
+  },
+  "storageOrphans": {
+    "items": [
+      {
+        "key": "9f2c1b7a-3c5e-4f11-8a90-2b0d5c7e1a44",
+        "size": 5242880,
+        "lastModified": "2026-08-01T09:12:00.000Z"
+      }
+    ],
+    "count": 1,
+    "totalBytes": 5242880,
+    "truncated": false
+  },
+  "databaseOrphans": {
+    "items": [
+      {
+        "id": "file_123",
+        "name": "report.pdf",
+        "path": "3a1f9c0d-77b2-4e6a-9d31-8c5b2e4f0a17",
+        "size": 1048576,
+        "mimeType": "application/pdf",
+        "modified": "2026-07-20T11:00:00.000Z",
+        "createdAt": "2026-07-20T11:00:00.000Z",
+        "trashed": false,
+        "ownerEmail": "user@example.com",
+        "ownerName": "User Name"
+      }
+    ],
+    "count": 1,
+    "totalBytes": 1048576,
+    "truncated": false
+  }
+}
+```
+
+**Fields:**
+
+- `driver`: `s3` or `local`.
+- `totals.skippedTooRecent`: Entries held back because they are younger than the grace window.
+- `storageOrphans`: Objects in storage with no `files` row pointing at them.
+- `databaseOrphans`: `files` rows whose stored object is missing. Trashed rows are included and flagged with `trashed`.
+- `truncated`: `true` when `count` exceeds the number of returned `items`. Each category returns at most 2000 items.
+
+### POST `/api/user/orphans/delete`
+
+Delete the orphans named in the request. Each entry is re-verified against the database and storage before removal; entries that no longer qualify come back as skipped with a reason.
+
+**Request Body:**
+
+```json
+{
+  "storageKeys": ["9f2c1b7a-3c5e-4f11-8a90-2b0d5c7e1a44"],
+  "fileIds": ["file_123"],
+  "graceMinutes": 1440
+}
+```
+
+**Validation:**
+
+- `storageKeys`: Optional. Array of strings, at most 500 entries.
+- `fileIds`: Optional. Array of strings, at most 500 entries.
+- `graceMinutes`: Optional. Integer between 60 and 525600. Defaults to 1440.
+
+At least one of `storageKeys` or `fileIds` must be non-empty.
+
+**Response:**
+
+```json
+{
+  "graceMinutes": 1440,
+  "storage": {
+    "results": [{ "key": "9f2c1b7a-3c5e-4f11-8a90-2b0d5c7e1a44", "deleted": true }],
+    "deleted": 1,
+    "skipped": 0
+  },
+  "database": {
+    "results": [{ "id": "file_123", "deleted": false, "reason": "Stored object exists again" }],
+    "deleted": 0,
+    "skipped": 1
+  }
+}
+```
+
+**Skip reasons:**
+
+- Storage keys: `Not a valid storage key`, `A file now references this object`, `Object no longer exists`, `Object was written too recently`
+- File IDs: `Row no longer exists`, `Row does not map to a storage key`, `Row was created too recently`, `Stored object exists again`
+
+**Error cases:**
+
+- `400 Select at least one orphan to delete` - Both arrays empty
+- `403 Only the first user can review orphaned files` - Caller is not the first user
+- `422 Validation failed` - Grace window out of range, array over 500 entries, or a non-string entry
+
 ## Related Topics
 
 - [Admin Guides](/docs/guides/admin/user-management) - User management
+- [Orphan Review](/docs/guides/admin/orphan-review) - Reviewing orphaned files
 - [Sub-users](/docs/guides/user/sub-users) - Creating and managing sub-users
 - [Authorization](/docs/concepts/authorization) - Permission model
 - [Storage Management](/docs/concepts/storage-management) - Storage concepts

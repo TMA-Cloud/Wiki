@@ -114,9 +114,21 @@ Files are automatically encrypted. Encryption uses AES-256-GCM with authenticate
 ### Cleanup
 
 - Trash cleanup frees space
-- Orphan file cleanup (S3: paginated listing to avoid loading all keys)
-- Automatic background processes
-- **S3:** Upload validation (e.g. `parentId`) runs after stream upload. The controller deletes failed bulk-upload objects when possible, but some rejected uploads can still leave orphan objects until the cleanup job runs. Keep the orphan cleanup job enabled and scheduled.
+- Automatic background processes handle trash, expired share links, and audit logs
+- Orphaned files are **not** removed automatically; an admin reviews and deletes them from **Settings** → **Administration** → **Review orphans**
+- **S3:** Upload validation (e.g. `parentId`) runs after stream upload. The controller deletes failed bulk-upload objects when possible, but some rejected uploads can still leave orphan objects behind. Review them periodically.
+
+### Orphans
+
+An orphan is either an object in storage that no `files` row points at, or a `files` row whose stored object is missing. Both are reported by an on-demand scan.
+
+- Scanning is read-only and makes a single pass over the bucket or upload directory, with no per-row HEAD requests. Memory is bounded by the number of database rows, not the number of stored objects.
+- A grace window (1 hour minimum, 24 hours default, 1 year maximum) hides anything younger on either side, so an upload or paste still in progress is never reported.
+- Row age comes from `files.created_at`, not `files.modified`, because uploads and copies preserve the client's original mtime.
+- Deletion is itemised. Every entry is re-verified against the database and the storage timestamp at the moment of deletion, so a stale scan cannot remove a live file.
+- Trashed rows still own their objects and count as referenced.
+
+See [Orphan Review](/docs/guides/admin/orphan-review) for the admin workflow.
 
 ## S3 Bucket Protection (when STORAGE_DRIVER=s3)
 

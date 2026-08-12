@@ -56,6 +56,9 @@ These events are only emitted when OnlyOffice integration is configured and enab
 - `admin.settings.read` - Admin viewed protected settings (failure when unauthorized)
 - `admin.user.list` - Admin listed all users
 - `admin.user.update` - Admin updated user (e.g. storage limit)
+- `admin.orphans.scan` - Admin scanned for orphans (metadata: `graceMinutes`, `storageOrphans`, `databaseOrphans`)
+- `admin.orphans.delete` - Admin deleted selected orphans (metadata: `graceMinutes`, `requestedStorage`, `requestedDatabase`, `storageDeleted`, `databaseDeleted`, `storageSkipped`, `databaseSkipped`)
+- `admin.orphans.access` - Non-admin attempted an orphan endpoint (metadata: `action`, `reason`); always `failure`
 
 ## Account Events
 

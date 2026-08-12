@@ -36,12 +36,6 @@ npm run worker
 - Runs every 24 hours
 - Permanent file deletion from storage
 
-#### Orphan Cleanup
-
-- Removes files without database records
-- Periodic scanning
-- Disk space recovery
-
 #### Share Link Cleanup
 
 - Deletes expired share links (`expires_at < NOW()`)

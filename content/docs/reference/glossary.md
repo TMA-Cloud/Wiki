@@ -53,6 +53,10 @@ The actual file format, detected by reading the first few bytes of the file cont
 
 The third-party document server that powers in-browser editing of `.docx`, `.xlsx`, `.pptx`, and `.pdf` files. Optional — the rest of TMA Cloud works without it.
 
+### Orphan
+
+Either a stored object that no `files` row points at, or a `files` row whose stored object is missing. Found by an on-demand scan and deleted only when an admin selects it. See [Orphan Review](/docs/guides/admin/orphan-review).
+
 ### Permission
 
 One capability a sub-user can be granted: `files.download`, `files.upload`, `files.edit`, `files.share`, `files.delete`, or `files.trash`. Stored in `users.permissions`. Account owners hold all of them implicitly and are never checked against the list. Anything not granted is refused. See [Authorization](/docs/concepts/authorization).

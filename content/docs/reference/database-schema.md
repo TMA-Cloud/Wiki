@@ -60,8 +60,11 @@ Files and folders.
 | `starred`    | BOOLEAN      | Default false                 |
 | `deleted_at` | TIMESTAMPTZ  | Soft delete timestamp         |
 | `modified`   | TIMESTAMPTZ  | Last modification time        |
+| `created_at` | TIMESTAMPTZ  | Row creation time             |
 
-**Indexes:** `user_id`, `parent_id`, `path`, `deleted_at`, full-text on `name`
+**Indexes:** `user_id`, `parent_id`, `path`, `deleted_at`, `created_at`, full-text on `name`
+
+**`modified` vs `created_at`:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. Renames and moves change neither `path` nor `created_at`.
 
 ### `share_links`
 

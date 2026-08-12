@@ -4,6 +4,7 @@
     "user-management",
     "storage-limits",
     "signup-control",
+    "orphan-review",
     "mfa-management",
     "share-base-url"
   ]
