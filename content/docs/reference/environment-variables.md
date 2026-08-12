@@ -7,11 +7,14 @@ Complete reference for all environment variables in TMA Cloud.
 
 ## Application Configuration
 
-| Variable      | Required         | Default       | Description         |
-| ------------- | ---------------- | ------------- | ------------------- |
-| `NODE_ENV`    | No               | `development` | Environment mode    |
-| `BPORT`       | No               | `3000`        | Backend server port |
-| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL  |
+| Variable      | Required         | Default       | Description                                   |
+| ------------- | ---------------- | ------------- | --------------------------------------------- |
+| `NODE_ENV`    | No               | `development` | Environment mode                              |
+| `BPORT`       | No               | `3000`        | Backend server port                           |
+| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL                            |
+| `TRUST_PROXY` | No               | `1`           | Reverse proxy hops to trust for the client IP |
+
+**`TRUST_PROXY`:** Behind a reverse proxy, the client IP is taken from `X-Forwarded-For` rather than the socket. Without this, every request appears to come from the proxy and all users share one rate-limit bucket. The default of `1` matches a single nginx or Traefik in front of the app, as in the shipped Compose files. Set it to the number of proxies if you have more than one, to a comma-separated list of proxy IPs or subnets, or to `0` when there is no proxy.
 
 ## Database Configuration
 
@@ -44,6 +47,9 @@ Complete reference for all environment variables in TMA Cloud.
 | ------------------------ | -------- | ------- | --------------------------------------------------------- |
 | `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                                 |
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, auth cookie has no `Secure` flag in production |
+| `SESSION_IDLE_DAYS`      | No       | `30`    | Days of inactivity before a session ends                  |
+
+**`SESSION_IDLE_DAYS`:** Tokens are issued for this window and re-issued while the user is active, so an active user is not logged out mid-use. A session ends after this many days with no requests. Values below 1 are ignored and fall back to 30. See [Authentication](/docs/concepts/authentication#session-lifetime).
 
 ## Google OAuth (Optional)
 

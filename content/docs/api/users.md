@@ -5,13 +5,13 @@ description: "User management endpoints for TMA Cloud."
 
 User management endpoints for TMA Cloud.
 
-**Note:** All endpoints in this section use the general API rate limit (10000 requests per 15 minutes per IP). Most also require admin privileges (first user).
+**Note:** All endpoints in this section use the general API rate limit (10000 requests per 15 minutes, per user when authenticated). Most also require admin privileges (first user). The sub-user endpoints require an account owner instead — see [Sub-users](#sub-users).
 
 ## List Users
 
 ### GET `/api/user/all`
 
-List all users (admin only).
+List all users (admin only). Sub-users are listed after the owner they belong to.
 
 **Response:**
 
@@ -29,17 +29,153 @@ An object containing an array of all user objects.
       "storageUsed": 1073741824,
       "storageLimit": 107374182400,
       "storageTotal": 107374182400,
-      "actualDiskSize": 1099511627776
+      "actualDiskSize": 1099511627776,
+      "parentUserId": null,
+      "permissions": null
     }
   ]
 }
 ```
 
+**Fields:**
+
+- `parentUserId`: The account this login belongs to. `null` for top-level accounts.
+- `permissions`: Granted permissions for sub-users. `null` for owners, who hold all of them.
+
+## Sub-users
+
+A sub-user is an extra login that shares the owner's files, folders and storage quota. These endpoints are restricted to account owners; a sub-user calling them receives `403`.
+
+See [Authorization](/docs/concepts/authorization) for the permission list and [Sub-users](/docs/guides/user/sub-users) for the interface.
+
+### GET `/api/user/sub-users`
+
+List the current owner's sub-users, along with the permissions the server recognises.
+
+**Response:**
+
+```json
+{
+  "subUsers": [
+    {
+      "id": "user_456",
+      "email": "colleague@example.com",
+      "name": "Colleague Name",
+      "permissions": ["files.download", "files.upload"],
+      "createdAt": "2024-01-01T00:00:00Z",
+      "mfaEnabled": false
+    }
+  ],
+  "availablePermissions": [
+    {
+      "key": "files.download",
+      "label": "Download",
+      "description": "Download files and folders, and open them in the document viewer"
+    }
+  ]
+}
+```
+
+**Note:** `availablePermissions` is the full catalog in display order. Clients should render this rather than a hard-coded list, so the options always match what the server enforces.
+
+### POST `/api/user/sub-users`
+
+Create a sub-user under the current owner.
+
+**Request Body:**
+
+```json
+{
+  "email": "colleague@example.com",
+  "password": "securepassword",
+  "name": "Colleague Name",
+  "permissions": ["files.download", "files.upload"]
+}
+```
+
+**Validation:**
+
+- `email`: Required. Valid email, max 254 characters. Must not already exist on the instance.
+- `password`: Required. Between 6 and 128 characters.
+- `name`: Required. Non-empty after trimming, max 100 characters.
+- `permissions`: Required. Array of permission keys. May be empty. Unknown keys are rejected.
+
+**Response (201):**
+
+```json
+{
+  "subUser": {
+    "id": "user_456",
+    "email": "colleague@example.com",
+    "name": "Colleague Name",
+    "permissions": ["files.download", "files.upload"],
+    "createdAt": "2024-01-01T00:00:00Z",
+    "mfaEnabled": false
+  }
+}
+```
+
+**Error cases:**
+
+- `403 Only the account owner can perform this action.` - Caller is a sub-user
+- `409 Email already in use`
+- `422 Validation failed` - Missing name, short password, or an unknown permission key; `details` names the field
+
+### PUT `/api/user/sub-users/:id`
+
+Replace a sub-user's permissions. The array is the complete new set, not a delta.
+
+**Request Body:**
+
+```json
+{
+  "permissions": ["files.download"]
+}
+```
+
+**Validation:**
+
+- `permissions`: Required. Array of permission keys. May be empty. Unknown keys are rejected.
+
+**Response:**
+
+```json
+{
+  "subUser": {
+    "id": "user_456",
+    "email": "colleague@example.com",
+    "name": "Colleague Name",
+    "permissions": ["files.download"],
+    "createdAt": "2024-01-01T00:00:00Z",
+    "mfaEnabled": false
+  }
+}
+```
+
+**Note:** Changes apply to the sub-user's next request. They do not need to log in again.
+
+### DELETE `/api/user/sub-users/:id`
+
+Remove a sub-user. Files are not affected — they belong to the owner. The sub-user's sessions and desktop heartbeats are dropped immediately.
+
+**Response:**
+
+```json
+{
+  "message": "Sub-user removed"
+}
+```
+
+**Error cases:**
+
+- `403 Only the account owner can perform this action.` - Caller is a sub-user
+- `404 Sub-user not found` - No such sub-user under this owner
+
 ## Storage
 
 ### GET `/api/user/storage`
 
-Get storage usage information for the authenticated user.
+Get storage usage information for the authenticated user's account. For a sub-user this reports the owner's usage and limit, since the quota is shared.
 
 **Response:**
 
@@ -427,4 +563,6 @@ Update the password change setting (admin only). When enabled, users can change 
 ## Related Topics
 
 - [Admin Guides](/docs/guides/admin/user-management) - User management
+- [Sub-users](/docs/guides/user/sub-users) - Creating and managing sub-users
+- [Authorization](/docs/concepts/authorization) - Permission model
 - [Storage Management](/docs/concepts/storage-management) - Storage concepts

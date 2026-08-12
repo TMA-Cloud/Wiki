@@ -5,6 +5,7 @@
     "manage-folders",
     "share-files",
     "starred-files",
-    "trash-restore"
+    "trash-restore",
+    "sub-users"
   ]
 }

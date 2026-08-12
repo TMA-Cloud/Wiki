@@ -72,33 +72,80 @@ npm run worker
 - `admin.settings.update` - Admin setting changed (e.g. signup enabled/disabled)
 - `admin.settings.read` - Admin read of protected settings
 
+### Account Events
+
+- `account.sub_user.create` / `account.sub_user.update` / `account.sub_user.delete` - Sub-user managed
+- `account.permission_denied` - Sub-user attempted something it was not granted
+- `account.owner_action_denied` - Sub-user attempted an owner-only action
+
+## Identifying the Actor
+
+Events are written to the `audit_log` table. Three columns describe who acted:
+
+- `user_id` - The login that performed the action. For a sub-user this is its own ID, never the owner's.
+- `account_owner_id` - The account the action happened under. Equals `user_id` for account owners.
+- `actor_role` - `owner` or `sub_user`.
+
+The `audit_activity` view resolves these to names and emails, which is usually easier to read than raw IDs.
+
+```sql
+SELECT created_at, actor_email, actor_role, action, status
+FROM audit_activity
+WHERE account_email = 'owner@example.com'
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
 ## Querying Audit Logs
 
 ### View User Activity
 
 ```sql
-SELECT event_type, status, metadata, created_at
-FROM audit_logs
+SELECT action, status, metadata, created_at
+FROM audit_log
 WHERE user_id = 'user_abc123'
+ORDER BY created_at DESC;
+```
+
+### View Everything Under One Account
+
+Includes the owner and all of its sub-users.
+
+```sql
+SELECT created_at, user_id, actor_role, action, resource_id
+FROM audit_log
+WHERE account_owner_id = 'user_abc123'
 ORDER BY created_at DESC;
 ```
 
 ### View Failed Operations
 
 ```sql
-SELECT event_type, user_id, metadata, created_at
-FROM audit_logs
+SELECT action, user_id, metadata, created_at
+FROM audit_log
 WHERE status = 'failure'
+ORDER BY created_at DESC;
+```
+
+### View Permission Denials
+
+Useful when a sub-user reports that something is missing from their interface.
+
+```sql
+SELECT created_at, actor_email, metadata->>'permission' AS permission,
+       metadata->>'path' AS path
+FROM audit_activity
+WHERE action = 'account.permission_denied'
 ORDER BY created_at DESC;
 ```
 
 ### View File Operations
 
 ```sql
-SELECT event_type, user_id, metadata->>'fileName' as file_name, created_at
-FROM audit_logs
+SELECT action, user_id, metadata->>'fileName' as file_name, created_at
+FROM audit_log
 WHERE resource_type = 'file'
-  AND event_type LIKE 'file.%'
+  AND action LIKE 'file.%'
 ORDER BY created_at DESC;
 ```
 
@@ -106,15 +153,15 @@ ORDER BY created_at DESC;
 
 ```sql
 -- Find operations on specific file
-SELECT * FROM audit_logs
+SELECT * FROM audit_log
 WHERE metadata @> '{"fileId": "file_123"}'::jsonb
 ORDER BY created_at DESC;
 
 -- Find large file uploads
 SELECT user_id, metadata->>'fileName' as file_name,
        (metadata->>'fileSize')::bigint as size, created_at
-FROM audit_logs
-WHERE event_type = 'file.upload'
+FROM audit_log
+WHERE action = 'file.upload'
   AND (metadata->>'fileSize')::bigint > 10485760
 ORDER BY created_at DESC;
 
@@ -123,8 +170,8 @@ SELECT user_id,
        metadata->>'fileCount' as file_count,
        metadata->>'parentId'  as parent_id,
        created_at
-FROM audit_logs
-WHERE event_type = 'file.upload.bulk'
+FROM audit_log
+WHERE action = 'file.upload.bulk'
 ORDER BY created_at DESC;
 ```
 
@@ -160,3 +207,4 @@ Higher values = faster processing but more database connections. Recommended: 5-
 - [Logging](/docs/guides/operations/logging) - Application logging
 - [Monitoring](/docs/guides/operations/monitoring) - System monitoring
 - [Reference: Audit Events](/docs/reference/audit-events) - Complete event list
+- [Database Schema](/docs/reference/database-schema#audit_log) - `audit_log` columns and the `audit_activity` view

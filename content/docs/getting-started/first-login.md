@@ -43,6 +43,10 @@ As the first user (admin), you can control whether new users can sign up:
 
 When signup is disabled, only the first user (admin) can allow signup.
 
+## Adding People to Your Account
+
+If others need access to the same files, create a sub-user for each of them rather than sharing your password. Sub-users sign in with their own email and password, share your files and storage, and only get the permissions you tick. See [Sub-users](/docs/guides/user/sub-users).
+
 ## Next Steps
 
 Now that you're logged in:

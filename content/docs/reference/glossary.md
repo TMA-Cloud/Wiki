@@ -5,9 +5,13 @@ description: "Short definitions for terms that appear throughout the TMA Cloud d
 
 Short definitions for terms that appear throughout the TMA Cloud docs.
 
+### Account owner
+
+A top-level login — one with no `parent_user_id`. Owns the files, folders and storage quota that its sub-users share, and is the only login that can manage those sub-users. See [Sub-users](/docs/guides/user/sub-users).
+
 ### Admin / first user
 
-The first account created on a fresh deployment. Permanently stored in `app_settings.first_user_id`. Sees the Administration section in Settings and controls signup, storage, and MFA settings.
+The first account created on a fresh deployment. Permanently stored in `app_settings.first_user_id`. Sees the Administration section in Settings and controls signup, storage, and MFA settings. Separate from account ownership: every account is an owner, but only one is the admin.
 
 ### Audit log
 
@@ -49,6 +53,10 @@ The actual file format, detected by reading the first few bytes of the file cont
 
 The third-party document server that powers in-browser editing of `.docx`, `.xlsx`, `.pptx`, and `.pdf` files. Optional — the rest of TMA Cloud works without it.
 
+### Permission
+
+One capability a sub-user can be granted: `files.download`, `files.upload`, `files.edit`, `files.share`, `files.delete`, or `files.trash`. Stored in `users.permissions`. Account owners hold all of them implicitly and are never checked against the list. Anything not granted is refused. See [Authorization](/docs/concepts/authorization).
+
 ### pg-boss
 
 The PostgreSQL-backed job queue used for background work (audit event writes, trash cleanup). You don't interact with it directly; it runs inside the backend process.
@@ -73,9 +81,13 @@ Moving a file to trash rather than removing it from storage. Trashed files are a
 
 How and where uploaded files live. `local` stores them in `UPLOAD_DIR` on the backend host; `s3` streams them to an S3-compatible bucket. Controlled by `STORAGE_DRIVER`.
 
+### Sub-user
+
+An extra login created by an account owner. Has its own email, password, MFA and sessions, but reads and writes the owner's files and counts against the owner's quota. Holds only the permissions the owner grants, and cannot create sub-users of its own. See [Sub-users](/docs/guides/user/sub-users).
+
 ### Token version (`token_version`)
 
-A per-user counter that increments when the user logs out of all devices or changes password. Existing JWTs are rejected if their embedded version is older than the current one — this is how "logout everywhere" works without a token denylist.
+A per-user counter that increments when the user logs out of all devices or changes password. Existing JWTs are rejected if their embedded version is older than the current one — this is how "logout everywhere" works without a token denylist. The counter is per login, so a sub-user changing its password does not sign out the rest of the account.
 
 ### Trash
 

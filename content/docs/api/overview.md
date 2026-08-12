@@ -13,6 +13,10 @@ All API endpoints are prefixed with `/api` unless otherwise specified.
 
 Most endpoints require JWT token sent as httpOnly cookie. Rate limiting: 25 attempts per 15 minutes for login/signup.
 
+## Authorization
+
+Endpoints act on the caller's account rather than the individual login, so an account owner and its sub-users share the same files and quota. File endpoints additionally check the caller's permission and return `403` when it is missing. See [Authorization](/docs/concepts/authorization).
+
 ## API Sections
 
 - **[Authentication](/docs/api/authentication)** - Login, signup, sessions

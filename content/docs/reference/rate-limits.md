@@ -9,6 +9,8 @@ Rate limiting configuration and limits for TMA Cloud API.
 
 Rate limits are enforced per IP address and/or user for different endpoint types to prevent abuse and ensure service stability.
 
+**Behind a reverse proxy:** limits keyed by IP need `TRUST_PROXY` set correctly, otherwise every request looks like it came from the proxy and all users share a single bucket. See [Environment Variables](/docs/reference/environment-variables). Sub-users count separately from their account owner, since keys use the individual login.
+
 ## Endpoint Limits
 
 ### Authentication Limiter
@@ -22,8 +24,8 @@ Rate limits are enforced per IP address and/or user for different endpoint types
 
 ### General API Limiter
 
-- **Limit:** 10000 requests per 15 minutes per IP address.
-- **Purpose:** Limits general API usage per IP.
+- **Limit:** 10000 requests per 15 minutes, keyed per user when authenticated and per IP address otherwise.
+- **Purpose:** Limits general API usage. Keying on the user means colleagues sharing an office IP do not share a bucket.
 - **Endpoints:**
   - Public endpoints (e.g. `GET /api/signup-status`).
   - Authenticated auth and profile endpoints (e.g. `/api/profile`, `/api/sessions`, `/api/mfa/*`, `/api/logout`).
@@ -103,4 +105,5 @@ Some endpoints provide a more specific message and additional data:
 ## Related Topics
 
 - [API Overview](/docs/api/overview) - API reference
+- [Environment Variables](/docs/reference/environment-variables) - `TRUST_PROXY` and other settings
 - [Error Codes](/docs/reference/error-codes) - Error reference

@@ -57,6 +57,24 @@ These events are only emitted when OnlyOffice integration is configured and enab
 - `admin.user.list` - Admin listed all users
 - `admin.user.update` - Admin updated user (e.g. storage limit)
 
+## Account Events
+
+- `account.sub_user.create` - Sub-user created (metadata: `email`, `permissions`; failure when the email is already in use)
+- `account.sub_user.update` - Sub-user permissions replaced (metadata: `permissions`)
+- `account.sub_user.delete` - Sub-user removed (metadata: `email`, `permissions`)
+- `account.permission_denied` - A sub-user attempted something it was not granted (metadata: `permission`, `method`, `path`); always `failure`
+- `account.owner_action_denied` - A sub-user attempted an owner-only action (metadata: `method`, `path`); always `failure`
+
+## Who Performed the Action
+
+Every row records the acting login and the account it happened under:
+
+- `user_id` - The login that acted. For a sub-user this is the sub-user's own ID, never the owner's.
+- `account_owner_id` - The account the action belongs to. Equals `user_id` for owners.
+- `actor_role` - `owner` or `sub_user`.
+
+The `audit_activity` view joins these back to names and emails. See [Database Schema](/docs/reference/database-schema#audit_activity).
+
 ## Event Metadata
 
 Each event includes metadata with relevant information:
@@ -64,6 +82,7 @@ Each event includes metadata with relevant information:
 - **File Events:** `fileId`, `fileName`, `fileSize`, `fileType`. For `file.upload.bulk` and `file.download.bulk`, metadata also includes `fileIds` and `fileCount`.
 - **User Events:** `userId`, `email`, `ipAddress`
 - **Share Events:** `shareLinkId`, `token`, `fileIds`
+- **Account Events:** `email`, `permissions`, and for denials `permission`, `method`, `path`
 
 ## Related Topics
 

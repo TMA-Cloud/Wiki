@@ -7,6 +7,31 @@ File management endpoints for TMA Cloud.
 
 **Note:** All endpoints that accept `ids` arrays process multiple files in bulk operations. This includes move, copy, star, share, delete, restore, and download operations.
 
+## Account Scope and Permissions
+
+File endpoints operate on the caller's **account**, not on the individual login. An account owner and its sub-users read and write the same files, folders and storage quota.
+
+Listing, searching, and reading file details are available to every member of an account. The remaining endpoints require a permission, which owners always hold and sub-users are granted individually:
+
+| Permission       | Endpoints                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `files.download` | `GET /:id/download`, `POST /download/bulk`                                                                   |
+| `files.upload`   | `POST /folder`, `POST /upload`, `POST /upload/bulk`, `POST /upload/check`, `POST /copy`, `POST /:id/derived` |
+| `files.edit`     | `POST /move`, `POST /rename`, `POST /star`, `POST /:id/replace`                                              |
+| `files.share`    | `POST /share`, `POST /share/links`, `POST /link-parent-share`                                                |
+| `files.delete`   | `POST /delete`                                                                                               |
+| `files.trash`    | `POST /trash/restore`, `POST /trash/delete`, `POST /trash/empty`                                             |
+
+A request without the required permission returns `403` with a message naming it:
+
+```json
+{
+  "message": "You do not have permission to do that. Ask the account owner to enable \"Upload & create\"."
+}
+```
+
+The check runs before the request body is read, so a rejected upload does not transfer its file. See [Authorization](/docs/concepts/authorization).
+
 ## List Files
 
 ### GET `/api/files`
@@ -839,4 +864,5 @@ A Server-Sent Events stream.
 ## Related Topics
 
 - [Sharing](/docs/api/sharing) - Share link endpoints
+- [Authorization](/docs/concepts/authorization) - Account scope and permissions
 - [File System Concepts](/docs/concepts/file-system) - File system overview

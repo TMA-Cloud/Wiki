@@ -68,19 +68,23 @@ Authenticate a user and receive a JWT token. If MFA is enabled for the user, `mf
 
 **Response:**
 
-The authenticated user's object.
+The authenticated user's object, including `isSubUser` and the login's `permissions` (same meaning as in [Profile](#profile)).
 
 ```json
 {
   "user": {
     "id": "user_123",
     "email": "user@example.com",
-    "name": "User Name"
+    "name": "User Name",
+    "isSubUser": false,
+    "permissions": ["files.download", "files.upload"]
   }
 }
 ```
 
 **Note:** The JWT token is set as an httpOnly cookie named `token`.
+
+**Note:** Sub-users log in through this endpoint like any other account.
 
 **Rate limiting:** 25 attempts per 15 minutes per IP/email.
 
@@ -163,7 +167,7 @@ On success, all existing sessions and tokens are invalidated. The user must log 
 
 ### GET `/api/profile`
 
-Get the current authenticated user's profile.
+Get the current authenticated user's profile, including what this login is allowed to do.
 
 **Response:**
 
@@ -173,11 +177,25 @@ Get the current authenticated user's profile.
   "email": "user@example.com",
   "name": "User Name",
   "mfaEnabled": false,
-  "createdAt": "2024-01-01T00:00:00Z"
+  "createdAt": "2024-01-01T00:00:00Z",
+  "isSubUser": false,
+  "permissions": [
+    "files.download",
+    "files.upload",
+    "files.edit",
+    "files.share",
+    "files.delete",
+    "files.trash"
+  ]
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Fields:**
+
+- `isSubUser`: `true` when this login belongs to another account.
+- `permissions`: What this login may do. Owners receive the full set; sub-users receive only what was granted. See [Authorization](/docs/concepts/authorization).
+
+**Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
 
 ## Google OAuth
 

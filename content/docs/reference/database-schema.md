@@ -9,22 +9,39 @@ PostgreSQL database schema for TMA Cloud.
 
 ### `users`
 
-User accounts.
+User accounts and sub-users.
 
-| Column                    | Type         | Description                     |
-| ------------------------- | ------------ | ------------------------------- |
-| `id`                      | VARCHAR(255) | Primary key                     |
-| `email`                   | VARCHAR(255) | Unique, not null                |
-| `password`                | VARCHAR(255) | Hashed (nullable for OAuth)     |
-| `name`                    | VARCHAR(255) | Display name                    |
-| `google_id`               | VARCHAR(255) | Unique (optional)               |
-| `mfa_enabled`             | BOOLEAN      | Default false                   |
-| `mfa_secret`              | TEXT         | TOTP secret (nullable)          |
-| `token_version`           | INTEGER      | Token version for revocation    |
-| `last_token_invalidation` | TIMESTAMP    | Last token invalidation time    |
-| `storage_limit`           | BIGINT       | Storage limit (nullable, bytes) |
-| `created_at`              | TIMESTAMPTZ  | Default now()                   |
-| `updated_at`              | TIMESTAMPTZ  | Default now()                   |
+| Column                    | Type         | Description                                      |
+| ------------------------- | ------------ | ------------------------------------------------ |
+| `id`                      | VARCHAR(255) | Primary key                                      |
+| `email`                   | VARCHAR(255) | Unique, not null                                 |
+| `password`                | VARCHAR(255) | Hashed (nullable for OAuth)                      |
+| `name`                    | VARCHAR(255) | Display name                                     |
+| `google_id`               | VARCHAR(255) | Unique (optional)                                |
+| `mfa_enabled`             | BOOLEAN      | Default false                                    |
+| `mfa_secret`              | TEXT         | TOTP secret (nullable)                           |
+| `token_version`           | INTEGER      | Token version for revocation                     |
+| `last_token_invalidation` | TIMESTAMP    | Last token invalidation time                     |
+| `storage_limit`           | BIGINT       | Storage limit (nullable, bytes)                  |
+| `parent_user_id`          | TEXT         | Account owner for sub-users (null for owners)    |
+| `permissions`             | TEXT[]       | Granted permissions for sub-users (default `{}`) |
+| `created_at`              | TIMESTAMPTZ  | Default now()                                    |
+| `updated_at`              | TIMESTAMPTZ  | Default now()                                    |
+
+**Sub-users:** A row with `parent_user_id` set is a sub-user of that account. The account any row belongs to is `COALESCE(parent_user_id, id)`, which is the value stored in `files.user_id`.
+
+**Constraints:**
+
+- `users_permissions_valid` — every entry in `permissions` must be a known key (`files.download`, `files.upload`, `files.edit`, `files.share`, `files.delete`, `files.trash`)
+- `users_owner_has_no_permissions` — owners keep an empty `permissions` array; they are never checked against it
+- `users_parent_not_self` — a row cannot be its own parent
+
+**Triggers:**
+
+- `trg_users_reject_nested_sub_user` — refuses an insert or update whose parent is itself a sub-user, so sub-users cannot own sub-users
+- `trg_users_reject_demoting_parent` — refuses turning an owner that already has sub-users into a sub-user
+
+**Indexes:** Partial index on `parent_user_id` where `parent_user_id IS NOT NULL`
 
 ### `files`
 
@@ -121,24 +138,57 @@ Active Electron desktop client heartbeat records.
 
 **Indexes:** `user_id`, `last_seen_at`
 
-### `audit_logs`
+### `audit_log`
 
 Audit trail events.
 
-| Column          | Type         | Description               |
-| --------------- | ------------ | ------------------------- |
-| `id`            | SERIAL       | Primary key               |
-| `event_type`    | VARCHAR(100) | Event type                |
-| `user_id`       | VARCHAR(16)  | FK → users.id (nullable)  |
-| `status`        | VARCHAR(20)  | 'success' or 'failure'    |
-| `resource_type` | VARCHAR(50)  | Resource type             |
-| `resource_id`   | VARCHAR(255) | Resource ID               |
-| `ip_address`    | INET         | Client IP                 |
-| `user_agent`    | TEXT         | Browser user agent        |
-| `metadata`      | JSONB        | Event-specific data       |
-| `created_at`    | TIMESTAMP    | Default CURRENT_TIMESTAMP |
+| Column               | Type        | Description                                         |
+| -------------------- | ----------- | --------------------------------------------------- |
+| `id`                 | BIGSERIAL   | Primary key                                         |
+| `request_id`         | TEXT        | Correlation ID, not null                            |
+| `user_id`            | TEXT        | FK → users.id (nullable). Who performed the action  |
+| `account_owner_id`   | TEXT        | FK → users.id (nullable). Account it happened under |
+| `actor_role`         | TEXT        | `owner` or `sub_user` at the time of the event      |
+| `action`             | TEXT        | Event type, e.g. `file.upload`                      |
+| `resource_type`      | TEXT        | Resource type                                       |
+| `resource_id`        | TEXT        | Resource ID                                         |
+| `status`             | TEXT        | 'success', 'failure' or 'error'                     |
+| `ip_address`         | INET        | Client IP                                           |
+| `user_agent`         | TEXT        | Browser user agent                                  |
+| `metadata`           | JSONB       | Event-specific data                                 |
+| `error_message`      | TEXT        | Error details when status is 'error'                |
+| `processing_time_ms` | INTEGER     | Operation duration                                  |
+| `created_at`         | TIMESTAMPTZ | Default now()                                       |
 
-**Indexes:** `user_id`, `event_type`, `created_at`, `(resource_type, resource_id)`
+`user_id` is always the login that acted. For a sub-user, `account_owner_id` is the owner whose files were touched; for an owner the two match.
+
+**Indexes:** `(user_id, created_at DESC)`, `(account_owner_id, created_at DESC)`, `action`, `created_at`, `request_id`, `(resource_type, resource_id)`, GIN on `metadata`
+
+## Views
+
+### `audit_activity`
+
+Read-only view over `audit_log` that resolves user IDs to names and emails, so the trail can be read without writing joins.
+
+| Column              | Description                                          |
+| ------------------- | ---------------------------------------------------- |
+| `actor_id`          | `audit_log.user_id`                                  |
+| `actor_name`        | Name of the login that acted                         |
+| `actor_email`       | Email of the login that acted                        |
+| `account_owner_id`  | Account the action happened under                    |
+| `account_email`     | Email of the account owner                           |
+| `acted_as_sub_user` | `true` when the actor differs from the account owner |
+| `actor_role`        | `owner` or `sub_user`                                |
+
+All other columns are passed through from `audit_log`.
+
+```sql
+SELECT created_at, actor_email, actor_role, action, resource_id
+FROM audit_activity
+WHERE account_email = 'owner@example.com'
+ORDER BY created_at DESC
+LIMIT 100;
+```
 
 ### `pgboss.*`
 
@@ -155,22 +205,44 @@ Migration tracking.
 
 ## Relationships
 
+- User → Sub-users (parent-child, self-referential via `parent_user_id`, CASCADE)
 - User → Files (one-to-many, CASCADE)
 - File → Files (parent-child, self-referential, CASCADE)
 - User → Share Links (one-to-many, CASCADE)
 - Share Link → Files (many-to-many via `share_link_files`)
 - User → Sessions (one-to-many, CASCADE)
 - User → Client Heartbeats (one-to-many, CASCADE)
-- User → Audit Logs (one-to-many, SET NULL)
+- User → Audit Log (one-to-many, SET NULL — on both `user_id` and `account_owner_id`)
+
+Deleting an owner cascades to its sub-users. Deleting a sub-user removes only that login; the account's files stay because they are stored under the owner's ID.
 
 ## Common Queries
 
-**List user files:**
+**List account files:**
+
+`$1` is the account ID — the owner's ID, not the sub-user's.
 
 ```sql
 SELECT * FROM files
 WHERE user_id = $1 AND parent_id = $2 AND deleted_at IS NULL
 ORDER BY type, name;
+```
+
+**Resolve the account for a login:**
+
+```sql
+SELECT COALESCE(parent_user_id, id) AS account_id, permissions
+FROM users
+WHERE id = $1;
+```
+
+**List an owner's sub-users:**
+
+```sql
+SELECT id, email, name, permissions, created_at
+FROM users
+WHERE parent_user_id = $1
+ORDER BY created_at;
 ```
 
 **Search files:**
@@ -193,12 +265,22 @@ ORDER BY
   modified DESC;
 ```
 
-**Query audit logs:**
+**Query audit log:**
 
 ```sql
-SELECT event_type, status, metadata, created_at
-FROM audit_logs
+SELECT action, status, metadata, created_at
+FROM audit_log
 WHERE user_id = $1
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
+**Query everything done under one account, including its sub-users:**
+
+```sql
+SELECT created_at, user_id, actor_role, action, resource_id
+FROM audit_log
+WHERE account_owner_id = $1
 ORDER BY created_at DESC
 LIMIT 100;
 ```

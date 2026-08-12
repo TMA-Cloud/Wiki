@@ -34,6 +34,18 @@ TMA Cloud supports multiple authentication methods:
 
 - JWT tokens with expiration
 - Token versioning for revocation
+- Session ID bound to the token, so single sessions can be revoked
+
+### Session Lifetime
+
+Sessions expire after a period of **inactivity**, not a fixed period after login.
+
+- Tokens are issued for the idle window, 30 days by default (`SESSION_IDLE_DAYS`)
+- While the user is active, the token is re-issued before it runs out, so an active user is not logged out mid-use
+- `sessions.last_activity` is updated on each authenticated request and is what the idle check reads
+- After the idle window passes with no requests, the session ends and the user logs in again
+
+Set `SESSION_IDLE_DAYS` to change the window. See [Environment Variables](/docs/reference/environment-variables).
 
 ### Active Sessions
 
@@ -49,6 +61,12 @@ TMA Cloud supports multiple authentication methods:
 - **Audit Logging:** All authentication events logged
 - **Password Change:** When enabled, users can change their own password from Settings → Security and password change will invalidate all active sessions
 
+## Sub-user Logins
+
+Sub-users authenticate the same way as any other account: their own email and password, their own MFA, and their own sessions. Logging out or changing the password on one login does not affect the others on the same account.
+
+What differs is what the login can reach — see [Authorization](/docs/concepts/authorization).
+
 ## First User Privileges
 
 The first user to sign up becomes the administrator with full system access.
@@ -63,5 +81,6 @@ Administrators can enable/disable user registration:
 ## Related Topics
 
 - [Authorization](/docs/concepts/authorization) - Access control and permissions
+- [Sub-users](/docs/guides/user/sub-users) - Extra logins on one account
 - [Security Model](/docs/concepts/security-model) - Overall security architecture
 - [API: Authentication](/docs/api/authentication) - API endpoints

@@ -24,14 +24,16 @@ Overall security architecture and practices in TMA Cloud.
 
 - **Active Session Management:** View and revoke sessions
 - **Logout All:** Invalidate all tokens
+- **Idle Expiry:** Sessions end after an inactivity window (30 days by default)
 
 ## Authorization Security
 
 ### Access Control
 
-- **User Isolation:** Users can only access their files
+- **Account Isolation:** A login can only reach its own account's files
 - **Role-Based:** Admin vs regular user permissions
-- **API Authorization:** Endpoint-level checks
+- **Per-Permission Grants:** Sub-users hold an explicit set of permissions; anything not granted is refused
+- **API Authorization:** Endpoint-level checks, run before request bodies are read
 - **Share Link Security:** Token-based access
 
 ### Input Validation
