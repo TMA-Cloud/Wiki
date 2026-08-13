@@ -1,6 +1,6 @@
 ---
-title: "Backups"
-description: "Backup and restore procedures for TMA Cloud."
+title: 'Backups'
+description: 'Backup and restore procedures for TMA Cloud.'
 ---
 
 Backup and restore procedures for TMA Cloud.

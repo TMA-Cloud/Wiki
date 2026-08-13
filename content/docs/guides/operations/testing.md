@@ -1,6 +1,6 @@
 ---
-title: "Testing"
-description: "Running the TMA Cloud test suites."
+title: 'Testing'
+description: 'Running the TMA Cloud test suites.'
 ---
 
 Running the TMA Cloud test suites.
@@ -10,12 +10,12 @@ Running the TMA Cloud test suites.
 There are four suites, all using [Vitest](https://vitest.dev). Two run from a clean
 checkout with no services; two talk to real infrastructure.
 
-| Suite               | Location                       | Needs                   |
-| ------------------- | ------------------------------ | ----------------------- |
-| Backend unit        | `backend/tests/unit`, `backend/tests/integration` | Nothing |
-| Backend integration | `backend/tests/integration-db` | PostgreSQL and Redis    |
-| S3 storage driver   | `backend/tests/integration-s3` | An S3-compatible bucket |
-| Frontend            | `frontend/tests`               | Nothing                 |
+| Suite               | Location                                          | Needs                   |
+| ------------------- | ------------------------------------------------- | ----------------------- |
+| Backend unit        | `backend/tests/unit`, `backend/tests/integration` | Nothing                 |
+| Backend integration | `backend/tests/integration-db`                    | PostgreSQL and Redis    |
+| S3 storage driver   | `backend/tests/integration-s3`                    | An S3-compatible bucket |
+| Frontend            | `frontend/tests`                                  | Nothing                 |
 
 `backend/tests/integration` holds route-level tests that mount the real routers with
 the controllers stubbed. They need no services, so they run as part of the unit suite.
@@ -109,10 +109,10 @@ The integration suite reads connection details from the project `.env`, then ove
 three of them so it never touches working data. Setup fails with an error if an
 override has not taken effect.
 
-| Override                    | Reason                                                                 |
-| --------------------------- | ---------------------------------------------------------------------- |
-| `DB_NAME=tma_cloud_test`    | Its own database. Setup stops unless the name ends in `_test`.          |
-| `REDIS_DB=15`               | Its own cache. Setup stops if the value is `0`.                         |
+| Override                            | Reason                                                         |
+| ----------------------------------- | -------------------------------------------------------------- |
+| `DB_NAME=tma_cloud_test`            | Its own database. Setup stops unless the name ends in `_test`. |
+| `REDIS_DB=15`                       | Its own cache. Setup stops if the value is `0`.                |
 | `UPLOAD_DIR=backend/tests/.tmp/...` | Setup stops if the path is outside the tests directory.        |
 
 Create the database once:

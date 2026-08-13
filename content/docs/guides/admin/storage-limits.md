@@ -1,6 +1,6 @@
 ---
-title: "Storage Limits"
-description: "Configure storage limits for users in TMA Cloud (admin only)."
+title: 'Storage Limits'
+description: 'Configure storage limits for users in TMA Cloud (admin only).'
 ---
 
 Configure storage limits for users in TMA Cloud (admin only).

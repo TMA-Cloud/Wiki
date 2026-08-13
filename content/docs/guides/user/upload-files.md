@@ -1,6 +1,6 @@
 ---
-title: "Upload Files"
-description: "Learn how to upload and manage files in TMA Cloud."
+title: 'Upload Files'
+description: 'Learn how to upload and manage files in TMA Cloud.'
 ---
 
 Learn how to upload and manage files in TMA Cloud.

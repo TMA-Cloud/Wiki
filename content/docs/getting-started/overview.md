@@ -1,6 +1,6 @@
 ---
-title: "Getting Started"
-description: "Welcome to TMA Cloud! This guide will help you get up and running quickly."
+title: 'Getting Started'
+description: 'Welcome to TMA Cloud! This guide will help you get up and running quickly.'
 ---
 
 Welcome to TMA Cloud! This guide will help you get up and running quickly.

@@ -1,6 +1,6 @@
 ---
-title: "Sharing API"
-description: "Share link endpoints for TMA Cloud."
+title: 'Sharing API'
+description: 'Share link endpoints for TMA Cloud.'
 ---
 
 Share link endpoints for TMA Cloud.

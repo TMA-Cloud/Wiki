@@ -1,6 +1,6 @@
 ---
-title: "OnlyOffice Issues"
-description: "Troubleshooting OnlyOffice integration problems."
+title: 'OnlyOffice Issues'
+description: 'Troubleshooting OnlyOffice integration problems.'
 ---
 
 Troubleshooting OnlyOffice integration problems.

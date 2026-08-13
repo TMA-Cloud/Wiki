@@ -1,6 +1,6 @@
 ---
-title: "First Login"
-description: "Create your first account and get started with TMA Cloud."
+title: 'First Login'
+description: 'Create your first account and get started with TMA Cloud.'
 ---
 
 Create your first account and get started with TMA Cloud.

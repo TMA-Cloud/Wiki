@@ -1,6 +1,6 @@
 ---
-title: "Database Schema"
-description: "PostgreSQL database schema for TMA Cloud."
+title: 'Database Schema'
+description: 'PostgreSQL database schema for TMA Cloud.'
 ---
 
 PostgreSQL database schema for TMA Cloud.

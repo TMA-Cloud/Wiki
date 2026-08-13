@@ -1,6 +1,6 @@
 ---
-title: "Sharing Model"
-description: "How file sharing works in TMA Cloud."
+title: 'Sharing Model'
+description: 'How file sharing works in TMA Cloud.'
 ---
 
 How file sharing works in TMA Cloud.

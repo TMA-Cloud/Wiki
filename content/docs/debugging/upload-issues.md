@@ -1,6 +1,6 @@
 ---
-title: "Upload Issues"
-description: "Troubleshooting file upload problems."
+title: 'Upload Issues'
+description: 'Troubleshooting file upload problems.'
 ---
 
 Troubleshooting file upload problems.

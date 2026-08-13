@@ -1,6 +1,6 @@
 ---
-title: "Storage Management"
-description: "Storage limits and management in TMA Cloud."
+title: 'Storage Management'
+description: 'Storage limits and management in TMA Cloud.'
 ---
 
 Storage limits and management in TMA Cloud.

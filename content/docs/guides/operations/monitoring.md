@@ -1,6 +1,6 @@
 ---
-title: "Monitoring"
-description: "System monitoring and health checks in TMA Cloud."
+title: 'Monitoring'
+description: 'System monitoring and health checks in TMA Cloud.'
 ---
 
 System monitoring and health checks in TMA Cloud.

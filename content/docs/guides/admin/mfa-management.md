@@ -1,6 +1,6 @@
 ---
-title: "MFA Management"
-description: "Manage multi-factor authentication in TMA Cloud (admin only)."
+title: 'MFA Management'
+description: 'Manage multi-factor authentication in TMA Cloud (admin only).'
 ---
 
 Manage multi-factor authentication in TMA Cloud (admin only).

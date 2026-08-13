@@ -1,6 +1,6 @@
 ---
-title: "Monitoring API"
-description: "Health and metrics endpoints for TMA Cloud."
+title: 'Monitoring API'
+description: 'Health and metrics endpoints for TMA Cloud.'
 ---
 
 Health and metrics endpoints for TMA Cloud.

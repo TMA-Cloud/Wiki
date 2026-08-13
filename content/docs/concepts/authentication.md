@@ -1,6 +1,6 @@
 ---
-title: "Authentication"
-description: "Authentication system overview for TMA Cloud."
+title: 'Authentication'
+description: 'Authentication system overview for TMA Cloud.'
 ---
 
 Authentication system overview for TMA Cloud.

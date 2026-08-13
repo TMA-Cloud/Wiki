@@ -1,6 +1,6 @@
 ---
-title: "Audit Logs"
-description: "Comprehensive audit trail system in TMA Cloud."
+title: 'Audit Logs'
+description: 'Comprehensive audit trail system in TMA Cloud.'
 ---
 
 Comprehensive audit trail system in TMA Cloud.

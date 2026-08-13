@@ -1,6 +1,6 @@
 ---
-title: "Logging"
-description: "Logging system documentation for TMA Cloud."
+title: 'Logging'
+description: 'Logging system documentation for TMA Cloud.'
 ---
 
 Logging system documentation for TMA Cloud.
@@ -77,12 +77,12 @@ All HTTP requests automatically logged with:
 ## Logging in Code
 
 ```javascript
-const { logger } = require("./config/logger");
+const { logger } = require('./config/logger');
 
-logger.info("User logged in");
-logger.info({ userId: "user_001" }, "User logged in");
-logger.warn({ fileSize: 1024000000 }, "Large file uploaded");
-logger.error({ err }, "Operation failed");
+logger.info('User logged in');
+logger.info({ userId: 'user_001' }, 'User logged in');
+logger.warn({ fileSize: 1024000000 }, 'Large file uploaded');
+logger.error({ err }, 'Operation failed');
 ```
 
 ## Log Output

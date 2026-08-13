@@ -1,6 +1,6 @@
 ---
-title: "File System"
-description: "File system architecture and organization in TMA Cloud."
+title: 'File System'
+description: 'File system architecture and organization in TMA Cloud.'
 ---
 
 File system architecture and organization in TMA Cloud.

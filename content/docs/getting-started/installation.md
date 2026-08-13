@@ -1,6 +1,6 @@
 ---
-title: "Installation"
-description: "Step-by-step installation guide for TMA Cloud."
+title: 'Installation'
+description: 'Step-by-step installation guide for TMA Cloud.'
 ---
 
 Step-by-step installation guide for TMA Cloud.

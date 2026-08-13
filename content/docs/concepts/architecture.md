@@ -1,6 +1,6 @@
 ---
-title: "Architecture Overview"
-description: "System architecture and design patterns for TMA Cloud."
+title: 'Architecture Overview'
+description: 'System architecture and design patterns for TMA Cloud.'
 ---
 
 System architecture and design patterns for TMA Cloud.

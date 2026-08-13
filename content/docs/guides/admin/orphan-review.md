@@ -1,6 +1,6 @@
 ---
-title: "Orphan Review"
-description: "Review and delete orphaned files and broken records in TMA Cloud (admin only)."
+title: 'Orphan Review'
+description: 'Review and delete orphaned files and broken records in TMA Cloud (admin only).'
 ---
 
 Review and delete orphaned files and broken records in TMA Cloud (admin only).

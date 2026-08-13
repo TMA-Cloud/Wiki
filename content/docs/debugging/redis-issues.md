@@ -1,6 +1,6 @@
 ---
-title: "Redis Issues"
-description: "Troubleshooting Redis connection problems."
+title: 'Redis Issues'
+description: 'Troubleshooting Redis connection problems.'
 ---
 
 Troubleshooting Redis connection problems.

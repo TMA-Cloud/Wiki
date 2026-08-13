@@ -1,6 +1,6 @@
 ---
-title: "API Examples"
-description: "Code examples for TMA Cloud API."
+title: 'API Examples'
+description: 'Code examples for TMA Cloud API.'
 ---
 
 Code examples for TMA Cloud API.
@@ -10,16 +10,16 @@ Code examples for TMA Cloud API.
 ### Login
 
 ```javascript
-const response = await fetch("/api/login", {
-  method: "POST",
+const response = await fetch('/api/login', {
+  method: 'POST',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    email: "user@example.com",
-    password: "password123",
+    email: 'user@example.com',
+    password: 'password123',
   }),
-  credentials: "include", // Important for cookies
+  credentials: 'include', // Important for cookies
 });
 
 const data = await response.json();
@@ -28,17 +28,17 @@ const data = await response.json();
 ### Signup
 
 ```javascript
-const response = await fetch("/api/signup", {
-  method: "POST",
+const response = await fetch('/api/signup', {
+  method: 'POST',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    email: "user@example.com",
-    password: "password123",
-    name: "User Name",
+    email: 'user@example.com',
+    password: 'password123',
+    name: 'User Name',
   }),
-  credentials: "include",
+  credentials: 'include',
 });
 
 const data = await response.json();
@@ -47,7 +47,7 @@ const data = await response.json();
 ### Signup status (public, for login page)
 
 ```javascript
-const response = await fetch("/api/signup-status", { credentials: "include" });
+const response = await fetch('/api/signup-status', { credentials: 'include' });
 const data = await response.json();
 // data.signupEnabled - show or hide signup link
 ```
@@ -55,8 +55,8 @@ const data = await response.json();
 ### Signup status (authenticated, for Settings)
 
 ```javascript
-const response = await fetch("/api/user/signup-status", {
-  credentials: "include",
+const response = await fetch('/api/user/signup-status', {
+  credentials: 'include',
 });
 const data = await response.json();
 // data.signupEnabled, data.canToggle, data.totalUsers (admin), data.additionalUsers (admin)
@@ -68,13 +68,13 @@ const data = await response.json();
 
 ```javascript
 const formData = new FormData();
-formData.append("file", fileInput.files[0]);
-formData.append("parent_id", "folder_123");
+formData.append('file', fileInput.files[0]);
+formData.append('parent_id', 'folder_123');
 
-const response = await fetch("/api/files/upload", {
-  method: "POST",
+const response = await fetch('/api/files/upload', {
+  method: 'POST',
   body: formData,
-  credentials: "include",
+  credentials: 'include',
 });
 
 const data = await response.json();
@@ -84,9 +84,9 @@ const data = await response.json();
 
 ```javascript
 const response = await fetch(
-  "/api/files?parentId=folder_123&sortBy=name&order=asc",
+  '/api/files?parentId=folder_123&sortBy=name&order=asc',
   {
-    credentials: "include",
+    credentials: 'include',
   },
 );
 
@@ -96,37 +96,37 @@ const data = await response.json();
 ### Download File
 
 ```javascript
-const response = await fetch("/api/files/file_123/download", {
-  credentials: "include",
+const response = await fetch('/api/files/file_123/download', {
+  credentials: 'include',
 });
 
 const blob = await response.blob();
 const url = window.URL.createObjectURL(blob);
-const a = document.createElement("a");
+const a = document.createElement('a');
 a.href = url;
-a.download = "file.pdf";
+a.download = 'file.pdf';
 a.click();
 ```
 
 ### Bulk Download Files
 
 ```javascript
-const response = await fetch("/api/files/download/bulk", {
-  method: "POST",
+const response = await fetch('/api/files/download/bulk', {
+  method: 'POST',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    ids: ["file_123", "file_456", "folder_789"],
+    ids: ['file_123', 'file_456', 'folder_789'],
   }),
-  credentials: "include",
+  credentials: 'include',
 });
 
 const blob = await response.blob();
 const url = window.URL.createObjectURL(blob);
-const a = document.createElement("a");
+const a = document.createElement('a');
 a.href = url;
-a.download = "download.zip";
+a.download = 'download.zip';
 a.click();
 ```
 
@@ -135,28 +135,28 @@ a.click();
 ### Create Share Link
 
 ```javascript
-const response = await fetch("/api/files/share", {
-  method: "POST",
+const response = await fetch('/api/files/share', {
+  method: 'POST',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    ids: ["file_123", "file_456"],
+    ids: ['file_123', 'file_456'],
     shared: true,
   }),
-  credentials: "include",
+  credentials: 'include',
 });
 
 const data = await response.json();
-const shareUrl = data.links["file_123"];
+const shareUrl = data.links['file_123'];
 ```
 
 ## Error Handling
 
 ```javascript
 try {
-  const response = await fetch("/api/files/some_file_id", {
-    credentials: "include",
+  const response = await fetch('/api/files/some_file_id', {
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -171,7 +171,7 @@ try {
         break;
       case 422:
         // Validation error: Show specific field errors
-        console.error("Validation failed:", errorData.details);
+        console.error('Validation failed:', errorData.details);
         break;
       default:
         // Show generic error from the 'message' field
@@ -183,7 +183,7 @@ try {
   }
 } catch (error) {
   // Handle network errors (e.g., failed to fetch)
-  console.error("Network error:", error);
+  console.error('Network error:', error);
 }
 ```
 

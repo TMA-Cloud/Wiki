@@ -1,12 +1,14 @@
 ---
-title: "Common Errors"
-description: "Frequently encountered errors and step-by-step diagnosis."
+title: 'Common Errors'
+description: 'Frequently encountered errors and step-by-step diagnosis.'
 ---
 
 Frequently encountered errors and step-by-step diagnosis.
 
 <Callout type="success" title="How to read this page">
-Each section lists the symptom, then a numbered checklist you can run top-to-bottom. Stop as soon as one step surfaces the cause — later steps assume earlier ones passed.
+  Each section lists the symptom, then a numbered checklist you can run
+  top-to-bottom. Stop as soon as one step surfaces the cause — later steps
+  assume earlier ones passed.
 </Callout>
 
 ## Database connection errors
@@ -38,7 +40,9 @@ Each section lists the symptom, then a numbered checklist you can run top-to-bot
 ### Symptom: "Redis connection failed"
 
 <Callout type="info">
-The app runs without Redis — caching, rate limits, and the SSE event stream degrade, but uploads and downloads still work. If you don't need those features, you can ignore the error.
+  The app runs without Redis — caching, rate limits, and the SSE event stream
+  degrade, but uploads and downloads still work. If you don't need those
+  features, you can ignore the error.
 </Callout>
 
 1. **Is Redis running?** `redis-cli -h "$REDIS_HOST" -p "${REDIS_PORT:-6379}" ping` — should print `PONG`.

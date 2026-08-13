@@ -1,6 +1,6 @@
 ---
-title: "Debugging Overview"
-description: "Troubleshooting guide for TMA Cloud."
+title: 'Debugging Overview'
+description: 'Troubleshooting guide for TMA Cloud.'
 ---
 
 Troubleshooting guide for TMA Cloud.

@@ -1,6 +1,6 @@
 ---
-title: "Error Codes"
-description: "Complete reference for all error codes in TMA Cloud API."
+title: 'Error Codes'
+description: 'Complete reference for all error codes in TMA Cloud API.'
 ---
 
 Complete reference for all error codes in TMA Cloud API.

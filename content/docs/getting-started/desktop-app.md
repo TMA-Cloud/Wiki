@@ -1,6 +1,6 @@
 ---
-title: "Desktop App (Electron)"
-description: "Optional Windows desktop client for TMA Cloud. Loads the same web app from your server URL; no separate frontend build."
+title: 'Desktop App (Electron)'
+description: 'Optional Windows desktop client for TMA Cloud. Loads the same web app from your server URL; no separate frontend build.'
 ---
 
 Optional Windows desktop client for TMA Cloud. Loads the same web app from your server URL; no separate frontend build.

@@ -1,6 +1,6 @@
 ---
-title: "Share Base URL"
-description: "Configure custom domain for share links in TMA Cloud (admin only)."
+title: 'Share Base URL'
+description: 'Configure custom domain for share links in TMA Cloud (admin only).'
 ---
 
 Configure custom domain for share links in TMA Cloud (admin only).

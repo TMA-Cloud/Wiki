@@ -1,6 +1,6 @@
 ---
-title: "Environment Variables"
-description: "Complete reference for all environment variables in TMA Cloud."
+title: 'Environment Variables'
+description: 'Complete reference for all environment variables in TMA Cloud.'
 ---
 
 Complete reference for all environment variables in TMA Cloud.

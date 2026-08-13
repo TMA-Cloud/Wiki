@@ -1,6 +1,6 @@
 ---
-title: "Security Model"
-description: "Overall security architecture and practices in TMA Cloud."
+title: 'Security Model'
+description: 'Overall security architecture and practices in TMA Cloud.'
 ---
 
 Overall security architecture and practices in TMA Cloud.
@@ -70,7 +70,10 @@ All incoming data from clients is strictly validated and sanitized on the backen
 - **Automatic:** Encryption on upload, decryption on download
 
 <Callout type="error" title="Key loss means data loss">
-The encryption key is read from an environment variable. If you lose or change the key, **previously stored files cannot be decrypted** — they are effectively unrecoverable. Back the key up somewhere safe (password manager, secrets vault) before taking the deployment to production.
+  The encryption key is read from an environment variable. If you lose or change
+  the key, **previously stored files cannot be decrypted** — they are
+  effectively unrecoverable. Back the key up somewhere safe (password manager,
+  secrets vault) before taking the deployment to production.
 </Callout>
 
 ### Database Security

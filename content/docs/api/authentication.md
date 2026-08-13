@@ -1,6 +1,6 @@
 ---
-title: "Authentication API"
-description: "Authentication endpoints for TMA Cloud."
+title: 'Authentication API'
+description: 'Authentication endpoints for TMA Cloud.'
 ---
 
 Authentication endpoints for TMA Cloud.

@@ -1,6 +1,6 @@
 ---
-title: "Glossary"
-description: "Short definitions for terms that appear throughout the TMA Cloud docs."
+title: 'Glossary'
+description: 'Short definitions for terms that appear throughout the TMA Cloud docs.'
 ---
 
 Short definitions for terms that appear throughout the TMA Cloud docs.

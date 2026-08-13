@@ -1,6 +1,6 @@
 ---
-title: "Sessions API"
-description: "Session management endpoints for TMA Cloud."
+title: 'Sessions API'
+description: 'Session management endpoints for TMA Cloud.'
 ---
 
 Session management endpoints for TMA Cloud.

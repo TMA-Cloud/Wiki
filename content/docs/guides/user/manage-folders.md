@@ -1,6 +1,6 @@
 ---
-title: "Manage Folders"
-description: "Organize your files with folders in TMA Cloud."
+title: 'Manage Folders'
+description: 'Organize your files with folders in TMA Cloud.'
 ---
 
 Organize your files with folders in TMA Cloud.

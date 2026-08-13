@@ -1,6 +1,6 @@
 ---
-title: "API Overview"
-description: "REST API reference for TMA Cloud backend."
+title: 'API Overview'
+description: 'REST API reference for TMA Cloud backend.'
 ---
 
 REST API reference for TMA Cloud backend.

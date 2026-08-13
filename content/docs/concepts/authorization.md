@@ -1,6 +1,6 @@
 ---
-title: "Authorization"
-description: "Authorization and access control in TMA Cloud."
+title: 'Authorization'
+description: 'Authorization and access control in TMA Cloud.'
 ---
 
 Authorization and access control in TMA Cloud.

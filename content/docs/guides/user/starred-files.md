@@ -1,6 +1,6 @@
 ---
-title: "Starred Files"
-description: "Quick access to your favorite files and folders."
+title: 'Starred Files'
+description: 'Quick access to your favorite files and folders.'
 ---
 
 Quick access to your favorite files and folders.

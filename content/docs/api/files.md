@@ -1,6 +1,6 @@
 ---
-title: "Files API"
-description: "File management endpoints for TMA Cloud."
+title: 'Files API'
+description: 'File management endpoints for TMA Cloud.'
 ---
 
 File management endpoints for TMA Cloud.

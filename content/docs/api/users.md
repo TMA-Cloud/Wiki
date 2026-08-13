@@ -1,6 +1,6 @@
 ---
-title: "Users API"
-description: "User management endpoints for TMA Cloud."
+title: 'Users API'
+description: 'User management endpoints for TMA Cloud.'
 ---
 
 User management endpoints for TMA Cloud.
@@ -654,12 +654,20 @@ At least one of `storageKeys` or `fileIds` must be non-empty.
 {
   "graceMinutes": 1440,
   "storage": {
-    "results": [{ "key": "9f2c1b7a-3c5e-4f11-8a90-2b0d5c7e1a44", "deleted": true }],
+    "results": [
+      { "key": "9f2c1b7a-3c5e-4f11-8a90-2b0d5c7e1a44", "deleted": true }
+    ],
     "deleted": 1,
     "skipped": 0
   },
   "database": {
-    "results": [{ "id": "file_123", "deleted": false, "reason": "Stored object exists again" }],
+    "results": [
+      {
+        "id": "file_123",
+        "deleted": false,
+        "reason": "Stored object exists again"
+      }
+    ],
     "deleted": 0,
     "skipped": 1
   }

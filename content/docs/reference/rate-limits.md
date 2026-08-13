@@ -1,6 +1,6 @@
 ---
-title: "Rate Limits"
-description: "Rate limiting configuration and limits for TMA Cloud API."
+title: 'Rate Limits'
+description: 'Rate limiting configuration and limits for TMA Cloud API.'
 ---
 
 Rate limiting configuration and limits for TMA Cloud API.

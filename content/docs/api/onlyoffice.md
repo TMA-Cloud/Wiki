@@ -1,6 +1,6 @@
 ---
-title: "OnlyOffice API"
-description: "OnlyOffice integration endpoints for TMA Cloud."
+title: 'OnlyOffice API'
+description: 'OnlyOffice integration endpoints for TMA Cloud.'
 ---
 
 OnlyOffice integration endpoints for TMA Cloud.

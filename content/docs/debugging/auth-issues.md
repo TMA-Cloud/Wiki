@@ -1,6 +1,6 @@
 ---
-title: "Authentication Issues"
-description: "Troubleshooting authentication problems."
+title: 'Authentication Issues'
+description: 'Troubleshooting authentication problems.'
 ---
 
 Troubleshooting authentication problems.

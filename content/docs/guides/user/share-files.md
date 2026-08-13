@@ -1,6 +1,6 @@
 ---
-title: "Share Files"
-description: "Create shareable links for files and folders in TMA Cloud."
+title: 'Share Files'
+description: 'Create shareable links for files and folders in TMA Cloud.'
 ---
 
 Create shareable links for files and folders in TMA Cloud.

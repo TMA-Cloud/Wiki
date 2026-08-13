@@ -1,6 +1,6 @@
 ---
-title: "Docker Issues"
-description: "Troubleshooting Docker deployment problems."
+title: 'Docker Issues'
+description: 'Troubleshooting Docker deployment problems.'
 ---
 
 Troubleshooting Docker deployment problems.

@@ -1,6 +1,6 @@
 ---
-title: "CLI Commands"
-description: "Command-line interface commands for TMA Cloud."
+title: 'CLI Commands'
+description: 'Command-line interface commands for TMA Cloud.'
 ---
 
 Command-line interface commands for TMA Cloud.

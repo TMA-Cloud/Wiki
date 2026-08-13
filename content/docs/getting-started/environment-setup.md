@@ -1,6 +1,6 @@
 ---
-title: "Environment Setup"
-description: "Environment variable reference for TMA Cloud."
+title: 'Environment Setup'
+description: 'Environment variable reference for TMA Cloud.'
 ---
 
 Environment variable reference for TMA Cloud.

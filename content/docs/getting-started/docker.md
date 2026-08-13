@@ -1,6 +1,6 @@
 ---
-title: "Docker Deployment"
-description: "Docker deployment guide for TMA Cloud."
+title: 'Docker Deployment'
+description: 'Docker deployment guide for TMA Cloud.'
 ---
 
 Docker deployment guide for TMA Cloud.
