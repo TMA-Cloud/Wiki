@@ -132,7 +132,7 @@ Create a new folder.
 
 **Validation:**
 
-- `name`: Required. Must not be empty and must contain only valid file name characters (`a-zA-Z0-9_.-`). Max length 100.
+- `name`: Required. Must not be empty after trimming. Max length 100. Any character is allowed except control characters and `/ \ : * ? " < > |`, so spaces, accents, and non-Latin scripts are accepted.
 - `parentId`: Optional. Must be a string.
 
 **Response:**
@@ -353,7 +353,7 @@ Rename a file or folder.
 **Validation:**
 
 - `id`: Required. Must be a string.
-- `name`: Required. Must not be empty and must contain only valid file name characters (`a-zA-Z0-9_.-`). Max length 100.
+- `name`: Required. Must not be empty after trimming. Max length 100. Any character is allowed except control characters and `/ \ : * ? " < > |`, so spaces, accents, and non-Latin scripts are accepted.
 
 **Response:**
 

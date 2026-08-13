@@ -39,6 +39,50 @@ npm run dev:worker
 
 Start audit worker in development mode with hot reload.
 
+### Tests
+
+```bash
+npm test
+```
+
+Run the unit and route-level test suites. Needs no database or cache.
+
+```bash
+npm run test:watch
+```
+
+Re-run affected tests as files change.
+
+```bash
+npm run test:coverage
+```
+
+Run the unit suites and write a coverage report to `backend/coverage`.
+
+```bash
+npm run test:integration
+```
+
+Run the suite that uses PostgreSQL and Redis. Requires a `tma_cloud_test` database; see [Testing](/docs/guides/operations/testing).
+
+```bash
+npm run test:integration:coverage
+```
+
+Same, with a coverage report in `backend/coverage-integration`.
+
+```bash
+npm run test:s3
+```
+
+Run the storage driver suite against the configured S3 bucket. Requires `STORAGE_DRIVER=s3` credentials.
+
+```bash
+npm run test:all
+```
+
+Run the unit suite, then the integration suite.
+
 ### Linting
 
 ```bash
@@ -306,3 +350,4 @@ The script auto-detects the PostgreSQL Docker container. Override with `DB_CONTA
 
 - [Installation](/docs/getting-started/installation) - Setup guide
 - [Docker Compose / Docker](/docs/getting-started/docker) - Docker Compose and prebuilt images
+- [Testing](/docs/guides/operations/testing) - Test suites and what each one needs

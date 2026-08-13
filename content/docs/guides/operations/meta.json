@@ -5,6 +5,7 @@
     "logging",
     "background-workers",
     "monitoring",
-    "backups"
+    "backups",
+    "testing"
   ]
 }

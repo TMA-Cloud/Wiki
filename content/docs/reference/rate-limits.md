@@ -33,12 +33,16 @@ Rate limits are enforced per IP address and/or user for different endpoint types
   - All user management endpoints under `/api/user/` (including `GET /api/user/signup-status`).
   - All version check endpoints under `/api/version/`.
   - OnlyOffice configuration, viewer, and file-serving endpoints under `/api/onlyoffice/`.
+  - All public share link endpoints under `/s/`.
 
-### Public Share Link Limiter
+### Public Share Links
 
-- **Limit:** 100 requests per 15 minutes per IP address.
-- **Purpose:** Protects public share links from scraping and denial-of-service attacks.
+There is no share-specific limiter. Routes under `/s/` use the General API Limiter above.
+
+- **Limit:** 10000 requests per 15 minutes. Share links are unauthenticated, so the key is the IP address.
 - **Endpoints:** All endpoints under `/s/`.
+
+Because share links are the only routes reachable without a session, this budget is the one most exposed to anonymous traffic. If you publish links widely, put a lower limit in front of `/s/` at your reverse proxy.
 
 ### Upload Limiter
 
