@@ -16,8 +16,451 @@
   --color-fd-ring: #60a5fa;
 }
 
+/* ============================================
+   Themed cursors
+   A brand-tinted SVG cursor for every cursor kind the site uses.
+   Light theme draws the blue mark with a white halo, dark theme a
+   light-blue mark with a dark halo, so both stay visible on any
+   surface. Each value keeps the native keyword as a fallback.
+   ============================================ */
+:root {
+  --cursor-default:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 11 20.9 13.4 14.6 19.6 12.4Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 11 20.9 13.4 14.6 19.6 12.4Z' fill='%232563eb'/></svg>")
+      5 3,
+    default;
+  --cursor-pointer:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M9.4 2.4a1.6 1.6 0 0 1 3.2 0v7.2a1.6 1.6 0 0 1 3.2 0v.9a1.6 1.6 0 0 1 3.1 0v.8a1.6 1.6 0 0 1 3.1 0v3.4c0 3.6-2.6 6.6-6.2 6.6h-1.9c-2.1 0-4-1.1-5.1-2.8l-3.1-4.8a1.6 1.6 0 0 1 2.5-2l1.2 1.4Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M9.4 2.4a1.6 1.6 0 0 1 3.2 0v7.2a1.6 1.6 0 0 1 3.2 0v.9a1.6 1.6 0 0 1 3.1 0v.8a1.6 1.6 0 0 1 3.1 0v3.4c0 3.6-2.6 6.6-6.2 6.6h-1.9c-2.1 0-4-1.1-5.1-2.8l-3.1-4.8a1.6 1.6 0 0 1 2.5-2l1.2 1.4Z' fill='%232563eb'/></svg>")
+      10 3,
+    pointer;
+  --cursor-text:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 4.5V19.5M9.2 4.5h5.6M9.2 19.5h5.6' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 4.5V19.5M9.2 4.5h5.6M9.2 19.5h5.6' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    text;
+  --cursor-vertical-text:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4.5 12h15M4.5 9.2v5.6M19.5 9.2v5.6' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M4.5 12h15M4.5 9.2v5.6M19.5 9.2v5.6' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    vertical-text;
+  --cursor-crosshair:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 2v7.2M12 14.8V22M2 12h7.2M14.8 12H22' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 2v7.2M12 14.8V22M2 12h7.2M14.8 12H22' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    crosshair;
+  --cursor-cell:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 2v7M12 15v7M2 12h7M15 12h7' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 2v7M12 15v7M2 12h7M15 12h7' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/><path d='M9 9h6v6H9Z' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M9 9h6v6H9Z' fill='none' stroke='%232563eb' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    cell;
+  --cursor-move:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 2.5 8.9 6M12 2.5 15.1 6M12 2.5v19M12 21.5 8.9 18M12 21.5 15.1 18M2.5 12 6 8.9M2.5 12 6 15.1M2.5 12h19M21.5 12 18 8.9M21.5 12 18 15.1' fill='none' stroke='%23ffffff' stroke-width='4.1' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 2.5 8.9 6M12 2.5 15.1 6M12 2.5v19M12 21.5 8.9 18M12 21.5 15.1 18M2.5 12 6 8.9M2.5 12 6 15.1M2.5 12h19M21.5 12 18 8.9M21.5 12 18 15.1' fill='none' stroke='%232563eb' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    move;
+  --cursor-grab:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M5.6 12.6V6.3a1.55 1.55 0 0 1 3.1 0v4.2V4.4a1.55 1.55 0 0 1 3.1 0v6V4.9a1.55 1.55 0 0 1 3.1 0v5.5V7.4a1.55 1.55 0 0 1 3.1 0v7.7c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M5.6 12.6V6.3a1.55 1.55 0 0 1 3.1 0v4.2V4.4a1.55 1.55 0 0 1 3.1 0v6V4.9a1.55 1.55 0 0 1 3.1 0v5.5V7.4a1.55 1.55 0 0 1 3.1 0v7.7c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%232563eb'/></svg>")
+      12 10,
+    grab;
+  --cursor-grabbing:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M5.6 13.9v-2.6a1.55 1.55 0 0 1 3.1 0v-1.2a1.55 1.55 0 0 1 3.1 0v-.5a1.55 1.55 0 0 1 3.1 0v.2a1.55 1.55 0 0 1 3.1 0v5.3c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M5.6 13.9v-2.6a1.55 1.55 0 0 1 3.1 0v-1.2a1.55 1.55 0 0 1 3.1 0v-.5a1.55 1.55 0 0 1 3.1 0v.2a1.55 1.55 0 0 1 3.1 0v5.3c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%232563eb'/></svg>")
+      12 10,
+    grabbing;
+  --cursor-ns-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 3v18M12 3 8.9 6.6M12 3l3.1 3.6M12 21l-3.1-3.6M12 21l3.1-3.6' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 3v18M12 3 8.9 6.6M12 3l3.1 3.6M12 21l-3.1-3.6M12 21l3.1-3.6' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    ns-resize;
+  --cursor-ew-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M3 12h18M3 12l3.6-3.1M3 12l3.6 3.1M21 12l-3.6-3.1M21 12l-3.6 3.1' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M3 12h18M3 12l3.6-3.1M3 12l3.6 3.1M21 12l-3.6-3.1M21 12l-3.6 3.1' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    ew-resize;
+  --cursor-nwse-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4.5 4.5 19.5 19.5M4.5 4.5h5.4M4.5 4.5v5.4M19.5 19.5h-5.4M19.5 19.5v-5.4' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M4.5 4.5 19.5 19.5M4.5 4.5h5.4M4.5 4.5v5.4M19.5 19.5h-5.4M19.5 19.5v-5.4' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    nwse-resize;
+  --cursor-nesw-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M19.5 4.5 4.5 19.5M19.5 4.5h-5.4M19.5 4.5v5.4M4.5 19.5h5.4M4.5 19.5v-5.4' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M19.5 4.5 4.5 19.5M19.5 4.5h-5.4M19.5 4.5v5.4M4.5 19.5h5.4M4.5 19.5v-5.4' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    nesw-resize;
+  --cursor-not-allowed:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 3.4a8.6 8.6 0 1 0 0 17.2 8.6 8.6 0 0 0 0-17.2ZM5.9 5.9l12.2 12.2' fill='none' stroke='%23ffffff' stroke-width='4.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 3.4a8.6 8.6 0 1 0 0 17.2 8.6 8.6 0 0 0 0-17.2ZM5.9 5.9l12.2 12.2' fill='none' stroke='%232563eb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    not-allowed;
+  --cursor-wait:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8Z' fill='none' stroke='%23ffffff' stroke-width='4.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8Z' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 7.2V12l3.4 2.4' fill='none' stroke='%23ffffff' stroke-width='4.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 7.2V12l3.4 2.4' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    wait;
+  --cursor-progress:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%232563eb'/><path d='M16.5 11.6a4.9 4.9 0 1 0 0 9.8 4.9 4.9 0 0 0 0-9.8Z' fill='none' stroke='%23ffffff' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.5 11.6a4.9 4.9 0 1 0 0 9.8 4.9 4.9 0 0 0 0-9.8Z' fill='none' stroke='%232563eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.5 13.9v2.6l1.9 1.3' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.5 13.9v2.6l1.9 1.3' fill='none' stroke='%232563eb' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    progress;
+  --cursor-help:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%232563eb'/><circle cx='16.6' cy='16.6' r='6.8' fill='%23ffffff'/><circle cx='16.6' cy='16.6' r='5.6' fill='%232563eb'/><path d='M14.6 14.9a2 2 0 0 1 3.9.6c0 1.3-1.7 1.4-1.7 2.6' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.7 19.7h.01' fill='none' stroke='%23ffffff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    help;
+  --cursor-copy:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%232563eb'/><circle cx='16.6' cy='16.6' r='6.8' fill='%23ffffff'/><circle cx='16.6' cy='16.6' r='5.6' fill='%232563eb'/><path d='M16.6 13.6v6M13.6 16.6h6' fill='none' stroke='%23ffffff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    copy;
+  --cursor-alias:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%232563eb'/><circle cx='16.6' cy='16.6' r='6.8' fill='%23ffffff'/><circle cx='16.6' cy='16.6' r='5.6' fill='%232563eb'/><path d='M14.3 18.9 19 14.2M15.2 14.2H19v3.8' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    alias;
+  --cursor-context-menu:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%23ffffff' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%232563eb'/><circle cx='16.6' cy='16.6' r='6.8' fill='%23ffffff'/><circle cx='16.6' cy='16.6' r='5.6' fill='%232563eb'/><path d='M14.2 14.5h4.8M14.2 16.6h4.8M14.2 18.7h4.8' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    context-menu;
+  --cursor-zoom-in:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2M10 6.9v6.2' fill='none' stroke='%23ffffff' stroke-width='4.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2M10 6.9v6.2' fill='none' stroke='%232563eb' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      10 10,
+    zoom-in;
+  --cursor-zoom-out:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2' fill='none' stroke='%23ffffff' stroke-width='4.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2' fill='none' stroke='%232563eb' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      10 10,
+    zoom-out;
+}
+
+.dark {
+  --cursor-default:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 11 20.9 13.4 14.6 19.6 12.4Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 11 20.9 13.4 14.6 19.6 12.4Z' fill='%2393c5fd'/></svg>")
+      5 3,
+    default;
+  --cursor-pointer:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M9.4 2.4a1.6 1.6 0 0 1 3.2 0v7.2a1.6 1.6 0 0 1 3.2 0v.9a1.6 1.6 0 0 1 3.1 0v.8a1.6 1.6 0 0 1 3.1 0v3.4c0 3.6-2.6 6.6-6.2 6.6h-1.9c-2.1 0-4-1.1-5.1-2.8l-3.1-4.8a1.6 1.6 0 0 1 2.5-2l1.2 1.4Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M9.4 2.4a1.6 1.6 0 0 1 3.2 0v7.2a1.6 1.6 0 0 1 3.2 0v.9a1.6 1.6 0 0 1 3.1 0v.8a1.6 1.6 0 0 1 3.1 0v3.4c0 3.6-2.6 6.6-6.2 6.6h-1.9c-2.1 0-4-1.1-5.1-2.8l-3.1-4.8a1.6 1.6 0 0 1 2.5-2l1.2 1.4Z' fill='%2393c5fd'/></svg>")
+      10 3,
+    pointer;
+  --cursor-text:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 4.5V19.5M9.2 4.5h5.6M9.2 19.5h5.6' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 4.5V19.5M9.2 4.5h5.6M9.2 19.5h5.6' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    text;
+  --cursor-vertical-text:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4.5 12h15M4.5 9.2v5.6M19.5 9.2v5.6' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M4.5 12h15M4.5 9.2v5.6M19.5 9.2v5.6' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    vertical-text;
+  --cursor-crosshair:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 2v7.2M12 14.8V22M2 12h7.2M14.8 12H22' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 2v7.2M12 14.8V22M2 12h7.2M14.8 12H22' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    crosshair;
+  --cursor-cell:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 2v7M12 15v7M2 12h7M15 12h7' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 2v7M12 15v7M2 12h7M15 12h7' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/><path d='M9 9h6v6H9Z' fill='none' stroke='%230b1220' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M9 9h6v6H9Z' fill='none' stroke='%2393c5fd' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    cell;
+  --cursor-move:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 2.5 8.9 6M12 2.5 15.1 6M12 2.5v19M12 21.5 8.9 18M12 21.5 15.1 18M2.5 12 6 8.9M2.5 12 6 15.1M2.5 12h19M21.5 12 18 8.9M21.5 12 18 15.1' fill='none' stroke='%230b1220' stroke-width='4.1' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 2.5 8.9 6M12 2.5 15.1 6M12 2.5v19M12 21.5 8.9 18M12 21.5 15.1 18M2.5 12 6 8.9M2.5 12 6 15.1M2.5 12h19M21.5 12 18 8.9M21.5 12 18 15.1' fill='none' stroke='%2393c5fd' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    move;
+  --cursor-grab:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M5.6 12.6V6.3a1.55 1.55 0 0 1 3.1 0v4.2V4.4a1.55 1.55 0 0 1 3.1 0v6V4.9a1.55 1.55 0 0 1 3.1 0v5.5V7.4a1.55 1.55 0 0 1 3.1 0v7.7c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M5.6 12.6V6.3a1.55 1.55 0 0 1 3.1 0v4.2V4.4a1.55 1.55 0 0 1 3.1 0v6V4.9a1.55 1.55 0 0 1 3.1 0v5.5V7.4a1.55 1.55 0 0 1 3.1 0v7.7c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%2393c5fd'/></svg>")
+      12 10,
+    grab;
+  --cursor-grabbing:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M5.6 13.9v-2.6a1.55 1.55 0 0 1 3.1 0v-1.2a1.55 1.55 0 0 1 3.1 0v-.5a1.55 1.55 0 0 1 3.1 0v.2a1.55 1.55 0 0 1 3.1 0v5.3c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M5.6 13.9v-2.6a1.55 1.55 0 0 1 3.1 0v-1.2a1.55 1.55 0 0 1 3.1 0v-.5a1.55 1.55 0 0 1 3.1 0v.2a1.55 1.55 0 0 1 3.1 0v5.3c0 3.5-2.5 6.4-6 6.4h-1.4c-2.1 0-4-1.1-5-2.8l-2.5-4a1.55 1.55 0 0 1 2.5-1.9l1.6 1.9Z' fill='%2393c5fd'/></svg>")
+      12 10,
+    grabbing;
+  --cursor-ns-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 3v18M12 3 8.9 6.6M12 3l3.1 3.6M12 21l-3.1-3.6M12 21l3.1-3.6' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 3v18M12 3 8.9 6.6M12 3l3.1 3.6M12 21l-3.1-3.6M12 21l3.1-3.6' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    ns-resize;
+  --cursor-ew-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M3 12h18M3 12l3.6-3.1M3 12l3.6 3.1M21 12l-3.6-3.1M21 12l-3.6 3.1' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M3 12h18M3 12l3.6-3.1M3 12l3.6 3.1M21 12l-3.6-3.1M21 12l-3.6 3.1' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    ew-resize;
+  --cursor-nwse-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4.5 4.5 19.5 19.5M4.5 4.5h5.4M4.5 4.5v5.4M19.5 19.5h-5.4M19.5 19.5v-5.4' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M4.5 4.5 19.5 19.5M4.5 4.5h5.4M4.5 4.5v5.4M19.5 19.5h-5.4M19.5 19.5v-5.4' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    nwse-resize;
+  --cursor-nesw-resize:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M19.5 4.5 4.5 19.5M19.5 4.5h-5.4M19.5 4.5v5.4M4.5 19.5h5.4M4.5 19.5v-5.4' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M19.5 4.5 4.5 19.5M19.5 4.5h-5.4M19.5 4.5v5.4M4.5 19.5h5.4M4.5 19.5v-5.4' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    nesw-resize;
+  --cursor-not-allowed:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 3.4a8.6 8.6 0 1 0 0 17.2 8.6 8.6 0 0 0 0-17.2ZM5.9 5.9l12.2 12.2' fill='none' stroke='%230b1220' stroke-width='4.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 3.4a8.6 8.6 0 1 0 0 17.2 8.6 8.6 0 0 0 0-17.2ZM5.9 5.9l12.2 12.2' fill='none' stroke='%2393c5fd' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    not-allowed;
+  --cursor-wait:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8Z' fill='none' stroke='%230b1220' stroke-width='4.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8Z' fill='none' stroke='%2393c5fd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 7.2V12l3.4 2.4' fill='none' stroke='%230b1220' stroke-width='4.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 7.2V12l3.4 2.4' fill='none' stroke='%2393c5fd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      12 12,
+    wait;
+  --cursor-progress:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%2393c5fd'/><path d='M16.5 11.6a4.9 4.9 0 1 0 0 9.8 4.9 4.9 0 0 0 0-9.8Z' fill='none' stroke='%230b1220' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.5 11.6a4.9 4.9 0 1 0 0 9.8 4.9 4.9 0 0 0 0-9.8Z' fill='none' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.5 13.9v2.6l1.9 1.3' fill='none' stroke='%230b1220' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.5 13.9v2.6l1.9 1.3' fill='none' stroke='%2393c5fd' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    progress;
+  --cursor-help:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%2393c5fd'/><circle cx='16.6' cy='16.6' r='6.8' fill='%230b1220'/><circle cx='16.6' cy='16.6' r='5.6' fill='%2393c5fd'/><path d='M14.6 14.9a2 2 0 0 1 3.9.6c0 1.3-1.7 1.4-1.7 2.6' fill='none' stroke='%230b1220' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/><path d='M16.7 19.7h.01' fill='none' stroke='%230b1220' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    help;
+  --cursor-copy:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%2393c5fd'/><circle cx='16.6' cy='16.6' r='6.8' fill='%230b1220'/><circle cx='16.6' cy='16.6' r='5.6' fill='%2393c5fd'/><path d='M16.6 13.6v6M13.6 16.6h6' fill='none' stroke='%230b1220' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    copy;
+  --cursor-alias:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%2393c5fd'/><circle cx='16.6' cy='16.6' r='6.8' fill='%230b1220'/><circle cx='16.6' cy='16.6' r='5.6' fill='%2393c5fd'/><path d='M14.3 18.9 19 14.2M15.2 14.2H19v3.8' fill='none' stroke='%230b1220' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    alias;
+  --cursor-context-menu:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%230b1220' stroke='%230b1220' stroke-width='3' stroke-linejoin='round'/><path d='M4 2 9.6 16.4 11.4 11.6 16.1 9.9Z' fill='%2393c5fd'/><circle cx='16.6' cy='16.6' r='6.8' fill='%230b1220'/><circle cx='16.6' cy='16.6' r='5.6' fill='%2393c5fd'/><path d='M14.2 14.5h4.8M14.2 16.6h4.8M14.2 18.7h4.8' fill='none' stroke='%230b1220' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      5 3,
+    context-menu;
+  --cursor-zoom-in:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2M10 6.9v6.2' fill='none' stroke='%230b1220' stroke-width='4.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2M10 6.9v6.2' fill='none' stroke='%2393c5fd' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      10 10,
+    zoom-in;
+  --cursor-zoom-out:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-1.8 -1.8 27.6 27.6'><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2' fill='none' stroke='%230b1220' stroke-width='4.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M10 3.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8ZM14.8 14.8 21 21M6.9 10h6.2' fill='none' stroke='%2393c5fd' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      10 10,
+    zoom-out;
+}
+
+/* High-contrast mode: hand control back to the system cursors. */
+@media (forced-colors: active) {
+  :root,
+  .dark {
+    --cursor-default: default;
+    --cursor-pointer: pointer;
+    --cursor-text: text;
+    --cursor-vertical-text: vertical-text;
+    --cursor-crosshair: crosshair;
+    --cursor-cell: cell;
+    --cursor-move: move;
+    --cursor-grab: grab;
+    --cursor-grabbing: grabbing;
+    --cursor-ns-resize: ns-resize;
+    --cursor-ew-resize: ew-resize;
+    --cursor-nwse-resize: nwse-resize;
+    --cursor-nesw-resize: nesw-resize;
+    --cursor-not-allowed: not-allowed;
+    --cursor-wait: wait;
+    --cursor-progress: progress;
+    --cursor-help: help;
+    --cursor-copy: copy;
+    --cursor-alias: alias;
+    --cursor-context-menu: context-menu;
+    --cursor-zoom-in: zoom-in;
+    --cursor-zoom-out: zoom-out;
+  }
+}
+
+body {
+  cursor: var(--cursor-default);
+}
+
+a[href],
+button,
+summary,
+select,
+label[for],
+[role='button'],
+[role='link'],
+[role='tab'],
+[role='menuitem'],
+[role='menuitemcheckbox'],
+[role='menuitemradio'],
+[role='option'],
+[role='switch'],
+[role='checkbox'],
+[role='radio'],
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+input[type='checkbox'],
+input[type='radio'],
+input[type='file'],
+input[type='color'] {
+  cursor: var(--cursor-pointer);
+}
+
+input:not([type]),
+input[type='text'],
+input[type='search'],
+input[type='email'],
+input[type='password'],
+input[type='url'],
+input[type='tel'],
+input[type='number'],
+input[type='date'],
+input[type='time'],
+textarea,
+[contenteditable='true'],
+[contenteditable=''] {
+  cursor: var(--cursor-text);
+}
+
+abbr[title],
+[data-tooltip] {
+  cursor: var(--cursor-help);
+}
+
+input[type='range'],
+[draggable='true'] {
+  cursor: var(--cursor-grab);
+}
+
+input[type='range']:active,
+[draggable='true']:active {
+  cursor: var(--cursor-grabbing);
+}
+
+[aria-busy='true'] {
+  cursor: var(--cursor-progress);
+}
+
+:disabled,
+[aria-disabled='true'],
+[data-disabled] {
+  cursor: var(--cursor-not-allowed);
+}
+
+/* Tailwind cursor utilities — repoint them at the themed set.
+   Declared outside @layer so they win over the generated utility. */
+.cursor-auto,
+.cursor-default {
+  cursor: var(--cursor-default);
+}
+.cursor-pointer {
+  cursor: var(--cursor-pointer);
+}
+.cursor-text {
+  cursor: var(--cursor-text);
+}
+.cursor-vertical-text {
+  cursor: var(--cursor-vertical-text);
+}
+.cursor-crosshair {
+  cursor: var(--cursor-crosshair);
+}
+.cursor-cell {
+  cursor: var(--cursor-cell);
+}
+.cursor-move,
+.cursor-all-scroll {
+  cursor: var(--cursor-move);
+}
+.cursor-grab {
+  cursor: var(--cursor-grab);
+}
+.cursor-grabbing {
+  cursor: var(--cursor-grabbing);
+}
+.cursor-not-allowed,
+.cursor-no-drop {
+  cursor: var(--cursor-not-allowed);
+}
+.cursor-wait {
+  cursor: var(--cursor-wait);
+}
+.cursor-progress {
+  cursor: var(--cursor-progress);
+}
+.cursor-help {
+  cursor: var(--cursor-help);
+}
+.cursor-copy {
+  cursor: var(--cursor-copy);
+}
+.cursor-alias {
+  cursor: var(--cursor-alias);
+}
+.cursor-context-menu {
+  cursor: var(--cursor-context-menu);
+}
+.cursor-zoom-in {
+  cursor: var(--cursor-zoom-in);
+}
+.cursor-zoom-out {
+  cursor: var(--cursor-zoom-out);
+}
+.cursor-n-resize,
+.cursor-s-resize,
+.cursor-ns-resize,
+.cursor-row-resize {
+  cursor: var(--cursor-ns-resize);
+}
+.cursor-e-resize,
+.cursor-w-resize,
+.cursor-ew-resize,
+.cursor-col-resize {
+  cursor: var(--cursor-ew-resize);
+}
+.cursor-nw-resize,
+.cursor-se-resize,
+.cursor-nwse-resize {
+  cursor: var(--cursor-nwse-resize);
+}
+.cursor-ne-resize,
+.cursor-sw-resize,
+.cursor-nesw-resize {
+  cursor: var(--cursor-nesw-resize);
+}
+.cursor-none {
+  cursor: none;
+}
+
+/* ============================================
+   Themed scrollbars
+   scrollbar-color is inherited, so setting it on <html> covers every
+   nested scroller in Firefox; the ::-webkit- rules do the same for
+   Chromium and Safari.
+   ============================================ */
+:root {
+  --scrollbar-size: 11px;
+  --scrollbar-thumb: color-mix(
+    in srgb,
+    var(--color-fd-primary) 45%,
+    transparent
+  );
+  --scrollbar-thumb-hover: color-mix(
+    in srgb,
+    var(--color-fd-primary) 75%,
+    transparent
+  );
+  --scrollbar-track: color-mix(
+    in srgb,
+    var(--color-fd-border) 45%,
+    transparent
+  );
+}
+
+.dark {
+  --scrollbar-thumb: color-mix(
+    in srgb,
+    var(--color-fd-primary) 38%,
+    transparent
+  );
+  --scrollbar-thumb-hover: color-mix(
+    in srgb,
+    var(--color-fd-primary) 65%,
+    transparent
+  );
+  --scrollbar-track: color-mix(
+    in srgb,
+    var(--color-fd-border) 55%,
+    transparent
+  );
+}
+
 html {
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  background-clip: content-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 html > body[data-scroll-locked] {
