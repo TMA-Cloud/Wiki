@@ -74,7 +74,7 @@ You choose an action for each conflicting file; nothing is uploaded until you co
 
 - **Grid View:** Thumbnail view of files
 - **List View:** Detailed list with metadata
-- **Sort Options:** Name, date, size, type
+- **Sort Options:** Name, Modified, Last opened, Size — each ascending or descending. Folders are always listed before files
 
 ### File Operations
 

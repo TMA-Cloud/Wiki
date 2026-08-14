@@ -118,6 +118,20 @@ Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** 
 | `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Concurrent audit events processed |
 | `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)           |
 
+## Last Access Time
+
+| Variable                     | Required | Default | Description                                             |
+| ---------------------------- | -------- | ------- | ------------------------------------------------------- |
+| `ACCESS_TIME_TRACKING`       | No       | `1`     | Set to `0` or `false` to stop recording access times    |
+| `ACCESS_TIME_WINDOW_MINUTES` | No       | `60`    | How stale a stored value must be before it is rewritten |
+| `ACCESS_TIME_FLUSH_SECONDS`  | No       | `10`    | How long updates are buffered before being written      |
+
+**`ACCESS_TIME_WINDOW_MINUTES`:** Repeat reads of the same item inside this window are not written down at all. The default of 60 matches the one-hour accuracy NTFS guarantees for its last-access time. Lower it for finer timestamps at the cost of more writes, or set it to `0` to record every read.
+
+**`ACCESS_TIME_FLUSH_SECONDS`:** Updates are held in memory and written in one batched statement per interval, so a download never waits on the write. Raising it reduces the number of statements; lowering it makes timestamps appear sooner. Buffered updates are flushed on shutdown.
+
+**`ACCESS_TIME_TRACKING`:** Turning it off leaves existing `accessed_at` values in place but stops updating them. Windows offers the same switch as `NtfsDisableLastAccessUpdate`. See [File System](/docs/concepts/file-system#last-access-time).
+
 ## Related Topics
 
 - [Environment Setup](/docs/getting-started/environment-setup) - Setup guide

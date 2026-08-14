@@ -41,8 +41,10 @@ List files and folders.
 **Query Parameters:**
 
 - `parentId` - Parent folder ID (optional)
-- `sortBy` - Sort field: `name`, `date`, `size`, `type` (optional)
-- `order` - Sort order: `asc`, `desc` (optional)
+- `sortBy` - Sort field: `name`, `size`, `modified`, `accessedAt`, `deletedAt` (optional, defaults to `modified`)
+- `order` - Sort order: `asc`, `desc` (optional, defaults to `desc`)
+
+Any other `sortBy` value is ignored and the default is used. `deletedAt` is only meaningful on `/api/files/trash`.
 
 **Response:**
 
@@ -58,10 +60,13 @@ An array of file and folder objects.
     "mimeType": "application/pdf",
     "parentId": "folder_456",
     "starred": false,
-    "modified": "2024-01-01T00:00:00Z"
+    "modified": "2024-01-01T00:00:00Z",
+    "accessedAt": "2024-01-02T09:15:00Z"
   }
 ]
 ```
+
+**`accessedAt`:** When the item was last read. Listing a folder updates that folder's own `accessedAt`, not the entries returned. The value is approximate — it is written at most once per hour per item and may lag by the cache TTL of this response. See [File System](/docs/concepts/file-system#last-access-time).
 
 ## File Statistics
 
@@ -110,10 +115,13 @@ An array of file and folder objects matching the search query.
     "mimeType": "application/pdf",
     "parentId": "folder_456",
     "starred": false,
-    "modified": "2024-01-01T00:00:00Z"
+    "modified": "2024-01-01T00:00:00Z",
+    "accessedAt": "2024-01-02T09:15:00Z"
   }
 ]
 ```
+
+Searching does not count as reading. The `accessedAt` values returned are unchanged by the search itself.
 
 ## Create Folder
 
@@ -421,7 +429,8 @@ An array of file and folder objects.
     "mimeType": "application/pdf",
     "parentId": "folder_456",
     "starred": true,
-    "modified": "2024-01-01T00:00:00Z"
+    "modified": "2024-01-01T00:00:00Z",
+    "accessedAt": "2024-01-02T09:15:00Z"
   }
 ]
 ```
@@ -549,6 +558,7 @@ An array of shared file and folder objects. Each object includes `expiresAt` fro
     "starred": false,
     "shared": true,
     "modified": "2024-01-01T00:00:00Z",
+    "accessedAt": "2024-01-02T09:15:00Z",
     "expiresAt": "2024-01-08T00:00:00Z"
   }
 ]
@@ -691,6 +701,8 @@ Download a single file or a folder (folders are returned as a ZIP archive).
 **Response:**
 The raw file content or a ZIP archive.
 
+Downloading marks the item as read. For a folder, the folder and every entry in the archive are marked. See [Last Access Time](/docs/concepts/file-system#last-access-time).
+
 ## Get File or Folder Info
 
 ### GET `/api/files/:id/info`
@@ -710,6 +722,7 @@ Get basic metadata for a single file or folder.
   "type": "file",
   "size": 1024,
   "modified": "2024-01-01T00:00:00Z",
+  "accessedAt": "2024-01-02T09:15:00Z",
   "parentId": "folder_456"
 }
 ```
@@ -722,6 +735,8 @@ Get basic metadata for a single file or folder.
   "name": "Reports",
   "type": "folder",
   "size": null,
+  "modified": "2024-01-01T00:00:00Z",
+  "accessedAt": "2024-01-02T09:15:00Z",
   "parentId": null,
   "folderInfo": {
     "totalSize": 1048576,
@@ -733,6 +748,7 @@ Get basic metadata for a single file or folder.
 
 - `size` and `folderInfo.totalSize` are in bytes.
 - For folders, `size` may be `null`; use `folderInfo.totalSize` for the recursive size.
+- `accessedAt` is the last read time. Calling this endpoint does not update it.
 
 **Errors:**
 
@@ -742,7 +758,7 @@ Get basic metadata for a single file or folder.
 
 ### POST `/api/files/:id/replace`
 
-Replace the contents of an existing file. The file ID and name stay the same; size and modified time are updated. Used when the user chooses "Replace the File" for a duplicate-name upload, and by the Windows desktop app when syncing edits from Word, Excel, PowerPoint, or other desktop editors.
+Replace the contents of an existing file. The file ID and name stay the same; size, modified time and last access time are updated. Used when the user chooses "Replace the File" for a duplicate-name upload, and by the Windows desktop app when syncing edits from Word, Excel, PowerPoint, or other desktop editors.
 
 **Path Parameters:**
 

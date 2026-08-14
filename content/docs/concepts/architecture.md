@@ -99,7 +99,7 @@ backend/
 - **Controllers:** Handle HTTP requests and business logic
 - **Middleware:** Auth, error handling, rate limiting, share domain blocking
 - **Models:** Database abstraction layer
-- **Services:** Background processes (cleanup, scanning, audit logging, OnlyOffice auto-save)
+- **Services:** Background processes (cleanup, scanning, audit logging, access time writes, OnlyOffice auto-save)
 - **Caching:** Redis-based caching with automatic invalidation
 - **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting
 

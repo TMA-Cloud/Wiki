@@ -47,24 +47,27 @@ User accounts and sub-users.
 
 Files and folders.
 
-| Column       | Type         | Description                   |
-| ------------ | ------------ | ----------------------------- |
-| `id`         | VARCHAR(255) | Primary key                   |
-| `name`       | VARCHAR(255) | Not null                      |
-| `type`       | VARCHAR(50)  | 'file' or 'folder'            |
-| `size`       | BIGINT       | File size in bytes            |
-| `mime_type`  | VARCHAR(255) | MIME type                     |
-| `user_id`    | VARCHAR(255) | FK → users.id                 |
-| `parent_id`  | VARCHAR(255) | FK → files.id (null for root) |
-| `path`       | TEXT         | Full path                     |
-| `starred`    | BOOLEAN      | Default false                 |
-| `deleted_at` | TIMESTAMPTZ  | Soft delete timestamp         |
-| `modified`   | TIMESTAMPTZ  | Last modification time        |
-| `created_at` | TIMESTAMPTZ  | Row creation time             |
+| Column        | Type         | Description                   |
+| ------------- | ------------ | ----------------------------- |
+| `id`          | VARCHAR(255) | Primary key                   |
+| `name`        | VARCHAR(255) | Not null                      |
+| `type`        | VARCHAR(50)  | 'file' or 'folder'            |
+| `size`        | BIGINT       | File size in bytes            |
+| `mime_type`   | VARCHAR(255) | MIME type                     |
+| `user_id`     | VARCHAR(255) | FK → users.id                 |
+| `parent_id`   | VARCHAR(255) | FK → files.id (null for root) |
+| `path`        | TEXT         | Full path                     |
+| `starred`     | BOOLEAN      | Default false                 |
+| `deleted_at`  | TIMESTAMPTZ  | Soft delete timestamp         |
+| `modified`    | TIMESTAMPTZ  | Last modification time        |
+| `created_at`  | TIMESTAMPTZ  | Row creation time             |
+| `accessed_at` | TIMESTAMPTZ  | Last read time, default now() |
 
-**Indexes:** `user_id`, `parent_id`, `path`, `deleted_at`, `created_at`, full-text on `name`
+**Indexes:** `user_id`, `parent_id`, `path`, `deleted_at`, `created_at`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, full-text on `name`
 
-**`modified` vs `created_at`:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. Renames and moves change neither `path` nor `created_at`.
+**The three timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
+
+**`accessed_at` precision:** The value is written at most once per hour per item, so it can lag a read by up to that long. This follows NTFS, which guarantees its last-access time only to within an hour, and Linux's `relatime`. Writes are buffered in memory and flushed in batches, so a read never waits on the update. See [File System](/docs/concepts/file-system#last-access-time).
 
 ### `share_links`
 

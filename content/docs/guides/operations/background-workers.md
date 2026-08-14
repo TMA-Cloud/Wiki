@@ -43,6 +43,20 @@ npm run worker
 - Runs at startup and every 7 days
 - Invalidates related caches after cleanup
 
+### Access Time Writer
+
+**Purpose:** Write buffered `accessed_at` timestamps to the `files` table
+
+Runs inside the main application process, not as a separate worker. Reads are recorded in memory and written in one batched statement every `ACCESS_TIME_FLUSH_SECONDS` (default 10). Each item is written at most once per `ACCESS_TIME_WINDOW_MINUTES` (default 60), so the write volume is set by the flush interval rather than by request traffic.
+
+**Configuration:**
+
+- `ACCESS_TIME_TRACKING` - Set to `0` to disable
+- `ACCESS_TIME_WINDOW_MINUTES` - Per-item suppression window
+- `ACCESS_TIME_FLUSH_SECONDS` - Buffer flush interval
+
+Buffered timestamps are written on shutdown. A failed flush is logged at `warn` with the message `[AccessTime] Failed to flush access times` and does not affect the request that triggered it. See [Last Access Time](/docs/concepts/file-system#last-access-time).
+
 ## Running Workers
 
 ### Production

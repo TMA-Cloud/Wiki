@@ -35,7 +35,7 @@ Quick access to your favorite files and folders.
 
 ### Sorting
 
-- Sort by name, date, size, type
+- Sort by name, modified, last opened, or size
 - Maintains organization
 - Easy to find files
 
