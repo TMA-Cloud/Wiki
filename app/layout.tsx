@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import { Provider } from '@/components/provider';
 import type { Metadata } from 'next';
+import { siteUrl } from '@/lib/shared';
 import './global.css';
 
 const inter = Inter({
@@ -8,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://tma-cloud.github.io/Wiki'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: 'TMA Cloud',
     template: '%s | TMA Cloud',
