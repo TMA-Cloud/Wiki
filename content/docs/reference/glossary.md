@@ -43,7 +43,7 @@ The signed token used to authenticate API requests. Delivered as an httpOnly coo
 
 ### Last opened (`accessed_at`)
 
-When a file or folder was last read. Downloads, document opens and share-link reads update it; searching, renaming and viewing Get Info do not. Opening a folder marks the folder, not the files inside it. The value is written at most once per hour per item, so it can lag a read by that much. See [Last Access Time](/docs/concepts/file-system#last-access-time).
+When a file or folder was last read. Downloads, document opens and share-link reads update it; searching, renaming and viewing Get Info do not. Opening a folder marks the folder, not the files inside it. The value is written at most once per hour per item, so it can lag a read by that much. The [Cloud Drive](#cloud-drive) reports it as the NTFS last-access time. See [Last Access Time](/docs/concepts/file-system#last-access-time).
 
 ### MFA (Multi-Factor Authentication)
 

@@ -90,6 +90,10 @@ The effect is at most one write per item per hour, batched. The number of statem
 
 Set `ACCESS_TIME_TRACKING=0` to switch the feature off. See [Environment Variables](/docs/reference/environment-variables#last-access-time) for the tuning knobs.
 
+### On the Cloud Drive
+
+The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Explorer's **Date accessed** column reflects it. The other three NTFS timestamps come from the modification time. Windows writes `LastAccessTime` back when a handle closes; the drive accepts and discards those writes, because the server decides what counts as a read. See [Desktop App](/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive).
+
 ## Storage
 
 ### Physical Storage
