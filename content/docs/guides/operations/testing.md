@@ -7,7 +7,7 @@ Running the TMA Cloud test suites.
 
 ## Overview
 
-There are four suites, all using [Vitest](https://vitest.dev). Two run from a clean
+There are five suites, all using [Vitest](https://vitest.dev). Three run from a clean
 checkout with no services; two talk to real infrastructure.
 
 | Suite               | Location                                          | Needs                   |
@@ -16,6 +16,7 @@ checkout with no services; two talk to real infrastructure.
 | Backend integration | `backend/tests/integration-db`                    | PostgreSQL and Redis    |
 | S3 storage driver   | `backend/tests/integration-s3`                    | An S3-compatible bucket |
 | Frontend            | `frontend/tests`                                  | Nothing                 |
+| Desktop app         | `electron/tests`                                  | Nothing                 |
 
 `backend/tests/integration` holds route-level tests that mount the real routers with
 the controllers stubbed. They need no services, so they run as part of the unit suite.
@@ -103,6 +104,33 @@ Test files are type-checked by their own TypeScript project:
 npx tsc -b tsconfig.test.json
 ```
 
+## Desktop App Commands
+
+Run from the `electron` directory.
+
+```bash
+npm test
+```
+
+Run the desktop app suite once.
+
+```bash
+npm run test:watch
+```
+
+Re-run affected tests as files change.
+
+```bash
+npm run test:coverage
+```
+
+Write a coverage report to `electron/coverage`.
+
+The suite runs under plain Node with no Electron runtime: `require('electron')` is
+redirected to an in-memory double, and `child_process.spawn` and `net.createServer`
+are replaced per test so PowerShell never runs and no named pipe is bound. Nothing is
+mounted, no window opens, and it runs the same on Windows and on the Linux CI runner.
+
 ## Integration Setup
 
 The integration suite reads connection details from the project `.env`, then overrides
@@ -157,6 +185,27 @@ against the configured bucket.
 
 API client and error handling, storage and file-name helpers, the Electron bridge,
 React hooks, and the Modal, Toast, and PermissionChecklist components.
+
+### Desktop App
+
+The main process end of every desktop feature:
+
+- Window security — context isolation, sandbox, blocked navigation and `window.open`,
+  denied permission requests, and the desktop-client header that only ever goes to the
+  configured server origin
+- The preload bridge: which channels it exposes, and that it never hands the page a
+  generic way to reach the main process
+- Open on desktop — download, watch, throttled re-upload, exported "Save As" files,
+  and the size-based reuse of an already downloaded copy
+- Clipboard — the file-drop, OLE and text-as-paths sources, size caps, name
+  sanitising, and origin checks on server-side copies
+- Cloud Drive — the per-session bridge token, the staging-directory confinement on
+  every path the filesystem host sends, save-only mode, mount and unmount, and
+  mounting from the auth cookie without unmounting on a token refresh
+- Updates — the installer URL, `Content-Disposition` filename sanitising, download
+  progress, and launching the installer
+- Save and bulk save dialogs, temp-directory cleanup, single-instance behaviour, and
+  the packaging contract the build scripts depend on
 
 ## Continuous Integration
 
