@@ -142,6 +142,8 @@ The Windows desktop app can mount TMA Cloud as a drive (for example `Z:`) so you
 - **Mounts automatically.** The drive appears a second or two after you sign in and is removed when you sign out or close the app. It reuses the app's existing session — no separate login.
 - **Save As anywhere.** In any app's Save dialog, choose the TMA Cloud drive as the destination. The file uploads through the same pipeline as a normal upload, so permissions, versioning, and audit all apply. Saving into an existing subfolder reuses that folder instead of creating a duplicate.
 - **Live updates.** Changes made from the web app or another device appear on the drive within a few seconds.
+- **Only your Windows account can read it.** The drive grants access to the Windows user who signed in (plus `SYSTEM` and Administrators). Other accounts on the same computer cannot open the mounted drive.
+- **Temporary cache.** Opening or saving a file stages it under `%TEMP%\tma-cloud-fs\`. Each staged file is deleted when the app closes its handle, anything left over is cleared when the drive unmounts, and stale files from a previous crash are removed on the next mount.
 - **Timestamps.** Explorer's **Date accessed** column shows the server's last-read time; **Date created**, **Date modified** and the change time all show the modification time. Windows tries to write **Date accessed** back when a file is closed, but the server owns the value, so the drive ignores those writes and the next refresh restores it. A file the server has no read time for shows its modification time instead.
 
 ### Save-only mode

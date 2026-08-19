@@ -199,9 +199,8 @@ The main process end of every desktop feature:
   and the size-based reuse of an already downloaded copy
 - Clipboard — the file-drop, OLE and text-as-paths sources, size caps, name
   sanitising, and origin checks on server-side copies
-- Cloud Drive — the per-session bridge token, the staging-directory confinement on
-  every path the filesystem host sends, save-only mode, mount and unmount, and
-  mounting from the auth cookie without unmounting on a token refresh
+- Cloud Drive — the per-session bridge token and that it reaches the host on stdin,
+  the staging-directory confinement on every path the filesystem host sends, save-only mode, mount and unmount, and mounting from the auth cookie without unmounting on a token refresh
 - Updates — the installer URL, `Content-Disposition` filename sanitising, download
   progress, and launching the installer
 - Save and bulk save dialogs, temp-directory cleanup, single-instance behaviour, and

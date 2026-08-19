@@ -184,6 +184,12 @@ Any app's Save As → Z:\ TMA Cloud (WinFsp)
 
 The main process mounts the drive when the auth cookie appears (sign-in) and unmounts on sign-out or app close. Directory listings are cached briefly and refreshed by the backend event stream. See [Desktop App — Cloud Drive](/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive).
 
+**Bridge authentication.** The pipe name is random per session and every request on it carries a per-session token; the main process rejects anything else, so another local process that reaches the pipe cannot issue operations against the signed-in account. The main process passes the token to the host on stdin (`--token-stdin`), not as a command-line argument, because a command line is readable by any process running as the same user for as long as the drive is mounted.
+
+**Drive permissions.** Files and folders on the drive report a security descriptor granting the signed-in Windows user, `SYSTEM` and the local Administrators group but not `Everyone` so other accounts on a shared machine cannot read the mount.
+
+**Local staging.** File bytes never travel on the pipe. Reads and writes stage through temp files under `%TEMP%\tma-cloud-fs\` whose paths are exchanged over the pipe. Staging files are deleted when their handle closes, and any survivors are removed when the drive unmounts.
+
 ## Data Flow
 
 ### Authentication Flow
