@@ -5,6 +5,8 @@ description: 'Code examples for TMA Cloud API.'
 
 Code examples for TMA Cloud API.
 
+**Every write needs the CSRF header.** `POST`, `PUT`, `PATCH` and `DELETE` requests to `/api` must send `X-Requested-With: XMLHttpRequest`, or the server answers `403 Forbidden: missing CSRF header`. The examples below include it. See [API Overview](/docs/api/overview#csrf-header).
+
 ## Authentication
 
 ### Login
@@ -14,6 +16,7 @@ const response = await fetch('/api/login', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
   body: JSON.stringify({
     email: 'user@example.com',
@@ -32,6 +35,7 @@ const response = await fetch('/api/signup', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
   body: JSON.stringify({
     email: 'user@example.com',
@@ -69,10 +73,12 @@ const data = await response.json();
 ```javascript
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
-formData.append('parent_id', 'folder_123');
+formData.append('parentId', 'folder_123');
 
 const response = await fetch('/api/files/upload', {
   method: 'POST',
+  // Do not set Content-Type by hand — the browser adds the multipart boundary.
+  headers: { 'X-Requested-With': 'XMLHttpRequest' },
   body: formData,
   credentials: 'include',
 });
@@ -115,6 +121,7 @@ const response = await fetch('/api/files/download/bulk', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
   body: JSON.stringify({
     ids: ['file_123', 'file_456', 'folder_789'],
@@ -139,6 +146,7 @@ const response = await fetch('/api/files/share', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
   body: JSON.stringify({
     ids: ['file_123', 'file_456'],
@@ -155,7 +163,7 @@ const shareUrl = data.links['file_123'];
 
 ```javascript
 try {
-  const response = await fetch('/api/files/some_file_id', {
+  const response = await fetch('/api/files/file_123/info', {
     credentials: 'include',
   });
 

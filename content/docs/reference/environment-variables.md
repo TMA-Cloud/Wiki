@@ -66,7 +66,7 @@ Complete reference for all environment variables in TMA Cloud.
 | Variable              | Required | Default             | Description                        |
 | --------------------- | -------- | ------------------- | ---------------------------------- |
 | `STORAGE_DRIVER`      | No       | `local`             | `local` or `s3`                    |
-| `UPLOAD_DIR`          | No       | `./uploads`         | Upload directory (local only)      |
+| `UPLOAD_DIR`          | No       | `backend/uploads`   | Upload directory (local only)      |
 | `FILE_ENCRYPTION_KEY` | No       | Development default | Encryption key for file encryption |
 
 **Note:** All file operations use streaming for large files. No memory limits for file size.
@@ -85,6 +85,8 @@ Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** 
 | Secret key | Yes\*    | -       | `R2_SECRET_ACCESS_KEY`     |
 | Endpoint   | No       | derived | `R2_ENDPOINT` (optional)   |
 | Public URL | No       | -       | `R2_PUBLIC_URL` (optional) |
+
+`R2_ACCESS_KEY` and `R2_SECRET_KEY` are accepted as fallbacks for the two key variables, but `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` take precedence when both are set.
 
 \*Required when using R2. Endpoint is `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com` unless `R2_ENDPOINT` is set. Region is set to `auto` for R2.
 
@@ -105,11 +107,11 @@ Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** 
 
 ## Logging Configuration
 
-| Variable              | Required | Default                       | Description                                        |
-| --------------------- | -------- | ----------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`           | No       | `info`                        | Log level (fatal, error, warn, info, debug, trace) |
-| `LOG_FORMAT`          | No       | `json` (prod), `pretty` (dev) | Log format (json, pretty)                          |
-| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1`                   | Comma-separated IPs allowed to access `/metrics`   |
+| Variable              | Required | Default                          | Description                                        |
+| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
+| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
+| `LOG_FORMAT`          | No       | `json` (prod), `pretty` (dev)    | Log format (json, pretty)                          |
+| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`   |
 
 ## Audit Logging Configuration
 

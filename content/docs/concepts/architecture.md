@@ -243,7 +243,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 
 ## Database Schema
 
-Key tables: `users`, `files`, `share_links`, `share_link_files`, `audit_logs`, `sessions`, `app_settings`
+Key tables: `users`, `files`, `share_links`, `share_link_files`, `sessions`, `mfa_backup_codes`, `client_heartbeats`, `app_settings`, `audit_log`
 
 See [Database Schema](/docs/reference/database-schema) for details.
 

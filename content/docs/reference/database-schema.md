@@ -11,22 +11,23 @@ PostgreSQL database schema for TMA Cloud.
 
 User accounts and sub-users.
 
-| Column                    | Type         | Description                                      |
-| ------------------------- | ------------ | ------------------------------------------------ |
-| `id`                      | VARCHAR(255) | Primary key                                      |
-| `email`                   | VARCHAR(255) | Unique, not null                                 |
-| `password`                | VARCHAR(255) | Hashed (nullable for OAuth)                      |
-| `name`                    | VARCHAR(255) | Display name                                     |
-| `google_id`               | VARCHAR(255) | Unique (optional)                                |
-| `mfa_enabled`             | BOOLEAN      | Default false                                    |
-| `mfa_secret`              | TEXT         | TOTP secret (nullable)                           |
-| `token_version`           | INTEGER      | Token version for revocation                     |
-| `last_token_invalidation` | TIMESTAMP    | Last token invalidation time                     |
-| `storage_limit`           | BIGINT       | Storage limit (nullable, bytes)                  |
-| `parent_user_id`          | TEXT         | Account owner for sub-users (null for owners)    |
-| `permissions`             | TEXT[]       | Granted permissions for sub-users (default `{}`) |
-| `created_at`              | TIMESTAMPTZ  | Default now()                                    |
-| `updated_at`              | TIMESTAMPTZ  | Default now()                                    |
+| Column                          | Type        | Description                                                  |
+| ------------------------------- | ----------- | ------------------------------------------------------------ |
+| `id`                            | TEXT        | Primary key                                                  |
+| `email`                         | TEXT        | Unique, not null                                             |
+| `password`                      | TEXT        | Hashed (nullable for OAuth-only accounts)                    |
+| `name`                          | TEXT        | Display name                                                 |
+| `google_id`                     | TEXT        | Unique (optional)                                            |
+| `mfa_enabled`                   | BOOLEAN     | Default false                                                |
+| `mfa_secret`                    | TEXT        | TOTP secret (nullable)                                       |
+| `mfa_last_time_step`            | BIGINT      | Last TOTP time step spent                                    |
+| `last_backup_code_regeneration` | TIMESTAMPTZ | Stamped when backup codes are regenerated                    |
+| `token_version`                 | INTEGER     | Token version for revocation, default 1                      |
+| `last_token_invalidation`       | TIMESTAMP   | Last token invalidation time                                 |
+| `storage_limit`                 | BIGINT      | Storage limit (nullable, bytes)                              |
+| `parent_user_id`                | TEXT        | Account owner for sub-users (null for owners), FK → users.id |
+| `permissions`                   | TEXT[]      | Granted permissions for sub-users, default `{}`              |
+| `created_at`                    | TIMESTAMPTZ | Default now()                                                |
 
 **Sub-users:** A row with `parent_user_id` set is a sub-user of that account. The account any row belongs to is `COALESCE(parent_user_id, id)`, which is the value stored in `files.user_id`.
 
@@ -47,23 +48,26 @@ User accounts and sub-users.
 
 Files and folders.
 
-| Column        | Type         | Description                   |
-| ------------- | ------------ | ----------------------------- |
-| `id`          | VARCHAR(255) | Primary key                   |
-| `name`        | VARCHAR(255) | Not null                      |
-| `type`        | VARCHAR(50)  | 'file' or 'folder'            |
-| `size`        | BIGINT       | File size in bytes            |
-| `mime_type`   | VARCHAR(255) | MIME type                     |
-| `user_id`     | VARCHAR(255) | FK → users.id                 |
-| `parent_id`   | VARCHAR(255) | FK → files.id (null for root) |
-| `path`        | TEXT         | Full path                     |
-| `starred`     | BOOLEAN      | Default false                 |
-| `deleted_at`  | TIMESTAMPTZ  | Soft delete timestamp         |
-| `modified`    | TIMESTAMPTZ  | Last modification time        |
-| `created_at`  | TIMESTAMPTZ  | Row creation time             |
-| `accessed_at` | TIMESTAMPTZ  | Last read time, default now() |
+| Column        | Type        | Description                                                                      |
+| ------------- | ----------- | -------------------------------------------------------------------------------- |
+| `id`          | TEXT        | Primary key                                                                      |
+| `name`        | TEXT        | Not null                                                                         |
+| `type`        | TEXT        | 'file' or 'folder'                                                               |
+| `size`        | BIGINT      | File size in bytes (null for folders)                                            |
+| `mime_type`   | TEXT        | MIME type                                                                        |
+| `user_id`     | TEXT        | FK → users.id, the account the row belongs to                                    |
+| `parent_id`   | TEXT        | FK → files.id (null for root)                                                    |
+| `path`        | TEXT        | Storage key: filename under `UPLOAD_DIR`, or the S3 object key. Null for folders |
+| `starred`     | BOOLEAN     | Default false                                                                    |
+| `shared`      | BOOLEAN     | Default false; true while an active share link exists                            |
+| `deleted_at`  | TIMESTAMPTZ | Soft delete timestamp                                                            |
+| `modified`    | TIMESTAMPTZ | Last modification time, not null, default now()                                  |
+| `created_at`  | TIMESTAMPTZ | Row creation time, not null, default now()                                       |
+| `accessed_at` | TIMESTAMPTZ | Last read time, not null, default now()                                          |
 
-**Indexes:** `user_id`, `parent_id`, `path`, `deleted_at`, `created_at`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, full-text on `name`
+**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, plus several partial indexes supporting trash listing and the recursive folder CTEs.
+
+Name search is backed by trigram GIN indexes from `pg_trgm` (`name`, `lower(name)`) and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
 
 **The three timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
 
@@ -73,27 +77,30 @@ Files and folders.
 
 Share link metadata.
 
-| Column       | Type         | Description                       |
-| ------------ | ------------ | --------------------------------- |
-| `id`         | VARCHAR(255) | Primary key (used as token)       |
-| `file_id`    | VARCHAR(255) | FK → files.id                     |
-| `user_id`    | VARCHAR(255) | FK → users.id                     |
-| `expires_at` | TIMESTAMPTZ  | Expiration (null = no expiration) |
-| `created_at` | TIMESTAMPTZ  | Default now()                     |
+| Column       | Type        | Description                       |
+| ------------ | ----------- | --------------------------------- |
+| `id`         | TEXT        | Primary key (used as token)       |
+| `file_id`    | TEXT        | FK → files.id                     |
+| `user_id`    | TEXT        | FK → users.id                     |
+| `expires_at` | TIMESTAMPTZ | Expiration (null = no expiration) |
+| `created_at` | TIMESTAMPTZ | Default now()                     |
 
-**Indexes:** Partial index on `expires_at` where `expires_at IS NOT NULL`
+**Indexes:** `file_id`; partial index on `expires_at` where `expires_at IS NOT NULL`
 
 ### `share_link_files`
 
 Junction table linking share links to files.
 
-| Column          | Type         | Description         |
-| --------------- | ------------ | ------------------- |
-| `share_link_id` | VARCHAR(255) | FK → share_links.id |
-| `file_id`       | VARCHAR(255) | FK → files.id       |
-| `created_at`    | TIMESTAMPTZ  | Default now()       |
+| Column     | Type | Description         |
+| ---------- | ---- | ------------------- |
+| `share_id` | TEXT | FK → share_links.id |
+| `file_id`  | TEXT | FK → files.id       |
 
-**Primary Key:** (`share_link_id`, `file_id`)
+**Primary Key:** (`share_id`, `file_id`)
+
+**Indexes:** `file_id`
+
+Note the column is `share_id`, not `share_link_id`. Both foreign keys cascade on delete.
 
 ### `app_settings`
 
@@ -108,7 +115,12 @@ Application-wide settings.
 | `max_upload_size_bytes`   | BIGINT      | Max single-file upload size in bytes (default 10737418240 = 10 GB) |
 | `hide_file_extensions`    | BOOLEAN     | When true, file names are shown without extensions (default false) |
 | `require_electron_client` | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
+| `allow_password_change`   | BOOLEAN     | When true, users may change their own password (default false)     |
+| `onlyoffice_url`          | TEXT        | OnlyOffice Document Server URL (null = integration off)            |
+| `onlyoffice_jwt_secret`   | TEXT        | Shared secret for signing OnlyOffice payloads                      |
 | `updated_at`              | TIMESTAMPTZ | Default now()                                                      |
+
+The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `RESTRICT` foreign key, so the first user cannot be deleted while the row references them.
 
 ### `sessions`
 
@@ -125,6 +137,25 @@ Active user sessions.
 | `last_activity` | TIMESTAMPTZ | Default now() (updates on each request) |
 
 **Indexes:** `(user_id, created_at DESC)`, `(user_id, token_version)`, `last_activity`
+
+A session is invalid once its `token_version` falls behind the user's current one, which is how "logout everywhere" and a password change end every session at once.
+
+### `mfa_backup_codes`
+
+One row per single-use MFA backup code.
+
+| Column       | Type      | Description                                 |
+| ------------ | --------- | ------------------------------------------- |
+| `id`         | TEXT      | Primary key                                 |
+| `user_id`    | TEXT      | FK → users.id, not null, CASCADE            |
+| `code_hash`  | TEXT      | bcrypt hash of the code, not null           |
+| `used`       | BOOLEAN   | Default false                               |
+| `created_at` | TIMESTAMP | Default `CURRENT_TIMESTAMP`                 |
+| `used_at`    | TIMESTAMP | When the code was spent (null while unused) |
+
+Codes are stored hashed, never in plain text, so a lost code cannot be recovered — only replaced. Ten rows are written when MFA is enabled and again on each regeneration, which first deletes the old set. Disabling MFA deletes all of a user's rows.
+
+**Indexes:** `user_id`; partial index on `(user_id, used)` where `used = FALSE`
 
 ### `client_heartbeats`
 
@@ -168,7 +199,9 @@ Audit trail events.
 
 `user_id` is always the login that acted. For a sub-user, `account_owner_id` is the owner whose files were touched; for an owner the two match.
 
-**Indexes:** `(user_id, created_at DESC)`, `(account_owner_id, created_at DESC)`, `action`, `created_at`, `request_id`, `(resource_type, resource_id)`, GIN on `metadata`
+**Indexes:** `(user_id, created_at DESC)` where `user_id IS NOT NULL`, `(account_owner_id, created_at DESC)`, `action`, `created_at DESC`, `request_id`, `(resource_type, resource_id)` where both are set, `(created_at DESC, action, error_message)` where status is `failure` or `error`, and a GIN index on `metadata` using `jsonb_path_ops`.
+
+**Retention:** rows older than 30 days are removed by the `cleanup_old_audit_logs(30)` function, called by a cleanup job every 24 hours.
 
 ## Views
 
@@ -217,6 +250,7 @@ Migration tracking.
 - User → Share Links (one-to-many, CASCADE)
 - Share Link → Files (many-to-many via `share_link_files`)
 - User → Sessions (one-to-many, CASCADE)
+- User → MFA Backup Codes (one-to-many, CASCADE)
 - User → Client Heartbeats (one-to-many, CASCADE)
 - User → Audit Log (one-to-many, SET NULL — on both `user_id` and `account_owner_id`)
 
@@ -252,6 +286,8 @@ ORDER BY created_at;
 ```
 
 **Search files:**
+
+This is the query used for search terms of three characters or more. Terms of one or two characters take a prefix-only branch instead, skipping the trigram similarity work.
 
 ```sql
 SELECT * FROM files

@@ -30,18 +30,37 @@ npm run worker
 
 ### Cleanup Services
 
+All four run inside the main application process, not the audit worker. Each runs once at startup and then on its own interval.
+
+| Job                | Interval | What it removes                                          |
+| ------------------ | -------- | -------------------------------------------------------- |
+| Trash cleanup      | 24 hours | Files trashed more than 15 days ago                      |
+| Audit log cleanup  | 24 hours | `audit_log` rows older than 30 days                      |
+| Share link cleanup | 7 days   | Share links whose `expires_at` has passed                |
+| Heartbeat cleanup  | 1 hour   | `client_heartbeats` rows not seen in the last 10 minutes |
+
+A job that is still running when its interval comes round again is skipped rather than started twice.
+
 #### Trash Cleanup
 
-- Automatic deletion after 15 days
-- Runs every 24 hours
-- Permanent file deletion from storage
+- Deletes rows where `deleted_at` is more than 15 days old
+- Removes the stored object as well as the database row
+
+#### Audit Log Cleanup
+
+- Calls the `cleanup_old_audit_logs(30)` PostgreSQL function
+- The deleted count is logged, so the retention window is visible in the logs
 
 #### Share Link Cleanup
 
 - Deletes expired share links (`expires_at < NOW()`)
 - Sets `shared = false` on files that no longer have an active share link
-- Runs at startup and every 7 days
 - Invalidates related caches after cleanup
+
+#### Heartbeat Cleanup
+
+- Purges desktop client heartbeats older than 10 minutes
+- This is what makes `GET /api/user/active-clients` reflect who is actually connected
 
 ### Access Time Writer
 
@@ -71,11 +90,11 @@ npm run worker
 
 ### Docker
 
-Workers run as separate containers:
+The audit worker runs as its own container, sharing the app image:
 
 ```bash
 docker compose up -d
-# Starts app, worker, and redis
+# Starts init-permissions, postgres, redis, app, and worker
 ```
 
 ## Monitoring Workers

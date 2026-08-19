@@ -14,9 +14,9 @@ TMA Cloud uses [Pino](https://getpino.io/) for structured logging with automatic
 ### Environment Variables
 
 ```bash
-LOG_LEVEL=info        # fatal, error, warn, info, debug, trace
-LOG_FORMAT=json       # json or pretty
-METRICS_ALLOWED_IPS=127.0.0.1,::1
+LOG_LEVEL=info        # fatal, error, warn, info, debug, trace (default: info)
+LOG_FORMAT=json       # json or pretty (default: json in production, pretty otherwise)
+METRICS_ALLOWED_IPS=127.0.0.1,::ffff:127.0.0.1,::1
 ```
 
 **Recommendation:**
@@ -76,8 +76,10 @@ All HTTP requests automatically logged with:
 
 ## Logging in Code
 
+The backend is ESM, so import rather than `require`:
+
 ```javascript
-const { logger } = require('./config/logger');
+import { logger } from './config/logger.js';
 
 logger.info('User logged in');
 logger.info({ userId: 'user_001' }, 'User logged in');

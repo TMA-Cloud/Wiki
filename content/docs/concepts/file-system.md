@@ -18,11 +18,11 @@ File system architecture and organization in TMA Cloud.
 - **ID:** Unique identifier (stable across operations)
 - **Name:** File or folder name
 - **Type:** 'file' or 'folder'
-- **Size:** File size in bytes (folders: 0)
+- **Size:** File size in bytes
 - **MIME Type:** Actual MIME type detected from file content (not from extension)
 - **Parent ID:** Parent folder reference
-- **Path:** Full path string
-- **User ID:** Owner reference
+- **Path:** The storage key, not a user-visible path
+- **User ID:** The account the item belongs to
 - **Last Access Time:** When the item was last read (`accessed_at`), shown in the UI as "Last opened"
 
 ## File Operations
@@ -55,9 +55,8 @@ File system architecture and organization in TMA Cloud.
 
 ### Path Management
 
-- Paths stored as full strings
-- Automatic path updates on move/rename
-- Path validation prevents traversal attacks
+- Renaming or moving an item changes its `parent_id` and `name`, not its storage key, so no stored object is touched
+- Every resolved path is checked to stay inside `UPLOAD_DIR`, which is what blocks traversal attempts
 
 ## Last Access Time
 

@@ -71,7 +71,7 @@ The PostgreSQL-backed job queue used for background work (audit event writes, tr
 
 ### Share domain
 
-An optional separate domain you can point at `/s/*` routes, so share links don't expose the main app's domain. Configured via `SHARE_BASE_URL` — see [Share Base URL](/docs/guides/admin/share-base-url).
+An optional separate domain you can point at `/s/*` routes, so share links don't expose the main app's domain. It is an admin setting stored in the database (`app_settings.share_base_url`), set it under **Settings** → **Administration**. See [Share Base URL](/docs/guides/admin/share-base-url).
 
 ### Share link / share token
 

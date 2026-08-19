@@ -5,78 +5,55 @@ description: 'System monitoring and health checks in TMA Cloud.'
 
 System monitoring and health checks in TMA Cloud.
 
-## Health Checks
+## Health Check
 
-### Application Health
+**Endpoint:** `GET /health` — no authentication.
 
-- Health check endpoint available
-- Database connection status
-- Redis connection status (if enabled)
+This is a **liveness** check. It returns `200` with `status`, `timestamp` and `uptime` whenever the HTTP server is accepting requests. It does not query PostgreSQL or Redis, so a healthy response does not tell you the database is reachable. The Compose healthcheck uses it to decide whether the container is serving.
 
-### Metrics Endpoint
+To check the database from outside the app, use `pg_isready` against the Postgres container; for Redis, `redis-cli ping`.
 
-**Endpoint:** `/metrics`
+## Metrics Endpoint
 
-**Access:** Restricted to IPs in `METRICS_ALLOWED_IPS`
+**Endpoint:** `GET /metrics` — Prometheus text format.
 
-**Metrics:**
+**Access:** restricted to the addresses in `METRICS_ALLOWED_IPS`. The default is loopback only (`127.0.0.1,::ffff:127.0.0.1,::1`), and a request from anywhere else is answered `403 Forbidden` and logged as an unauthorized access attempt. Behind a reverse proxy, `TRUST_PROXY` has to be right or the check sees the proxy's address rather than the caller's.
 
-- Request counts
-- Response times
-- Error rates
-- System resources
+### What is exposed
 
-## Monitoring Tools
+**Node.js process metrics** (`nodejs_` prefix, from `prom-client` defaults): heap and resident memory, CPU, event loop lag, active handles, garbage collection durations.
 
-### Application Logs
+**Audit queue metrics:**
 
-- Structured JSON logs
-- Request tracking
-- Error logging
-- Performance metrics
+| Metric                              | Type      | Useful for                                                    |
+| ----------------------------------- | --------- | ------------------------------------------------------------- |
+| `audit_events_queued_total`         | Counter   | Event volume, broken down by `action` and `status`            |
+| `audit_events_processed_total`      | Counter   | Worker throughput                                             |
+| `audit_events_failed_total`         | Counter   | Processing failures, broken down by `reason`                  |
+| `audit_queue_depth`                 | Gauge     | Backlog — a rising value means the worker is down or too slow |
+| `audit_queue_failed_depth`          | Gauge     | Jobs that exhausted their retries                             |
+| `audit_processing_duration_seconds` | Histogram | Per-event processing time                                     |
+| `audit_last_processed_timestamp`    | Gauge     | Staleness — alert when the gap from now grows                 |
 
-### Database Monitoring
+The two gauges are refreshed every 30 seconds from the pg-boss job table.
 
-- Connection pool status
-- Query performance
-- Migration status
+### What is not exposed
 
-### Redis Monitoring
+There are no HTTP request counters, latency histograms, error-rate metrics, cache hit/miss counters, or storage-usage gauges. Per-request data lives in the structured logs, and storage figures are available through `GET /api/user/storage`.
 
-- Cache hit/miss rates
-- Connection status
-- Memory usage
+## Suggested Alerts
 
-## Key Metrics
+- `audit_queue_depth` above a few hundred and climbing — the audit worker is not running
+- `time() - audit_last_processed_timestamp` above a few minutes — same signal, from the other direction
+- `audit_queue_failed_depth` greater than zero — events are being lost
+- `/health` not answering `200` — the process is down
+- Disk usage on the volume behind `UPLOAD_DIR`, checked at the host level
 
-### Performance
+## Monitoring Beyond the App
 
-- Request latency
-- Throughput
-- Error rates
-- Cache performance
-
-### Resources
-
-- Disk space usage
-- Database size
-- Memory usage
-- CPU usage
-
-### Business
-
-- User counts
-- Storage usage
-- File operations
-- Share link usage
-
-## Best Practices
-
-- Monitor health endpoints
-- Set up alerts
-- Review logs regularly
-- Track key metrics
-- Monitor resource usage
+- **Logs:** structured JSON on stdout, with a request ID on every line. See [Logging](/docs/guides/operations/logging).
+- **Database:** standard PostgreSQL monitoring. Migration state is the `migrations` table.
+- **Redis:** `redis-cli INFO`. Redis is optional — the app degrades to no caching rather than failing.
 
 ## Related Topics
 

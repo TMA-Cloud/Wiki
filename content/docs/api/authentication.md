@@ -24,7 +24,7 @@ Create a new user account. This endpoint respects the server's signup enabled/di
 **Validation:**
 
 - `email`: Must be a valid email format and not exceed 254 characters.
-- `password`: Must be between 6 and 128 characters.
+- `password`: Must be between 8 and 128 characters.
 - `name`: Optional. Must not exceed 100 characters.
 
 **Response:**
@@ -130,36 +130,47 @@ This endpoint:
 - Requires authentication.
 - Is only available when password change is enabled by the first user (admin).
 - Only works for accounts that have a local email/password (not Google-only accounts).
+- Requires **recent** authentication: the session must have been created within the last 10 minutes. An older session is rejected with `403` and the user has to log in again first.
+- Requires a valid MFA or backup code in `mfaCode` when MFA is enabled on the account, regardless of session age.
 
 **Request Body:**
 
 ```json
 {
   "oldPassword": "current-password",
-  "newPassword": "new-password"
+  "newPassword": "new-password",
+  "mfaCode": "123456"
 }
 ```
 
 **Validation:**
 
 - `oldPassword`: Required. String, 1–128 characters.
-- `newPassword`: Required. String, 6–128 characters. Must be different from `oldPassword`.
+- `newPassword`: Required. String, 8–128 characters. Must be different from `oldPassword`.
+- `mfaCode`: Optional at the schema level, 6–20 characters. Required by the handler when the account has MFA enabled. Accepts a 6-digit TOTP code or an 8-character backup code.
 
 **Response (success):**
 
 ```json
 {
-  "message": "Password changed successfully. Please log in again."
+  "message": "Password changed successfully, Please log in again!"
 }
 ```
 
 On success, all existing sessions and tokens are invalidated. The user must log in again with the new password.
 
-**Error cases (examples):**
+**Error cases:**
 
 - `401 Not authenticated`
 - `403 Password change is currently disabled by the administrator`
+- `403 For your security, please log in again before changing your password.`
+- `400 MFA verification code is required to change your password.`
+- `401 Invalid MFA code.`
 - `400 Current password is incorrect`
+- `400 New password must be different from the current password`
+- `400 Password change is not available for this account` [Accounts created with Google]
+
+Failed attempts are recorded as `auth.password_change` audit events with a `reason` in the metadata.
 
 **Rate limiting:** Auth rate limit (same as login/signup: 25 attempts per 15 minutes per IP/email).
 
@@ -266,19 +277,27 @@ Verify an MFA code (TOTP) and enable MFA for the user's account.
 
 **Validation:**
 
-- `code`: Required. Must be a 6-digit string.
+- `code`: Required. Must be a 6-digit TOTP string. Anything else is rejected as an invalid code.
+
+Only valid during enrolment. If MFA is already enabled the request returns `400 MFA is already enabled`, so a replayed code cannot mint a second batch of backup codes.
 
 **Response:**
 
-Returns a success message, a new set of backup codes, and a flag to prompt the user to sign out other sessions.
+Returns a success message, a set of 10 backup codes, and a flag to prompt the user to sign out other sessions.
 
 ```json
 {
   "message": "MFA enabled successfully",
-  "backupCodes": ["ABCD-EFGH", "IJKL-MNOP"],
+  "backupCodes": ["K7RM2PXQ", "H4TCVB9D"],
   "shouldPromptSessions": true
 }
 ```
+
+**Error cases:**
+
+- `400 MFA not set up. Please set up MFA first.`
+- `400 MFA is already enabled`
+- `400 Invalid verification code`
 
 **Rate limiting:** 5 attempts per minute per IP/user.
 
@@ -296,7 +315,7 @@ Disable MFA for the user's account. Requires a valid MFA code (either TOTP or a 
 
 **Validation:**
 
-- `code`: Required. Must be a 6-digit (TOTP) or 8-character (backup code) string.
+- `code`: Required. Must be a 6-digit TOTP string or an 8-character backup code. The TOTP check runs first; a code that is not six digits falls through to the backup-code check.
 
 **Response:**
 
@@ -311,15 +330,17 @@ Disable MFA for the user's account. Requires a valid MFA code (either TOTP or a 
 
 ### POST `/api/mfa/backup-codes/regenerate`
 
-Regenerate MFA backup codes, which invalidates all existing backup codes.
+Regenerate MFA backup codes, which invalidates all existing backup codes. Returns 10 fresh codes. The delete and insert share one transaction, so a failure part-way leaves the previous codes usable.
 
 **Response:**
 
 ```json
 {
-  "backupCodes": ["ABCD-EFGH", "IJKL-MNOP"]
+  "backupCodes": ["K7RM2PXQ", "H4TCVB9D"]
 }
 ```
+
+**Backup code format:** 8 characters drawn from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` — uppercase letters and digits with the ambiguous `0 O 1 I L` removed. The web UI strips dashes from its MFA input fields, so a user may type `ABCD-EFGH`, but an API client must send `ABCDEFGH`.
 
 **Error Response (429 Too Many Requests):**
 

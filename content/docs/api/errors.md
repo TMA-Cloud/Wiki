@@ -38,7 +38,7 @@ Validation errors (HTTP status `422`) provide additional detail in a `details` a
   "message": "Validation failed",
   "details": [
     { "email": "Invalid email format" },
-    { "password": "Password must be between 6 and 128 characters" }
+    { "password": "Password must be between 8 and 128 characters" }
   ]
 }
 ```
@@ -47,10 +47,15 @@ Validation errors (HTTP status `422`) provide additional detail in a `details` a
 
 - `400 Bad Request`: The request was malformed, such as containing invalid JSON.
 - `401 Unauthorized`: Authentication is required and has failed or has not been provided.
-- `403 Forbidden`: The authenticated user does not have permission to perform the action.
+- `403 Forbidden`: The authenticated user does not have permission to perform the action, or a state-changing request arrived without the `X-Requested-With: XMLHttpRequest` CSRF header (see [API Overview](/docs/api/overview#csrf-header)).
 - `404 Not Found`: The requested resource could not be found.
 - `422 Unprocessable Entity`: The request was well-formed but could not be processed due to validation errors. Check the `details` field for more information.
 - `429 Too Many Requests`: The user has sent too many requests in a given amount of time.
+- `409 Conflict`: The resource already exists — e.g. a sub-user email already in use.
+- `410 Gone`: The share link has expired.
+- `413 Payload Too Large`: The upload would exceed the account's storage quota.
+- `415 Unsupported Media Type`: The file's content does not match its extension.
+- `499 Client Closed Request`: The client cancelled the upload. Non-standard status, borrowed from nginx.
 - `500 Internal Server Error`: An unexpected condition was encountered on the server.
 - `503 Service Unavailable`: The server is not ready to handle the request.
 

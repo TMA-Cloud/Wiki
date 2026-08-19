@@ -20,6 +20,7 @@ Rate limits are enforced per IP address and/or user for different endpoint types
 - **Endpoints:**
   - `POST /api/login`
   - `POST /api/signup`
+  - `POST /api/change-password`
   - `GET /api/google/callback`
 
 ### General API Limiter
@@ -51,14 +52,17 @@ Because share links are the only routes reachable without a session, this budget
 - **Endpoints:**
   - `POST /api/files/upload`
   - `POST /api/files/upload/bulk`
+  - `POST /api/files/upload/check`
   - `POST /api/files/:id/replace`
+  - `POST /api/files/:id/derived`
 
 ### Specialized MFA Limiters
 
-- **MFA Verification/Disabling:** 5 attempts per minute per IP/user.
+- **MFA Verification/Disabling:** 5 attempts per minute, keyed on IP + user ID. The limit is this tight because each attempt runs a bcrypt comparison, which is deliberately expensive.
   - `POST /api/mfa/verify`
   - `POST /api/mfa/disable`
-- **Backup Code Regeneration:** 3 attempts per 10 minutes per user.
+  - `POST /api/google/mfa-verify` (only registered when Google OAuth is configured)
+- **Backup Code Regeneration:** 3 attempts per 10 minutes, keyed on IP + user ID.
   - `POST /api/mfa/backup-codes/regenerate`
 
 ### SSE Connection Limiter
@@ -90,14 +94,18 @@ When a rate limit is exceeded:
 }
 ```
 
-Some endpoints provide a more specific message and additional data:
+Note that the limiters put the sentence in an `error` field rather than a `message` field, unlike the rest of the API.
+
+The backup-code cooldown is separate from the limiter above it and answers in the normal shape, with the remaining wait included:
 
 ```json
 {
-  "message": "Too many backup code regeneration attempts, please try again later",
+  "message": "Please wait 3 minutes and 45 seconds before regenerating backup codes again",
   "retryAfterMs": 225000
 }
 ```
+
+A regeneration request therefore hits `429` for either of two reasons: the 3-per-10-minutes limiter, or the 5-minute cooldown between successful regenerations.
 
 ## Best Practices
 

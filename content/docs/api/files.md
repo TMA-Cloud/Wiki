@@ -134,7 +134,7 @@ Create a new folder.
 ```json
 {
   "name": "New Folder",
-  "parent_id": "parent_folder_id"
+  "parentId": "parent_folder_id"
 }
 ```
 
@@ -161,35 +161,71 @@ The created folder object.
 
 ### POST `/api/files/upload/check`
 
-Check if the user has enough storage space for an upload before sending the file.
+Check whether an upload would be refused, before sending the file. Two things are checked: the storage quota and when `samples` is supplied, whether each file's content matches its extension.
 
 **Request Body:**
 
 ```json
 {
-  "fileSize": 1024
+  "fileSize": 1024,
+  "samples": [{ "name": "report.pdf", "head": "JVBERi0xLjcK..." }]
 }
 ```
 
 **Validation:**
 
-- `fileSize`: Required. Must be a non-negative integer representing the file size in bytes.
+- `fileSize`: Required. Must be a non-negative integer representing the total size in bytes.
+- `samples`: Optional. Array of at most 32 entries.
+- `samples[].name`: Required within an entry. String, max 1024 characters.
+- `samples[].head`: Required within an entry. Base64 of the first bytes of the file, max 12 KiB of base64. The upload stream itself sniffs 8 KiB of content; base64 inflates that by a third, which is what the ceiling leaves room for.
 
-**Response (Success):**
+**Response (200, allowed):**
 
 ```json
 {
-  "message": "Storage space available"
+  "allowed": true
 }
 ```
 
-**Response (Error):**
+**Response (413, quota exceeded):**
 
 ```json
 {
   "message": "Storage limit exceeded. Required: 1 GB, available: 500 MB."
 }
 ```
+
+**Response (415, content contradicts extension):**
+
+`message` is the reason for the first refused file; `refused` lists all of them.
+
+```json
+{
+  "message": "File content does not match extension .pdf",
+  "refused": [
+    {
+      "fileName": "invoice.pdf",
+      "reason": "File content does not match extension .pdf"
+    }
+  ]
+}
+```
+
+Checking before the upload starts is what lets the client refuse a bad file without transferring it first.
+
+## Recent Files
+
+### GET `/api/files/recent`
+
+List the account's most recently read files, ordered by `accessed_at` descending. Folders and trashed items are excluded.
+
+**Query Parameters:**
+
+- `limit` - Optional. Defaults to 10, clamped to the recent-files cache size.
+
+**Response:**
+
+An array of file objects, same shape as [List Files](#list-files). The result is served from the Redis cache when available.
 
 ## Upload File
 
@@ -200,8 +236,8 @@ Upload a file.
 **Form Data:**
 
 - `file` - File to upload (required)
-- `parent_id` - Parent folder ID (optional)
-- `path` - Target path (optional)
+- `parentId` - Parent folder ID (optional)
+- `lastModifiedTimes` - Optional. The client's original modification time for the file. A value that fails validation is ignored and the row keeps the upload time.
 
 **MIME Type Validation:**
 
@@ -237,10 +273,12 @@ Upload multiple files at once using `multipart/form-data`.
 **Form Data:**
 
 - `files` - Files to upload (required)
-- `parent_id` - Parent folder ID (optional)
-- `path` - Target path (optional)
-- `relativePaths` - Optional. One value per file, same order as `files`. When present, the server uses these relative paths (e.g. `"MyFolder/sub/file.txt"`) to recreate folder structure under `parent_id`.
+- `parentId` - Parent folder ID (optional)
+- `relativePaths` - Optional. One value per file, same order as `files`. When present, the server uses these relative paths (e.g. `"MyFolder/sub/file.txt"`) to recreate folder structure under `parentId`.
 - `clientIds` - Optional. One value per file, same order as `files`. Echoed back in the response for easier client-side matching.
+- `lastModifiedTimes` - Optional. One value per file, same order as `files`. The client's original modification times. Entries that fail validation are ignored individually rather than failing the batch.
+
+`relativePaths`, `clientIds` and `lastModifiedTimes` are repeated fields joined to the file parts by ordinal, so all three must carry one entry per file in the same order.
 
 **Duplicate names:** For each file, if a file with the same name already exists in the parent folder, the server assigns a unique display name (e.g. `document (1).pdf`).
 

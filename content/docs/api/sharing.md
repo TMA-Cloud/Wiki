@@ -5,7 +5,7 @@ description: 'Share link endpoints for TMA Cloud.'
 
 Share link endpoints for TMA Cloud.
 
-**Note:** All public sharing endpoints are rate-limited to 100 requests per 15 minutes per IP address to prevent abuse.
+**Note:** There is no share-specific limiter. Routes under `/s/` use the general API limiter: 10000 requests per 15 minutes. Share links are unauthenticated, so the key is the IP address. Because these are the only routes reachable without a session, put a tighter limit in front of `/s/` at your reverse proxy if you publish links widely. See [Rate Limits](/docs/reference/rate-limits).
 
 ## Share Links (Public)
 

@@ -28,53 +28,47 @@ npm run worker
 
 ## Audit Events
 
+[Audit Events](/docs/reference/audit-events) is the complete catalog with metadata fields. The summary below groups them by area.
+
 ### Authentication Events
 
-- `user.signup` - User creates account
-- `user.login` - User logs in
-- `user.logout` - User logs out
-- `user.login.failed` - Failed login attempt
-- `auth.logout` - Session logout
-- `auth.logout_all` - Logout from all devices
-- `auth.suspicious_token` - Token fingerprint mismatch
-- `auth.session_revoked` - Session revoked
+- `auth.signup`, `auth.login`, `auth.login.failure`
+- `auth.logout`, `auth.logout_all`
+- `auth.session_revoked`, `auth.other_sessions_revoked`
+- `auth.password_change`
 
 ### File Events
 
-- `file.upload` - File uploaded
-- `file.upload.bulk` - Multiple files uploaded in bulk
-- `file.download` - File downloaded
-- `file.delete` - File moved to trash
-- `file.delete.permanent` - File permanently deleted
-- `file.restore` - File restored from trash
-- `file.rename` - File/folder renamed
-- `file.move` - Files/folders moved
-- `file.copy` - Files/folders copied
-- `file.star` / `file.unstar` - File starred/unstarred
+- `file.upload`, `file.upload.bulk`
+- `file.download`, `file.download.bulk`
+- `file.update` - contents replaced in place
+- `file.delete`, `file.delete.permanent`, `file.restore`
+- `file.rename`, `file.move`, `file.copy`
+- `file.star`, `file.unstar`
 
 ### Folder Events
 
-- `folder.create` - Folder created
+- `folder.create`, `folder.download`
 
 ### Share Events
 
-- `share.create` - Share link created
-- `share.delete` - Share link removed
-- `share.access` - Public access to shared file/folder
+- `share.create`, `share.delete`
+- `share.access` - anonymous view of a share link
+- `share.download` - download through a share link
 
 ### Document Events (OnlyOffice)
 
-- `document.open` - Document opened in OnlyOffice
-- `document.save` - Document saved from OnlyOffice
+- `document.open`, `document.save`
 
-### Settings Events
+### Admin Events
 
-- `admin.settings.update` - Admin setting changed (e.g. signup enabled/disabled)
-- `admin.settings.read` - Admin read of protected settings
+- `admin.settings.update`, `admin.settings.read`
+- `admin.user.list`, `admin.user.update`
+- `admin.orphans.scan`, `admin.orphans.delete`, `admin.orphans.access`
 
 ### Account Events
 
-- `account.sub_user.create` / `account.sub_user.update` / `account.sub_user.delete` - Sub-user managed
+- `account.sub_user.create`, `account.sub_user.update`, `account.sub_user.delete`
 - `account.permission_denied` - Sub-user attempted something it was not granted
 - `account.owner_action_denied` - Sub-user attempted an owner-only action
 
@@ -186,17 +180,21 @@ npm run worker
 
 ### Check Queue Status
 
+The queue is named `audit-events`. If you set `PGBOSS_SCHEMA`, substitute it for `pgboss` below.
+
 ```sql
 -- View pending jobs
 SELECT * FROM pgboss.job
-WHERE name = 'audit-log' AND state = 'created'
+WHERE name = 'audit-events' AND state IN ('created', 'retry')
 ORDER BY createdon DESC;
 
--- View completed jobs
+-- View failed jobs
 SELECT * FROM pgboss.job
-WHERE name = 'audit-log' AND state = 'completed'
-ORDER BY completedon DESC LIMIT 100;
+WHERE name = 'audit-events' AND state = 'failed'
+ORDER BY createdon DESC LIMIT 100;
 ```
+
+These are the same two counts exposed as the `audit_queue_depth` and `audit_queue_failed_depth` metrics on `/metrics`.
 
 ### Worker Concurrency
 

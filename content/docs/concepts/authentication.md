@@ -23,10 +23,11 @@ TMA Cloud supports multiple authentication methods:
 
 ### Multi-Factor Authentication (MFA)
 
-- TOTP-based (Time-based One-Time Password)
+- TOTP-based (Time-based One-Time Password), 30-second steps
 - QR code setup
 - Optional per-user
-- Backup codes as fallback (single-use, replaceable)
+- Backup codes as fallback: 10 codes, 8 characters each, single-use, stored hashed and replaceable
+- Replay-protected: the time step a code belongs to is recorded, and a step that has already been spent is refused. Only the current step and the one before it are accepted, so a code is valid for at most one minute and only once
 
 ## Session Management
 
@@ -59,7 +60,7 @@ Set `SESSION_IDLE_DAYS` to change the window. See [Environment Variables](/docs/
 - **Token Versioning:** Invalidate all tokens on logout-all
 - **Rate Limiting:** 25 login/signup attempts per 15 minutes per IP/email; MFA verify/disable 5 attempts per minute; backup code regeneration 3 attempts per 10 minutes with 5-minute cooldown
 - **Audit Logging:** All authentication events logged
-- **Password Change:** When enabled, users can change their own password from Settings → Security and password change will invalidate all active sessions
+- **Password Change:** When enabled by the admin, users change their own password from Settings → Security. Two gates apply before the change is accepted: the session must be less than 10 minutes old, and an MFA or backup code is required when MFA is on. On success every session and token for that login is invalidated
 
 ## Sub-user Logins
 

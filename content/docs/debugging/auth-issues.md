@@ -27,12 +27,13 @@ Troubleshooting authentication problems.
 
 **Solutions:**
 
-1. Verify time sync on device (TOTP requires accurate time)
-2. Check MFA secret is correct
+1. Verify time sync on device. TOTP accepts only the current 30-second step and the one before it, so a device clock more than about a minute off will fail every code
+2. Each code can be used once. Re-entering a code that just worked is rejected as a replay, which looks identical to a wrong code
 3. Ensure MFA is properly enabled after setup
 4. Contact admin if MFA needs to be reset (admin cannot disable user MFA)
-5. If using backup codes, dashes are optional (ABCD-EFGH can be typed as ABCDEFGH)
-6. If rate-limited, wait one minute and retry
+5. Backup codes are 8 characters and contain no dashes. The login and MFA-disable fields strip any dashes you type, so `ABCD-EFGH` and `ABCDEFGH` both work in the app but a direct API call is compared as sent, so send the code without separators
+6. A backup code works once. Check the remaining count under **Settings** → **Security**; regenerating replaces all ten and invalidates the old set
+7. If rate-limited, wait one minute and retry
 
 ## Session Issues
 

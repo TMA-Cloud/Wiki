@@ -14,6 +14,7 @@ Complete list of audit event types in TMA Cloud.
 - `auth.logout_all` - Logout from all devices
 - `auth.session_revoked` - Single session revoked
 - `auth.other_sessions_revoked` - All other sessions revoked
+- `auth.password_change` - Password change attempt. Success records the new `newTokenVersion`; failures record a `reason` of `session_not_recent`, `invalid_mfa_code`, or `invalid_current_password`
 
 ## File Events
 
@@ -21,6 +22,7 @@ Complete list of audit event types in TMA Cloud.
 - `file.upload.bulk` - Multiple files uploaded in a single bulk operation
 - `file.download` - File downloaded (single)
 - `file.download.bulk` - Multiple files/folders downloaded as ZIP
+- `file.update` - File contents replaced in place, via `POST /api/files/:id/replace` (metadata: `fileName`, `size`)
 - `file.delete` - File moved to trash
 - `file.delete.permanent` - File permanently deleted
 - `file.restore` - File restored from trash
@@ -32,7 +34,8 @@ Complete list of audit event types in TMA Cloud.
 
 ## Folder Events
 
-- `folder.create` - Folder created
+- `folder.create` - Folder created (metadata: `folderName`, `parentId`)
+- `folder.download` - Folder downloaded as a ZIP archive (metadata: `folderName`); logged only after the archive completes
 
 ## Share Events
 

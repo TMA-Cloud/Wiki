@@ -60,6 +60,12 @@ npm run test:coverage
 Run the unit suites and write a coverage report to `backend/coverage`.
 
 ```bash
+npm run test:ui
+```
+
+Open the Vitest UI for interactive runs.
+
+```bash
 npm run test:integration
 ```
 
@@ -159,7 +165,7 @@ To check current lifecycle config from project root: `node backend/scripts/check
 
 #### Bulk import drive to local
 
-Use when you have existing data on disk and want it in the app's **local** storage with encryption and DB records. Requires `STORAGE_DRIVER=local`, `LOCAL_STORAGE_PATH`, and `FILE_ENCRYPTION_KEY` in `.env`.
+Use when you have existing data on disk and want it in the app's **local** storage with encryption and DB records. Requires `STORAGE_DRIVER=local` and `FILE_ENCRYPTION_KEY` in `.env`. Files land in `UPLOAD_DIR`.
 
 From the **backend** directory:
 
@@ -249,7 +255,7 @@ Prebuilt Docker images are available on GitHub Container Registry:
 
 ```bash
 docker pull ghcr.io/tma-cloud/tma:latest
-docker pull ghcr.io/tma-cloud/tma:2.0.4
+docker pull ghcr.io/tma-cloud/tma:3.0.0
 ```
 
 ### Build Image from Source
@@ -261,16 +267,28 @@ make build
 Build Docker image with default tag.
 
 ```bash
-make build IMAGE_TAG=2.0.4
+make build IMAGE_TAG=3.0.0
 ```
 
-Build Docker image with custom tag.
+Build Docker image with custom tag. The `version` image label is read from `backend/package.json` regardless of the tag you pass.
 
 ```bash
 make build-no-cache
 ```
 
 Build Docker image without cache.
+
+```bash
+make clean
+```
+
+Remove the built image.
+
+```bash
+make help
+```
+
+List the available targets and configuration variables.
 
 ### Docker Compose
 
@@ -309,10 +327,10 @@ View logs from app service only.
 ### PostgreSQL
 
 ```bash
-psql -h localhost -U postgres -d cloud_storage
+psql -h localhost -U postgres -d tma_cloud_storage
 ```
 
-Connect to PostgreSQL database.
+Connect to PostgreSQL database. Substitute your `DB_NAME` if you changed it.
 
 ### Migrations
 

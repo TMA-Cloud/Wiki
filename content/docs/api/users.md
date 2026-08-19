@@ -96,7 +96,7 @@ Create a sub-user under the current owner.
 **Validation:**
 
 - `email`: Required. Valid email, max 254 characters. Must not already exist on the instance.
-- `password`: Required. Between 6 and 128 characters.
+- `password`: Required. Between 8 and 128 characters.
 - `name`: Required. Non-empty after trimming, max 100 characters.
 - `permissions`: Required. Array of permission keys. May be empty. Unknown keys are rejected.
 

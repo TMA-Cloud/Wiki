@@ -40,9 +40,9 @@ Frequently encountered errors and step-by-step diagnosis.
 ### Symptom: "Redis connection failed"
 
 <Callout type="info">
-  The app runs without Redis — caching, rate limits, and the SSE event stream
-  degrade, but uploads and downloads still work. If you don't need those
-  features, you can ignore the error.
+  The app runs without Redis — caching and the SSE event stream degrade, but
+  uploads, downloads and every other operation still work. Rate limiting is
+  unaffected; the limiters keep their counters in the process, not in Redis.
 </Callout>
 
 1. **Is Redis running?** `redis-cli -h "$REDIS_HOST" -p "${REDIS_PORT:-6379}" ping` — should print `PONG`.
@@ -82,8 +82,7 @@ See [Upload Issues](/docs/debugging/upload-issues) for upload-specific problems.
 
 1. **Confirm email + password** — passwords are case-sensitive.
 2. **Is MFA enabled?** If yes, the login flow needs a TOTP code; a missing code surfaces as this error.
-3. **Account disabled?** Admin can check **Settings → Registered Users**.
-4. **Rate limit.** After 25 failed attempts in 15 minutes, further attempts are rejected until the window expires. Wait or reset from another network.
+3. **Rate limit.** After 25 attempts in 15 minutes from the same IP and email, further attempts are rejected until the window expires. Wait, or try from another network.
 
 See [Auth Issues](/docs/debugging/auth-issues) for deeper auth troubleshooting.
 

@@ -57,27 +57,12 @@ Any account, including yours, can add extra logins that share its files and quot
 
 ### MFA Management
 
-- View MFA status per user
-- Cannot disable user MFA (user must do it)
-- Monitor MFA adoption
+- View MFA status per user in the user list
+- Cannot enable or disable another user's MFA
 
 ### Passwords
 
-- When **Allow password change** is enabled in **Settings** → **Administration**, users can change their password.
-
-## User Operations
-
-### Viewing User Files
-
-- Access user file structure (admin only)
-- Monitor storage usage
-- Assist with file management
-
-### Account Management
-
-- View user activity
-- Review audit logs per user
-- Monitor storage usage
+- When **Allow password change** is enabled in **Settings** → **Administration**, users can change their own password. There is no way for an admin to set another user's password from the interface.
 
 ## Best Practices
 

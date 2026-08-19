@@ -96,7 +96,7 @@ chown -R 1001:1001 uploads  # Container runs as UID 1001
 make build
 
 # Build with custom tag
-make build IMAGE_TAG=2.0.3
+make build IMAGE_TAG=3.0.0
 
 # Build without cache
 make build-no-cache

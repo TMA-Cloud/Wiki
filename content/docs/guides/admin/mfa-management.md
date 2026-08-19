@@ -17,9 +17,7 @@ Manage multi-factor authentication in TMA Cloud (admin only).
 
 ### View MFA Status
 
-- See which users have MFA enabled
-- Monitor MFA adoption
-- View MFA statistics
+- The **Registered Users** list shows an `mfaEnabled` flag per user
 
 ### MFA Configuration
 
@@ -48,8 +46,8 @@ Manage multi-factor authentication in TMA Cloud (admin only).
 - Delivered as a downloadable text file on enable or regenerate
 - File format includes application name, masked account email, generation date, and usage instructions
 - File name: `mfa-backup-codes_TMA-Cloud_YYYY-MM-DD.txt`
-- Each code is single-use; dashes are optional when typing codes
-- Codes formatted in groups of 5 with numbered brackets
+- Each code is single-use. Codes are 8 characters drawn from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` and contain no dashes
+- Ten codes, printed in numbered brackets and separated into groups of 5
 - Regenerate to replace all existing codes
 - Cooldown: 5 minutes between regenerations
 - Rate limit: 3 attempts per 10 minutes

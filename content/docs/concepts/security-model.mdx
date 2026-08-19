@@ -9,9 +9,9 @@ Overall security architecture and practices in TMA Cloud.
 
 ### Password Security
 
-- **Hashing:** bcrypt with salt rounds
-- **Storage:** Hashed passwords only
-- **Validation:** Strong password requirements
+- **Hashing:** bcrypt, 10 rounds
+- **Storage:** Hashed passwords only but a Google-only account stores no password at all
+- **Validation:** 8–128 characters, enforced by the server and mirrored in the client
 
 ### Token Security
 
@@ -25,6 +25,7 @@ Overall security architecture and practices in TMA Cloud.
 - **Active Session Management:** View and revoke sessions
 - **Logout All:** Invalidate all tokens
 - **Idle Expiry:** Sessions end after an inactivity window (30 days by default)
+- **CSRF:** State-changing requests must carry `X-Requested-With: XMLHttpRequest`, Checkout [API Overview](/docs/api/overview#csrf-header)
 
 ## Authorization Security
 
@@ -64,7 +65,7 @@ All incoming data from clients is strictly validated and sanitized on the backen
 ### File Encryption
 
 - **Algorithm:** AES-256-GCM authenticated encryption
-- **Scope:** Files in `UPLOAD_DIR`
+- **Scope:** Stored file contents in`UPLOAD_DIR` or S3 bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
 - **Stream Processing:** Memory-efficient for large files
 - **Automatic:** Encryption on upload, decryption on download

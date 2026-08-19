@@ -29,15 +29,8 @@ Create a directory and download the files
 
 ```bash
 mkdir tma-cloud && cd tma-cloud
-curl -sSL -o docker-compose.yml https://raw.githubusercontent.com/TMA-Cloud/TMA/main/docker-compose.yml
-curl -sSL -o .env.example https://raw.githubusercontent.com/TMA-Cloud/TMA/main/.env.example
-```
-
-Configure environment
-
-```bash
-cp .env.example .env
-# Edit .env with your configuration.
+curl -sSL -o compose.yml https://raw.githubusercontent.com/TMA-Cloud/TMA/main/docker-compose.yml
+curl -sSL -o .env https://raw.githubusercontent.com/TMA-Cloud/TMA/main/.env.example
 ```
 
 Start all services
@@ -89,6 +82,7 @@ cp ../.env.example ../.env
 **Required variables:**
 
 - `JWT_SECRET` - Secret key for JWT tokens
+- `FILE_ENCRYPTION_KEY` - Key used to encrypt stored files
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` - Database connection
 - `REDIS_HOST`, `REDIS_PORT` - Redis connection (optional)
 - `BPORT` - Backend port (default: 3000)
@@ -102,7 +96,7 @@ cp ../.env.example ../.env
 #### 3. Create Database
 
 ```sql
-CREATE DATABASE cloud_storage;
+CREATE DATABASE tma_cloud_storage;
 ```
 
 Migrations run automatically on startup.

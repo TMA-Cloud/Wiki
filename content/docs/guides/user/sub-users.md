@@ -23,7 +23,7 @@ Use sub-users instead of handing your password to a colleague. Because each pers
 4. Fill in the details:
    - **Name** - Required. Shown in the audit log next to their actions
    - **Email** - Their login email. Must not already be in use anywhere on the instance
-   - **Password** - At least 6 characters
+   - **Password** - At least 8 characters
 5. Tick the permissions they should have (see below)
 6. Click **Create sub-user**
 
