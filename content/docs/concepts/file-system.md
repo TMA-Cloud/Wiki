@@ -44,6 +44,7 @@ File system architecture and organization in TMA Cloud.
 - **Streaming:** Files streamed without loading into memory
 - **Upload:** Temp files streamed directly to destination
 - **Download:** Files streamed from storage to client
+- **Range requests:** A download can ask for a byte range and get only that part
 - **ZIP Archives:** Files streamed into archive without buffering
 - **Rename:** Change file/folder names
 
@@ -104,11 +105,38 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 
 ### File Encryption
 
-- Files encrypted with AES-256-GCM
+- Files encrypted with AES-GCM-HKDF-STREAMING, the segmented scheme from Google's Tink library
 - Encryption key configured via `FILE_ENCRYPTION_KEY` environment variable
-- Files stored in format: `[IV][ENCRYPTED_DATA][TAG]`
+- Each file gets its own key, derived from `FILE_ENCRYPTION_KEY` and a random salt stored in the file's header
+- The plaintext is split into 1 MiB segments, each with its own authentication tag
 - Automatic decryption on download
 - If `FILE_ENCRYPTION_KEY` changes, existing encrypted files will not decrypt with the new key unless you re-encrypt them using the rotation scripts documented in [CLI Commands](/docs/reference/cli-commands)
+
+Files written before the segmented format was introduced use the older layout: one AES-256-GCM pass over the whole file, stored as `[IV][ENCRYPTED_DATA][TAG]`. Both formats are readable. Which one a file uses is recorded in `files.enc_version` (1 for the old layout, 2 for the segmented one), and the conversion script in [CLI Commands](/docs/reference/cli-commands#convert-files-to-the-segmented-format) rewrites the old ones.
+
+## Partial Downloads
+
+A download can ask for part of a file instead of all of it, using a standard HTTP `Range` header. The server reads only the segments the range falls in, so opening a large file does not require transferring what comes before the part you want.
+
+This is what the segmented encryption format is for. A file stored in the older format carries one authentication tag over the whole thing, which cannot be verified from a fragment, so those files are always sent whole and report `Accept-Ranges: none` until they are converted.
+
+### What Uses It
+
+| Client            | What ranges are used for                                                                                              |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Cloud Drive       | Reads the 4 MiB blocks a read touches instead of downloading the file first                                           |
+| OnlyOffice        | The document-serving endpoint accepts ranges, so a large document does not have to arrive whole before editing starts |
+| Browsers          | Seeking in audio or video opened straight from a link, and PDF viewers that read a page at a time                     |
+| Download managers | Resuming an interrupted transfer                                                                                      |
+
+### Response Details
+
+- `Accept-Ranges: bytes` on files in the segmented format, `none` on the older format
+- `Content-Length` is exact on every download, so clients can show real progress
+- An `ETag` and `Last-Modified` are sent, and a repeat request that includes them gets `304 Not Modified`
+- A range past the end of the file returns `416`
+
+See [Download File](/docs/api/files#download-file) for the request format.
 
 ### Storage Limits
 

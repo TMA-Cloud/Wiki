@@ -736,10 +736,59 @@ Download a single file or a folder (folders are returned as a ZIP archive).
 
 - `id`: Required. Must be a string.
 
+**Query Parameters:**
+
+- `inline` - Send the file for display instead of download (optional, boolean). Sets `Content-Disposition: inline`, which is what an `<img>`, `<video>`, or PDF viewer needs. Ignored for file types that could execute in a browser and those are always sent as an attachment
+
 **Response:**
 The raw file content or a ZIP archive.
 
+**Response Headers (single file):**
+
+| Header           | Value                                                                         |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `Content-Length` | Exact size of the file, so clients can show real progress                     |
+| `Accept-Ranges`  | `bytes` for files in the segmented encryption format, otherwise `none`        |
+| `ETag`           | Weak validator for the stored object                                          |
+| `Last-Modified`  | When the stored object last changed                                           |
+| `Cache-Control`  | `private, no-cache` where a client may store the response but must revalidate |
+
 Downloading marks the item as read. For a folder, the folder and every entry in the archive are marked. See [Last Access Time](/docs/concepts/file-system#last-access-time).
+
+#### Range Requests
+
+A single file can be fetched in parts with a `Range` header, so opening a large file does not require transferring all of it first. Only the segments the range falls in are read from storage.
+
+```bash
+curl -H "Range: bytes=0-1048575" \
+  https://your-domain.com/api/files/file_123/download
+```
+
+**Responses:**
+
+- **206** - Partial content, with `Content-Range: bytes <start>-<end>/<total>`
+- **200** - The whole file, when no usable range was requested. A multi-range header, a malformed one, or a file still in the older encryption format
+- **416** - The range starts past the end of the file. Includes `Content-Range: bytes */<total>`
+
+Suffix ranges (`bytes=-500`) and open-ended ranges (`bytes=500-`) are both accepted. Only one range per request is honored.
+
+`If-Range` is respected: send it with the `ETag` from an earlier response and the range is served only if the file has not changed since, otherwise the whole file comes back.
+
+Files stored in the older single-pass encryption format cannot be authenticated from a fragment, so they report `Accept-Ranges: none` and are always sent whole. Converting them turns ranges on — see [CLI Commands](/docs/reference/cli-commands#convert-files-to-the-segmented-format).
+
+#### Conditional Requests
+
+Send back the `ETag` or `Last-Modified` from an earlier response to skip the transfer when nothing changed.
+
+```bash
+curl -H 'If-None-Match: W/"1a2b-3c4d"' \
+  https://your-domain.com/api/files/file_123/download
+```
+
+**Responses:**
+
+- **304** - Not modified, no body
+- **200** - The file changed since the validator was issued
 
 ## Get File or Folder Info
 

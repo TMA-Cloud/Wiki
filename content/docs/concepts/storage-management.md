@@ -54,19 +54,21 @@ This ensures that guessing or enumerating file IDs does not grant access to anot
 
 ## File Encryption
 
-Files are automatically encrypted. Encryption uses AES-256-GCM with authenticated encryption.
+Files are automatically encrypted, using AES-GCM-HKDF-STREAMING and the segmented scheme from Google's Tink library. The plaintext is cut into 1 MiB segments, each encrypted with AES-256-GCM under a key derived for that file alone.
 
 ### Behavior
 
 - **Scope:** Files in `UPLOAD_DIR` (local) or S3 object key (S3) are encrypted
 - **Transparent:** Encryption and decryption happen automatically
 - **Streaming:** Large files processed in streams to avoid memory issues
+- **Partial reads:** Because each segment authenticates on its own, a download can serve a byte range by reading only the segments it covers. See [Partial Downloads](/docs/concepts/file-system#partial-downloads)
 
 ### File Operations
 
 - **Read/Write:** All file operations use streaming (local path or S3 key)
 - **Upload:** Files streamed from client to storage (S3: multipart upload when needed)
 - **Download:** Files streamed from storage to client (S3: GetObject stream)
+- **Ranged download:** Only the segments covering the requested range are read (S3: GetObject with a `Range` header)
 - **Copy:** Files streamed from source to destination (S3: stream copy with re-encrypt)
 - **Share:** Share link download uses same path/key resolution; works for both local and S3
 
@@ -82,6 +84,17 @@ Files are automatically encrypted. Encryption uses AES-256-GCM with authenticate
 - `FILE_ENCRYPTION_KEY` is used for both encryption and decryption
 - Changing `FILE_ENCRYPTION_KEY` without re-encrypting existing encrypted data will break decryption for those existing files/objects
 - Use `rotate-file-encryption-local.js` or `rotate-file-encryption-s3.js` to re-encrypt existing data. See [CLI Commands](/docs/reference/cli-commands)
+
+### Storage Format
+
+Two on-disk formats exist, and `files.enc_version` records which one each stored object uses:
+
+| Version | Layout                                                      | Ranged downloads |
+| ------- | ----------------------------------------------------------- | ---------------- |
+| 1       | One AES-256-GCM pass over the whole file, `[IV][DATA][TAG]` | No               |
+| 2       | AES-GCM-HKDF-STREAMING, 1 MiB segments                      | Yes              |
+
+Everything written now uses version 2. Version 1 exists on deployments that predate it and stays readable. Run the conversion script to rewrite those files — see [CLI Commands](/docs/reference/cli-commands#convert-files-to-the-segmented-format). Rotating the key converts them as well, since a rotation rewrites every object anyway.
 
 ## Disk Space Monitoring (Local only)
 

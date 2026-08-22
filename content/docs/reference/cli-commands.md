@@ -212,6 +212,36 @@ node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR
 - Enforces per-user storage limit and max file size (checked before any upload).
 - Preserves file and folder modification times (mtime). On first error, S3 script rolls back created folders and uploaded files.
 
+### Convert files to the segmented format
+
+Use once, on a deployment that predates the segmented encryption format, to rewrite files still stored in the older single-pass layout. Files written after the upgrade are already in the new format, so a fresh install has nothing to convert.
+
+Converting is what enables byte-range downloads for those files: until then they are always sent whole. See [Storage Format](/docs/concepts/storage-management#storage-format).
+
+From the **backend** directory:
+
+```bash
+npm run encryption:migrate-streaming
+```
+
+The script:
+
+- Works for both storage drivers; it uses whichever `STORAGE_DRIVER` is configured
+- Does **not** change the encryption key. `FILE_ENCRYPTION_KEY` must be the key the files were written with
+- Asks for confirmation, then prints progress
+- Uses a fixed concurrency of **10** objects at a time
+- Includes files in the trash, since those can be restored
+- Clears the cached rows that recorded the old version when it finishes
+
+How each file is handled:
+
+1. Streams it through decrypt then re-encrypt into a temporary object alongside the original. Plaintext is never written to disk, and the live file is untouched while this runs
+2. Checks the rewritten size against what the format predicts
+3. Replaces the original with the temporary object
+4. Records the new version, correcting `files.size` if the stored row disagreed with the real length
+
+Safe to re-run. It only picks up files still marked as the old version, so a second run reports nothing to do. If it is interrupted, re-running finishes the remainder; a file left half-written is discarded rather than promoted.
+
 ### Rotate FILE_ENCRYPTION_KEY (re-encrypt existing data)
 
 Use when you change `FILE_ENCRYPTION_KEY` and need existing encrypted files to remain decryptable.
@@ -222,13 +252,16 @@ The scripts:
 - Ask you for the **old** `FILE_ENCRYPTION_KEY` to decrypt current data
 - Print progress while running
 - Use a fixed concurrency of **10** workers/objects at a time
+- Include files in the trash, since those can be restored
+- Write every file in the current format, so a rotation also converts anything still in the older one
+- Clear the cached rows that recorded the old version when they finish
 
 From the **backend** directory:
 
 #### Rotate local storage
 
 ```bash
-node scripts/rotate-file-encryption-local.js
+npm run encryption:rotate-local
 ```
 
 Notes:
@@ -239,7 +272,7 @@ Notes:
 #### Rotate S3 storage
 
 ```bash
-node scripts/rotate-file-encryption-s3.js
+npm run encryption:rotate-s3
 ```
 
 Notes:

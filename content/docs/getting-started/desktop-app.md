@@ -143,8 +143,11 @@ The Windows desktop app can mount TMA Cloud as a drive (for example `Z:`) so you
 - **Save As anywhere.** In any app's Save dialog, choose the TMA Cloud drive as the destination. The file uploads through the same pipeline as a normal upload, so permissions, versioning, and audit all apply. Saving into an existing subfolder reuses that folder instead of creating a duplicate.
 - **Live updates.** Changes made from the web app or another device appear on the drive within a few seconds.
 - **Only your Windows account can read it.** The drive grants access to the Windows user who signed in (plus `SYSTEM` and Administrators). Other accounts on the same computer cannot open the mounted drive.
-- **Temporary cache.** Opening or saving a file stages it under `%TEMP%\tma-cloud-fs\`. Each staged file is deleted when the app closes its handle, anything left over is cleared when the drive unmounts, and stale files from a previous crash are removed on the next mount.
+- **Opens without downloading the whole file.** Reads fetch 4 MiB blocks as an application asks for them, so scrubbing to the middle of a video or opening the last page of a large PDF transfers only that part. A read that continues forward fetches the next block ahead of time. Files under 4 MiB are fetched in one go, since a range would not save a round trip.
+- **Temporary cache.** Opening or saving a file stages it under `%TEMP%\tma-cloud-fs\`. A file being read is a sparse cache file holding only the blocks that were fetched; a file being written is staged in full, because an upload replaces the whole file. Each staged file is deleted when the app closes its handle, anything left over is cleared when the drive unmounts, and stale files from a previous crash are removed on the next mount.
 - **Timestamps.** Explorer's **Date accessed** column shows the server's last-read time; **Date created**, **Date modified** and the change time all show the modification time. Windows tries to write **Date accessed** back when a file is closed, but the server owns the value, so the drive ignores those writes and the next refresh restores it. A file the server has no read time for shows its modification time instead.
+
+Block-wise reading needs the segmented encryption format. A file still stored in the older format is fetched whole on first read and then served from the cache — correct, just without the saving. See [Storage Format](/docs/concepts/storage-management#storage-format).
 
 ### Save-only mode
 

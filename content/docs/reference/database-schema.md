@@ -64,14 +64,13 @@ Files and folders.
 | `modified`    | TIMESTAMPTZ | Last modification time, not null, default now()                                  |
 | `created_at`  | TIMESTAMPTZ | Row creation time, not null, default now()                                       |
 | `accessed_at` | TIMESTAMPTZ | Last read time, not null, default now()                                          |
+| `enc_version` | SMALLINT    | Encryption format of the stored object. Null for folders                         |
 
-**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, plus several partial indexes supporting trash listing and the recursive folder CTEs.
+**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, a partial index on rows still awaiting encryption conversion, plus several partial indexes supporting trash listing and the recursive folder CTEs.
 
 Name search is backed by trigram GIN indexes from `pg_trgm` (`name`, `lower(name)`) and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
 
 **The three timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
-
-**`accessed_at` precision:** The value is written at most once per hour per item, so it can lag a read by up to that long. This follows NTFS, which guarantees its last-access time only to within an hour, and Linux's `relatime`. Writes are buffered in memory and flushed in batches, so a read never waits on the update. See [File System](/docs/concepts/file-system#last-access-time).
 
 ### `share_links`
 

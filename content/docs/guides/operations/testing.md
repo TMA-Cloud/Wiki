@@ -159,9 +159,11 @@ when the run finishes.
 
 ### Unit
 
-Validation and path handling, AES-256-GCM encryption, MIME detection from magic bytes,
-Redis caching, JWT handling, the auth and permission middleware, error-to-status
-mapping, and the rate limiters. Database and Redis are replaced with in-memory doubles.
+Validation and path handling, both encryption formats and the AES-GCM-HKDF-STREAMING
+wire format itself, HTTP range and conditional-request parsing, MIME detection from
+magic bytes, Redis caching, JWT handling, the auth and permission middleware,
+error-to-status mapping, and the rate limiters. Database and Redis are replaced with
+in-memory doubles.
 
 ### Integration
 
@@ -175,11 +177,13 @@ controllers and models, against PostgreSQL and Redis.
 - Storage quotas across an account
 - Trash retention and the 15-day cleanup job
 - Password change, its re-authentication gate, and session invalidation
+- Range downloads, conditional requests, and inline previews
+- Converting a file from the older encryption format, including that it stays readable before conversion and gains range support after
 
 ### S3
 
-Upload, multipart upload, copy, delete, stat, pagination, and encryption round trips
-against the configured bucket.
+Upload, multipart upload, copy, delete, stat, pagination, encryption round trips, and
+ranged reads of an encrypted object against the configured bucket.
 
 ### Frontend
 

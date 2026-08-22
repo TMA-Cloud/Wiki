@@ -64,11 +64,15 @@ All incoming data from clients is strictly validated and sanitized on the backen
 
 ### File Encryption
 
-- **Algorithm:** AES-256-GCM authenticated encryption
+- **Algorithm:** AES-GCM-HKDF-STREAMING, the segmented scheme from Google's Tink library
+- **Per-file keys:** Each file's key is derived with HKDF-SHA256 from `FILE_ENCRYPTION_KEY` and a random salt stored in the file's header, so two files never share a key
+- **Tamper detection:** A modified segment fails to authenticate so segment numbers and an end-of-file marker are part of each segment's nonce, so reordering, duplicating, or truncating a file is also rejected
 - **Scope:** Stored file contents in`UPLOAD_DIR` or S3 bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
 - **Stream Processing:** Memory-efficient for large files
 - **Automatic:** Encryption on upload, decryption on download
+
+Files stored before this format was introduced use one AES-256-GCM pass over the whole file. They stay readable, and the conversion script in [CLI Commands](/docs/reference/cli-commands#convert-files-to-the-segmented-format) rewrites them.
 
 <Callout type="error" title="Key loss means data loss">
   The encryption key is read from an environment variable. If you lose or change

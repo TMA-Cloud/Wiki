@@ -35,8 +35,13 @@ Download a file from a share link.
 **Responses:**
 
 - **200** - File download
+- **206** - Partial content, when the request carried a `Range` header
+- **304** - Not modified, when the request carried a matching `ETag` or `Last-Modified`
 - **404** - Link or file not found
 - **410** - Link has expired
+- **416** - Requested range is past the end of the file
+
+Range and conditional requests work the same way as on the authenticated download endpoint. See [Download File](/docs/api/files#range-requests).
 
 ### GET `/s/:token/zip`
 
