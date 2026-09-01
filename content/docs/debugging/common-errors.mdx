@@ -72,7 +72,6 @@ The file exceeds the per-request max upload size (separate from storage quota).
 1. **Check disk space** on the backend host: `df -h`.
 2. **Check `UPLOAD_DIR` permissions** — the backend process must be able to write to it.
 3. **Network stability** — retry once; transient drops cause this too.
-4. **MIME detection failure** — very small or truncated files can fail magic-byte detection. Try re-exporting the file.
 
 See [Upload Issues](/docs/debugging/upload-issues) for upload-specific problems.
 

@@ -83,7 +83,6 @@ For validation errors, the response includes a `details` field:
 - `409` - Conflict (email already in use, unique constraint violation)
 - `410` - Gone (expired share link)
 - `413` - Payload Too Large (storage limit exceeded)
-- `415` - Unsupported Media Type (file content contradicts its extension)
 - `422` - Unprocessable Entity (Validation Error)
 - `429` - Too Many Requests (rate limit or backup-code cooldown)
 - `499` - Client Closed Request (upload cancelled by the client)

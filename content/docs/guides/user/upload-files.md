@@ -95,7 +95,6 @@ You choose an action for each conflicting file; nothing is uploaded until you co
 
 - All file types supported
 - MIME type detected from file content (magic bytes)
-- Actual file type stored regardless of filename extension
 - Preview for images and documents
 
 ### Document Editing and Viewers

@@ -55,7 +55,6 @@ The file exceeds the max upload size setting.
 2. Disk space: `df -h`
 3. File permissions on upload directory
 4. Network connectivity
-5. MIME type detection (file content must be readable)
 
 ### "Upload cancelled by client" (499 REQUEST_ABORTED)
 

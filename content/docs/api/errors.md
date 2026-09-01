@@ -54,7 +54,6 @@ Validation errors (HTTP status `422`) provide additional detail in a `details` a
 - `409 Conflict`: The resource already exists — e.g. a sub-user email already in use.
 - `410 Gone`: The share link has expired.
 - `413 Payload Too Large`: The upload would exceed the account's storage quota.
-- `415 Unsupported Media Type`: The file's content does not match its extension.
 - `499 Client Closed Request`: The client cancelled the upload. Non-standard status, borrowed from nginx.
 - `500 Internal Server Error`: An unexpected condition was encountered on the server.
 - `503 Service Unavailable`: The server is not ready to handle the request.

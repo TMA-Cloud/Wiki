@@ -50,7 +50,7 @@ All incoming data from clients is strictly validated and sanitized on the backen
   - Cross-Site Scripting (XSS)
   - Path Traversal
   - Insecure Deserialization
-- **MIME Type Validation:** For file uploads, the actual file content (magic bytes) is verified to match its declared MIME type, preventing content spoofing attacks.
+- **MIME Type Handling:** The stored MIME type is detected from the file's content (magic bytes), not the filename or the client-sent header.
 
 ## Data Security
 
@@ -59,8 +59,8 @@ All incoming data from clients is strictly validated and sanitized on the backen
 - **User Isolation:** Files stored per-user
 - **Path Validation:** Prevents directory traversal
 - **Access Control:** Database-level checks
-- **MIME Type Detection:** Actual file type detected from content (magic bytes)
-- **MIME Type Validation:** File content must match declared type
+- **MIME Type Detection:** Stored type is detected from content (magic bytes), not the filename; a content/extension mismatch is never used to reject an upload
+- **Safe Serving:** Downloads use `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`, so a disguised file downloads instead of running in the browser
 
 ### File Encryption
 

@@ -161,23 +161,19 @@ The created folder object.
 
 ### POST `/api/files/upload/check`
 
-Check whether an upload would be refused, before sending the file. Two things are checked: the storage quota and when `samples` is supplied, whether each file's content matches its extension.
+Check whether an upload would fit the storage quota, before sending the file. Only the size is checked; file content is not inspected, because any file is accepted regardless of whether its content matches its extension.
 
 **Request Body:**
 
 ```json
 {
-  "fileSize": 1024,
-  "samples": [{ "name": "report.pdf", "head": "JVBERi0xLjcK..." }]
+  "fileSize": 1024
 }
 ```
 
 **Validation:**
 
 - `fileSize`: Required. Must be a non-negative integer representing the total size in bytes.
-- `samples`: Optional. Array of at most 32 entries.
-- `samples[].name`: Required within an entry. String, max 1024 characters.
-- `samples[].head`: Required within an entry. Base64 of the first bytes of the file, max 12 KiB of base64. The upload stream itself sniffs 8 KiB of content; base64 inflates that by a third, which is what the ceiling leaves room for.
 
 **Response (200, allowed):**
 
@@ -195,23 +191,7 @@ Check whether an upload would be refused, before sending the file. Two things ar
 }
 ```
 
-**Response (415, content contradicts extension):**
-
-`message` is the reason for the first refused file; `refused` lists all of them.
-
-```json
-{
-  "message": "File content does not match extension .pdf",
-  "refused": [
-    {
-      "fileName": "invoice.pdf",
-      "reason": "File content does not match extension .pdf"
-    }
-  ]
-}
-```
-
-Checking before the upload starts is what lets the client refuse a bad file without transferring it first.
+Checking before the upload starts is what lets the client stop an over-quota upload without transferring the file first.
 
 ## Recent Files
 
@@ -239,10 +219,11 @@ Upload a file.
 - `parentId` - Parent folder ID (optional)
 - `lastModifiedTimes` - Optional. The client's original modification time for the file. A value that fails validation is ignored and the row keeps the upload time.
 
-**MIME Type Validation:**
+**MIME Type Handling:**
 
-- The actual MIME type is detected from the file's content (magic bytes).
-- The stored MIME type will always match the actual file content, even if the file extension is different.
+- The stored MIME type is detected from the file's content (magic bytes), not the filename or the client-sent `Content-Type` as both of which can lie. When the content is not recognisable, the client-sent type is kept.
+- A mismatch between content and extension never rejects the upload so all files are stored.
+- Downloads are always served as attachments with `X-Content-Type-Options: nosniff`, so a file whose content does not match its extension cannot be run by the browser.
 
 **Duplicate names:** If a file with the same name already exists in the parent folder, the server assigns a unique display name (e.g. `document (1).pdf`). The client can instead overwrite the existing file by calling `POST /api/files/:id/replace` with the existing file's ID.
 

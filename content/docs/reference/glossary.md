@@ -51,7 +51,7 @@ Optional second factor (TOTP) on top of the password. Managed per user; admins c
 
 ### MIME type / magic bytes
 
-The actual file format, detected by reading the first few bytes of the file content (not the file extension). TMA Cloud rejects uploads whose content doesn't match a supported type, regardless of what the file is named.
+The actual file format, read from the first few bytes of the file content (not the file extension). TMA Cloud does not reject an upload when this doesn't match the extension so the file is stored either way. OnlyOffice editing is the exception: a document is only opened when its content matches its extension.
 
 ### OnlyOffice
 
