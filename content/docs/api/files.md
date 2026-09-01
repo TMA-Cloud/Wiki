@@ -739,6 +739,8 @@ Download a single file or a folder (folders are returned as a ZIP archive).
 **Response:**
 The raw file content or a ZIP archive.
 
+Single-file downloads accept an HTTP `Range` header and reply `206 Partial Content` with `Content-Range` for the requested bytes; the response advertises `Accept-Ranges: bytes`. Only the segments overlapping the range are read and decrypted. Folder/bulk downloads are streamed ZIP archives and do not support ranges.
+
 Downloading marks the item as read. For a folder, the folder and every entry in the archive are marked. See [Last Access Time](/docs/concepts/file-system#last-access-time).
 
 ## Get File or Folder Info

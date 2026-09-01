@@ -64,8 +64,9 @@ All incoming data from clients is strictly validated and sanitized on the backen
 
 ### File Encryption
 
-- **Algorithm:** AES-256-GCM authenticated encryption
-- **Scope:** Stored file contents in`UPLOAD_DIR` or S3 bucket. File names and metadata live in the database
+- **Algorithm:** AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`)
+- **Segmented:** Objects are split into 1 MB segments, each authenticated on its own, with a per-file key derived from the master key via HKDF-SHA256. This lets downloads serve HTTP `Range` requests without reading the whole file
+- **Scope:** Stored file contents in `UPLOAD_DIR` or S3 bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
 - **Stream Processing:** Memory-efficient for large files
 - **Automatic:** Encryption on upload, decryption on download

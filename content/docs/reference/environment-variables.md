@@ -63,11 +63,11 @@ Complete reference for all environment variables in TMA Cloud.
 
 ## File Storage
 
-| Variable              | Required | Default             | Description                        |
-| --------------------- | -------- | ------------------- | ---------------------------------- |
-| `STORAGE_DRIVER`      | No       | `local`             | `local` or `s3`                    |
-| `UPLOAD_DIR`          | No       | `backend/uploads`   | Upload directory (local only)      |
-| `FILE_ENCRYPTION_KEY` | No       | Development default | Encryption key for file encryption |
+| Variable              | Required | Default             | Description                    |
+| --------------------- | -------- | ------------------- | ------------------------------ |
+| `STORAGE_DRIVER`      | No       | `local`             | `local` or `s3`                |
+| `UPLOAD_DIR`          | No       | `backend/uploads`   | Upload directory (local only)  |
+| `FILE_ENCRYPTION_KEY` | No       | Development default | Master key for file encryption |
 
 **Note:** All file operations use streaming for large files. No memory limits for file size.
 

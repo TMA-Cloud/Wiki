@@ -212,9 +212,24 @@ node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR
 - Enforces per-user storage limit and max file size (checked before any upload).
 - Preserves file and folder modification times (mtime). On first error, S3 script rolls back created folders and uploaded files.
 
+### Migrate to streaming encryption (one-time)
+
+Stored files use Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`). If you are upgrading from the earlier single-blob format (`[IV][DATA][TAG]`), run this once to convert existing objects to the segmented format.
+
+- Run it with the app **stopped**, before deploying the upgrade
+- Uses the same `FILE_ENCRYPTION_KEY` but it re-wraps the bytes, not the key
+- Auto-detects the storage driver (local or S3)
+- Safe to re-run: objects already in the streaming format are detected and skipped
+
+From the **backend** directory:
+
+```bash
+node scripts/migrate-to-streaming-encryption.js
+```
+
 ### Rotate FILE_ENCRYPTION_KEY (re-encrypt existing data)
 
-Use when you change `FILE_ENCRYPTION_KEY` and need existing encrypted files to remain decryptable.
+Use when you change `FILE_ENCRYPTION_KEY` and need existing encrypted files to remain decryptable. The files stay in the streaming format; only the key changes.
 
 The scripts:
 

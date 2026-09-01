@@ -54,34 +54,36 @@ This ensures that guessing or enumerating file IDs does not grant access to anot
 
 ## File Encryption
 
-Files are automatically encrypted. Encryption uses AES-256-GCM with authenticated encryption.
+Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`), which splits each object into 1 MB segments, each with its own authentication tag.
 
 ### Behavior
 
 - **Scope:** Files in `UPLOAD_DIR` (local) or S3 object key (S3) are encrypted
 - **Transparent:** Encryption and decryption happen automatically
 - **Streaming:** Large files processed in streams to avoid memory issues
+- **Seekable:** Because segments are independent, a single-file download can serve an HTTP `Range` request by decrypting only the overlapping segments
 
 ### File Operations
 
 - **Read/Write:** All file operations use streaming (local path or S3 key)
 - **Upload:** Files streamed from client to storage (S3: multipart upload when needed)
-- **Download:** Files streamed from storage to client (S3: GetObject stream)
+- **Download:** Files streamed from storage to client (S3: GetObject stream); supports HTTP `Range` for partial reads
 - **Copy:** Files streamed from source to destination (S3: stream copy with re-encrypt)
 - **Share:** Share link download uses same path/key resolution; works for both local and S3
 
 ### Key Configuration
 
-- Set `FILE_ENCRYPTION_KEY` environment variable
-- Generate key: `openssl rand -base64 32`
-- Key can be base64, hex, or string (derived with PBKDF2)
+- Set `FILE_ENCRYPTION_KEY` environment variable — the master key from which each file's key is derived (HKDF-SHA256)
+- Generate key: `openssl rand -base64 32` (a 32-byte base64 or hex key is recommended)
+- Key can be base64, hex, or a passphrase (stretched with PBKDF2)
 - Development fallback key used if not set (not secure for production)
 
-### Key Rotation
+### Key Rotation and Migration
 
 - `FILE_ENCRYPTION_KEY` is used for both encryption and decryption
-- Changing `FILE_ENCRYPTION_KEY` without re-encrypting existing encrypted data will break decryption for those existing files/objects
-- Use `rotate-file-encryption-local.js` or `rotate-file-encryption-s3.js` to re-encrypt existing data. See [CLI Commands](/docs/reference/cli-commands)
+- Changing `FILE_ENCRYPTION_KEY` without re-encrypting existing data will break decryption for those existing files/objects
+- Use `rotate-file-encryption-local.js` or `rotate-file-encryption-s3.js` to re-encrypt existing data with a new key
+- Upgrading from the earlier single-blob (`[IV][DATA][TAG]`) format: run `migrate-to-streaming-encryption.js` once, with the app stopped, before deploying. See [CLI Commands](/docs/reference/cli-commands)
 
 ## Disk Space Monitoring (Local only)
 

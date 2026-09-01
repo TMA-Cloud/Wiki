@@ -43,7 +43,7 @@ File system architecture and organization in TMA Cloud.
 
 - **Streaming:** Files streamed without loading into memory
 - **Upload:** Temp files streamed directly to destination
-- **Download:** Files streamed from storage to client
+- **Download:** Files streamed from storage to client; single-file downloads support HTTP `Range` (partial content) for seeking
 - **ZIP Archives:** Files streamed into archive without buffering
 - **Rename:** Change file/folder names
 
@@ -104,11 +104,12 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 
 ### File Encryption
 
-- Files encrypted with AES-256-GCM
+- Files encrypted with AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (the `AES256_GCM_HKDF_1MB` scheme)
 - Encryption key configured via `FILE_ENCRYPTION_KEY` environment variable
-- Files stored in format: `[IV][ENCRYPTED_DATA][TAG]`
+- Each object has a 40-byte header (a random salt and nonce prefix) followed by 1 MB segments, each sealed with its own authentication tag. A per-file key is derived from `FILE_ENCRYPTION_KEY` with HKDF-SHA256
+- Segments make stored objects seekable: a download serves an HTTP `Range` request by fetching and decrypting only the overlapping segments, so a large file opens without reading all of it
 - Automatic decryption on download
-- If `FILE_ENCRYPTION_KEY` changes, existing encrypted files will not decrypt with the new key unless you re-encrypt them using the rotation scripts documented in [CLI Commands](/docs/reference/cli-commands)
+- If `FILE_ENCRYPTION_KEY` changes, existing files will not decrypt with the new key unless you re-encrypt them using the rotation scripts documented in [CLI Commands](/docs/reference/cli-commands)
 
 ### Storage Limits
 
