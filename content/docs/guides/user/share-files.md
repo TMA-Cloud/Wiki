@@ -21,6 +21,9 @@ Create shareable links for files and folders in TMA Cloud.
 3. Choose an expiry option
 4. All folder contents accessible via link
 
+Anything you add to the folder later by upload, new folder, copy, or move is
+included in the share automatically, including items in subfolders.
+
 ### Bulk Share
 
 1. Select multiple files/folders
@@ -84,15 +87,15 @@ Re-sharing an already-shared file lets you change the expiry.
 
 ### Via Share Link
 
-1. Click share link (or paste in browser)
-2. View shared files/folders
-3. Download files as needed
+1. Click the share link (or paste it in the browser)
+2. For a folder, browse the contents; open subfolders to move into them, and use the breadcrumb to go back
+3. For a single file, use the download button on the page
 
 ### Download Options
 
-- **Single File:** Direct download
-- **Folder:** Download as ZIP archive
-- **Multiple Files:** Select and download
+- **Single File:** Landing page with a download button
+- **File in a folder:** Click the file to download it
+- **Folder:** Open subfolders to browse; use **Download all** to zip the current folder
 
 ## Security Considerations
 

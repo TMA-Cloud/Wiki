@@ -25,6 +25,13 @@ Share links provide public access to files and folders without requiring authent
 - **Read-Only:** Share links provide read access only
 - **Download:** Files can be downloaded via share link
 
+## Accessing Shared Content
+
+- A shared folder opens a listing page. Files download on click. Subfolders open in place, with a breadcrumb back to the shared root.
+- A single-file share opens a landing page with the file name, size, and a download button.
+- Each folder page has a **Download all** action that zips the current folder.
+- Only items linked to the share are reachable. Browsing a folder that is not part of the share returns **404 Not Found**, even with a valid token.
+
 ## Creating Share Links
 
 ### Single File Share
@@ -33,11 +40,17 @@ Share a single file with a unique link.
 
 ### Folder Share
 
-Share entire folders, including all contents.
+Share entire folders, including all contents. The whole subtree is linked to
+the share, so subfolders are reachable through the same link.
 
 ### Multiple Files Share
 
 Link multiple files to a single share link.
+
+### Adding to a Shared Folder
+
+Items added to a shared folder after it is shared are linked into the same
+share automatically.
 
 ## Share Link URLs
 

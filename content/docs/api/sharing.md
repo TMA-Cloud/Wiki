@@ -11,7 +11,7 @@ Share link endpoints for TMA Cloud.
 
 ### GET `/s/:token`
 
-View shared files/folders.
+View a shared file or folder. A folder returns a listing page. A single-file share returns a landing page with a download button.
 
 **Validation:**
 
@@ -23,9 +23,9 @@ View shared files/folders.
 - **404** - Link does not exist or has been removed
 - **410** - Link has expired
 
-### GET `/s/:token/file/:id`
+### GET `/s/:token/folder/:id`
 
-Download a file from a share link.
+Browse a subfolder inside a shared folder. Returns the listing page for that folder. The folder must be part of the share.
 
 **Validation:**
 
@@ -34,7 +34,22 @@ Download a file from a share link.
 
 **Responses:**
 
-- **200** - File download
+- **200** - HTML page with the subfolder's contents
+- **404** - Link not found, or the folder is not part of this share
+- **410** - Link has expired
+
+### GET `/s/:token/file/:id`
+
+Download an item from a share link. A file `id` downloads the file. A folder `id` downloads that folder's contents as a ZIP.
+
+**Validation:**
+
+- `token`: Required. Must be a non-empty string.
+- `id`: Required. Must be a non-empty string.
+
+**Responses:**
+
+- **200** - File or ZIP download
 - **404** - Link or file not found
 - **410** - Link has expired
 
