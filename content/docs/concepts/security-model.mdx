@@ -65,17 +65,19 @@ All incoming data from clients is strictly validated and sanitized on the backen
 ### File Encryption
 
 - **Algorithm:** AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`)
-- **Segmented:** Objects are split into 1 MB segments, each authenticated on its own, with a per-file key derived from the master key via HKDF-SHA256. This lets downloads serve HTTP `Range` requests without reading the whole file
+- **Segmented:** Objects are split into 1 MB segments, each authenticated on its own. This lets downloads serve HTTP `Range` requests without reading the whole file
+- **Envelope keys:** Each file has its own random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps it. Rotating the KEK rewraps the stored DEKs without re-encrypting the objects
 - **Scope:** Stored file contents in `UPLOAD_DIR` or S3 bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
 - **Stream Processing:** Memory-efficient for large files
 - **Automatic:** Encryption on upload, decryption on download
 
 <Callout type="error" title="Key loss means data loss">
-  The encryption key is read from an environment variable. If you lose or change
-  the key, **previously stored files cannot be decrypted** — they are
-  effectively unrecoverable. Back the key up somewhere safe (password manager,
-  secrets vault) before taking the deployment to production.
+  The KEK is read from an environment variable. If you lose it — or change it
+  without rotating (see [CLI Commands](/docs/reference/cli-commands)) —
+  **previously stored files cannot be decrypted** and are effectively
+  unrecoverable. Back the key up somewhere safe (password manager, secrets
+  vault) before taking the deployment to production.
 </Callout>
 
 ### Database Security

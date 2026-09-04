@@ -105,11 +105,11 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 ### File Encryption
 
 - Files encrypted with AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (the `AES256_GCM_HKDF_1MB` scheme)
-- Encryption key configured via `FILE_ENCRYPTION_KEY` environment variable
-- Each object has a 40-byte header (a random salt and nonce prefix) followed by 1 MB segments, each sealed with its own authentication tag. A per-file key is derived from `FILE_ENCRYPTION_KEY` with HKDF-SHA256
+- Each file is encrypted under its own random data key (DEK). `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps the DEK; the wrapped DEK and its KEK version are stored on the file's database row
+- Each object has a 40-byte header (a random salt and nonce prefix) followed by 1 MB segments, each sealed with its own authentication tag. The per-file encryption key is derived from the DEK with HKDF-SHA256
 - Segments make stored objects seekable: a download serves an HTTP `Range` request by fetching and decrypting only the overlapping segments, so a large file opens without reading all of it
 - Automatic decryption on download
-- If `FILE_ENCRYPTION_KEY` changes, existing files will not decrypt with the new key unless you re-encrypt them using the rotation scripts documented in [CLI Commands](/docs/reference/cli-commands)
+- Rotate `FILE_ENCRYPTION_KEY` with `rotate-kek.js`, which only rewraps the stored DEKs and never re-encrypts the objects. See [CLI Commands](/docs/reference/cli-commands)
 
 ### Storage Limits
 

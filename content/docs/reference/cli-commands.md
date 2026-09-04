@@ -227,40 +227,40 @@ From the **backend** directory:
 node scripts/migrate-to-streaming-encryption.js
 ```
 
-### Rotate FILE_ENCRYPTION_KEY (re-encrypt existing data)
+### Rotate FILE_ENCRYPTION_KEY (KEK)
 
-Use when you change `FILE_ENCRYPTION_KEY` and need existing encrypted files to remain decryptable. The files stay in the streaming format; only the key changes.
+`FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps each file's data key (DEK). Rotating it only rewraps the stored DEKs — a database update per file — and never reads or rewrites the encrypted objects, so it works the same for local and S3.
 
-The scripts:
+Steps:
 
-- Re-encrypt the existing encrypted objects/files with the **new** `FILE_ENCRYPTION_KEY` from `.env`
-- Ask you for the **old** `FILE_ENCRYPTION_KEY` to decrypt current data
-- Print progress while running
-- Use a fixed concurrency of **10** workers/objects at a time
+1. Set the new key as `FILE_ENCRYPTION_KEY` and bump `FILE_KEK_VERSION` (for example `1` → `2`).
+2. Keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (for example `FILE_ENCRYPTION_KEY_V1`) so the old DEKs can be unwrapped.
+3. Run it from the **backend** directory:
 
-From the **backend** directory:
+   ```bash
+   npm run rotate:kek
+   ```
 
-#### Rotate local storage
-
-```bash
-node scripts/rotate-file-encryption-local.js
-```
+4. Once it reports `Remaining=0`, remove the old `FILE_ENCRYPTION_KEY_V<oldVersion>`.
 
 Notes:
 
-- Runs only when `STORAGE_DRIVER=local`
-- For each file, writes a temporary file next to the encrypted file and then replaces the original file after re-encryption
+- No objects are downloaded or re-uploaded
+- Safe to interrupt and re-run: only files still wrapped under an older KEK are touched
+- Failures are written to a `kek-rotation-failures-*.json` manifest
 
-#### Rotate S3 storage
+### Backfill envelope encryption (one-time)
+
+Run once on a deployment created before envelope encryption, to give existing files their own DEK. Reads each object, re-encrypts it under a fresh DEK, and records the wrapped DEK on the row.
+
+- Run with the app **stopped**, after applying migrations and taking a backup
+- Re-encrypts to a new storage key, flips the database row, then deletes the old object — safe to interrupt and re-run
+- Failures are written to an `envelope-backfill-failures-*.json` manifest
+- `--concurrency N` sets how many objects are re-encrypted at once (default 8). Each is a full download + re-encrypt + re-upload, so raise it for many small files on a fast link (16–32)
 
 ```bash
-node scripts/rotate-file-encryption-s3.js
+npm run backfill:envelope
 ```
-
-Notes:
-
-- Runs only when `STORAGE_DRIVER=s3`
-- Downloads each encrypted object, re-encrypts it, and uploads it back to the same object key (no per-object temp objects created)
 
 ## Docker Commands
 

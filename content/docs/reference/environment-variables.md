@@ -63,13 +63,16 @@ Complete reference for all environment variables in TMA Cloud.
 
 ## File Storage
 
-| Variable              | Required | Default             | Description                    |
-| --------------------- | -------- | ------------------- | ------------------------------ |
-| `STORAGE_DRIVER`      | No       | `local`             | `local` or `s3`                |
-| `UPLOAD_DIR`          | No       | `backend/uploads`   | Upload directory (local only)  |
-| `FILE_ENCRYPTION_KEY` | No       | Development default | Master key for file encryption |
+| Variable              | Required | Default             | Description                        |
+| --------------------- | -------- | ------------------- | ---------------------------------- |
+| `STORAGE_DRIVER`      | No       | `local`             | `local` or `s3`                    |
+| `UPLOAD_DIR`          | No       | `backend/uploads`   | Upload directory (local only)      |
+| `FILE_ENCRYPTION_KEY` | No       | Development default | Key-encryption key (KEK) for files |
+| `FILE_KEK_VERSION`    | No       | `1`                 | Version of the current KEK         |
 
 **Note:** All file operations use streaming for large files. No memory limits for file size.
+
+**Key rotation:** To rotate, set a new `FILE_ENCRYPTION_KEY`, increment `FILE_KEK_VERSION`, and keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (e.g. `FILE_ENCRYPTION_KEY_V1`) until `rotate-kek.js` reports `Remaining=0`. See [CLI Commands](/docs/reference/cli-commands).
 
 ## S3-compatible (when STORAGE_DRIVER=s3)
 

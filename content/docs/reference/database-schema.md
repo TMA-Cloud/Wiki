@@ -48,24 +48,26 @@ User accounts and sub-users.
 
 Files and folders.
 
-| Column        | Type        | Description                                                                      |
-| ------------- | ----------- | -------------------------------------------------------------------------------- |
-| `id`          | TEXT        | Primary key                                                                      |
-| `name`        | TEXT        | Not null                                                                         |
-| `type`        | TEXT        | 'file' or 'folder'                                                               |
-| `size`        | BIGINT      | File size in bytes (null for folders)                                            |
-| `mime_type`   | TEXT        | MIME type                                                                        |
-| `user_id`     | TEXT        | FK → users.id, the account the row belongs to                                    |
-| `parent_id`   | TEXT        | FK → files.id (null for root)                                                    |
-| `path`        | TEXT        | Storage key: filename under `UPLOAD_DIR`, or the S3 object key. Null for folders |
-| `starred`     | BOOLEAN     | Default false                                                                    |
-| `shared`      | BOOLEAN     | Default false; true while an active share link exists                            |
-| `deleted_at`  | TIMESTAMPTZ | Soft delete timestamp                                                            |
-| `modified`    | TIMESTAMPTZ | Last modification time, not null, default now()                                  |
-| `created_at`  | TIMESTAMPTZ | Row creation time, not null, default now()                                       |
-| `accessed_at` | TIMESTAMPTZ | Last read time, not null, default now()                                          |
+| Column            | Type        | Description                                                                      |
+| ----------------- | ----------- | -------------------------------------------------------------------------------- |
+| `id`              | TEXT        | Primary key                                                                      |
+| `name`            | TEXT        | Not null                                                                         |
+| `type`            | TEXT        | 'file' or 'folder'                                                               |
+| `size`            | BIGINT      | File size in bytes (null for folders)                                            |
+| `mime_type`       | TEXT        | MIME type                                                                        |
+| `user_id`         | TEXT        | FK → users.id, the account the row belongs to                                    |
+| `parent_id`       | TEXT        | FK → files.id (null for root)                                                    |
+| `path`            | TEXT        | Storage key: filename under `UPLOAD_DIR`, or the S3 object key. Null for folders |
+| `starred`         | BOOLEAN     | Default false                                                                    |
+| `shared`          | BOOLEAN     | Default false; true while an active share link exists                            |
+| `deleted_at`      | TIMESTAMPTZ | Soft delete timestamp                                                            |
+| `modified`        | TIMESTAMPTZ | Last modification time, not null, default now()                                  |
+| `created_at`      | TIMESTAMPTZ | Row creation time, not null, default now()                                       |
+| `accessed_at`     | TIMESTAMPTZ | Last read time, not null, default now()                                          |
+| `dek_wrapped`     | BYTEA       | Wrapped per-file data key (DEK); null for folders                                |
+| `dek_kek_version` | INTEGER     | Version of the KEK the DEK is wrapped under                                      |
 
-**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, plus several partial indexes supporting trash listing and the recursive folder CTEs.
+**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, `dek_kek_version` for encrypted files (used by key rotation), plus several partial indexes supporting trash listing and the recursive folder CTEs.
 
 Name search is backed by trigram GIN indexes from `pg_trgm` (`name`, `lower(name)`) and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
 

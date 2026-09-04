@@ -54,7 +54,7 @@ This ensures that guessing or enumerating file IDs does not grant access to anot
 
 ## File Encryption
 
-Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`), which splits each object into 1 MB segments, each with its own authentication tag.
+Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`), which splits each object into 1 MB segments, each with its own authentication tag. Each file has its own random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps the DEK, and the wrapped DEK is stored on the file's database row.
 
 ### Behavior
 
@@ -73,17 +73,17 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 ### Key Configuration
 
-- Set `FILE_ENCRYPTION_KEY` environment variable — the master key from which each file's key is derived (HKDF-SHA256)
-- Generate key: `openssl rand -base64 32` (a 32-byte base64 or hex key is recommended)
+- Set `FILE_ENCRYPTION_KEY` — the key-encryption key (KEK) that wraps each file's data key
+- Set `FILE_KEK_VERSION` — the version number of the current KEK (default `1`)
+- Generate a key: `openssl rand -base64 32` (a 32-byte base64 or hex key is recommended)
 - Key can be base64, hex, or a passphrase (stretched with PBKDF2)
 - Development fallback key used if not set (not secure for production)
 
-### Key Rotation and Migration
+### Key Rotation
 
-- `FILE_ENCRYPTION_KEY` is used for both encryption and decryption
-- Changing `FILE_ENCRYPTION_KEY` without re-encrypting existing data will break decryption for those existing files/objects
-- Use `rotate-file-encryption-local.js` or `rotate-file-encryption-s3.js` to re-encrypt existing data with a new key
-- Upgrading from the earlier single-blob (`[IV][DATA][TAG]`) format: run `migrate-to-streaming-encryption.js` once, with the app stopped, before deploying. See [CLI Commands](/docs/reference/cli-commands)
+- Rotating the KEK only rewraps each file's stored DEK; the encrypted objects are never read or rewritten
+- Set a new `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>`, then run `rotate-kek.js`. Remove the old key once it reports `Remaining=0`
+- A deployment created before envelope encryption runs `backfill-envelope-encryption.js` once to give existing files a DEK. See [CLI Commands](/docs/reference/cli-commands)
 
 ## Disk Space Monitoring (Local only)
 
