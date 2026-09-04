@@ -89,6 +89,14 @@ You choose an action for each conflicting file; nothing is uploaded until you co
 - **Star:** Mark files as favorites
 - **Select all (desktop app):** Press **Ctrl+A** / **Cmd+A** in the file list to select all items in the current folder
 
+### Download Progress and Cancel
+
+- A floating progress panel shows active downloads, in the same style as the upload panel
+- **Single file:** the panel shows the file name, size, and a percentage bar that tracks the download
+- **Folder or multiple files:** downloaded as a ZIP; the panel shows an in-progress bar without a percentage, because the archive is streamed and its final size is not known in advance
+- **Desktop app:** the same panel appears while the file is saved through the desktop app
+- Each active download has a **Cancel** button; finished downloads clear on their own
+
 ## File Types
 
 ### Supported Files

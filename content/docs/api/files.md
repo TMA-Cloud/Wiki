@@ -583,6 +583,25 @@ An array of shared file and folder objects. Each object includes `expiresAt` fro
 ]
 ```
 
+## Progress Streaming
+
+`POST /api/files/delete`, `POST /api/files/trash/restore`, and `POST /api/files/trash/delete` can stream progress for large selections. Send an `Accept: application/x-ndjson` request header and the response is `application/x-ndjson` — one JSON object per line — instead of a single JSON body.
+
+The selected ids are processed in batches. One line is written after each batch completes, followed by a final line:
+
+```json
+{"type":"progress","done":0,"total":40}
+{"type":"progress","done":25,"total":40}
+{"type":"progress","done":40,"total":40}
+{"type":"done","message":"Files moved to trash."}
+```
+
+- `progress` — `done` of `total` ids processed so far. The first line reports `done: 0`.
+- `done` — the operation finished. Its remaining fields are the same body the endpoint returns without streaming (for example `message`).
+- `error` — the operation failed partway; `message` describes the failure. HTTP status is already `200`, so read the stream to detect this.
+
+Without the `Accept: application/x-ndjson` header, each endpoint returns the single JSON object documented for it below, and the behaviour is unchanged. The batches are not a single transaction: a failure after the first batch leaves earlier batches applied.
+
 ## Delete Files
 
 ### POST `/api/files/delete`
@@ -608,6 +627,8 @@ Move one or more files/folders to the trash.
   "message": "Files moved to trash."
 }
 ```
+
+**Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
 ## Get Trash
 
@@ -665,6 +686,8 @@ Restore one or more files/folders from the trash.
 }
 ```
 
+**Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
+
 ## Permanent Delete
 
 ### POST `/api/files/trash/delete`
@@ -690,6 +713,8 @@ Permanently delete one or more files/folders from the trash. This action is irre
   "message": "Files permanently deleted."
 }
 ```
+
+**Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
 ## Empty Trash
 
