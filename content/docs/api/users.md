@@ -29,7 +29,6 @@ An object containing an array of all user objects.
       "storageUsed": 1073741824,
       "storageLimit": 107374182400,
       "storageTotal": 107374182400,
-      "actualDiskSize": 1099511627776,
       "parentUserId": null,
       "permissions": null
     }
@@ -179,7 +178,6 @@ Get storage usage information for the authenticated user's account. For a sub-us
 
 **Response:**
 
-- **Local:** `used`, `total`, `free` (total/free from disk and per-user limit).
 - **S3:** `used`; `total` and `free` are per-user limit and (limit − used), or `null` when no limit (Unlimited).
 
 ```json
@@ -620,7 +618,7 @@ Scan storage and the database for orphans. Read-only; nothing is deleted.
 
 **Fields:**
 
-- `driver`: `s3` or `local`.
+- `driver`: `s3`.
 - `totals.skippedTooRecent`: Entries held back because they are younger than the grace window.
 - `storageOrphans`: Objects in storage with no `files` row pointing at them.
 - `databaseOrphans`: `files` rows whose stored object is missing. Trashed rows are included and flagged with `trashed`.

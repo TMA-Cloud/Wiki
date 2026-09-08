@@ -50,7 +50,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Starts three services:
+Starts four services:
 
 - **App** (`tma-cloud-app`) - Main application
 - **PostgreSQL** (`tma-cloud-postgres`) - Database
@@ -65,10 +65,7 @@ Access at `http://localhost:3000` (or configured `BPORT`).
 
 All variables loaded from `.env` file.
 
-**Important:** `UPLOAD_DIR` in `.env` must match container path:
-
-- Default: `UPLOAD_DIR=/app/uploads` (matches `./uploads:/app/uploads` volume)
-- Custom: Match your volume mount path
+Configure the required S3-compatible bucket endpoint, name, and credentials in `.env`. See [Environment Variables](/docs/reference/environment-variables).
 
 **Redis Configuration:**
 
@@ -78,16 +75,9 @@ All variables loaded from `.env` file.
 
 **Database access from host:** To run backend scripts that need the database (e.g. bulk import) from the host, the DB port must be reachable. In `docker-compose.yml`, uncomment the postgres `ports` entry (e.g. `127.0.0.1:5432:5432`).
 
-### Volume Mounts
+### Persistent Data
 
-Default: `./uploads:/app/uploads`
-
-**Permissions:**
-
-```bash
-mkdir -p uploads
-chown -R 1001:1001 uploads  # Container runs as UID 1001
-```
+PostgreSQL and Redis use the `postgres-data` and `redis-data` volumes. File contents are stored in the configured S3-compatible bucket.
 
 ## Building Images
 

@@ -853,13 +853,11 @@ The new file is created as a separate entry in the same folder as the original f
 
 - `id` - Source file ID (required). The new file is created as a sibling of this file.
 
-**Form Data (local / non-S3 deployments):**
+**Form Data:**
 
 - `file` - Derived file content (required). Single file in `multipart/form-data`.
 
-**S3-backed deployments:**
-
-- When `STORAGE_DRIVER=s3`, uploads are streamed and `streamUploadToS3` sets `req.streamedUpload`. The desktop client sends the same `multipart/form-data` request; the server handles streaming and metadata creation.
+The server streams and encrypts the multipart upload directly to the configured bucket, then creates the file metadata.
 
 **Validation:**
 

@@ -7,17 +7,15 @@ Storage limits and management in TMA Cloud.
 
 ## Storage Driver
 
-- **Local:** Files stored on disk under `UPLOAD_DIR`. Paths stored in database.
 - **S3:** Files stored in S3-compatible object storage. Object keys stored in database.
-- Set `STORAGE_DRIVER=local` (default) or `STORAGE_DRIVER=s3`. When S3, set endpoint, bucket, and credentials (see [Environment Variables](/docs/reference/environment-variables)).
-- Upload, download, copy, rename, delete, and share work the same for both; implementation uses streaming for S3 (no temp files).
+- Set the bucket endpoint, name, and credentials (see [Environment Variables](/docs/reference/environment-variables)). Missing or incomplete configuration stops backend startup.
+- Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage.
 
 ## Storage Limits
 
 ### Per-User Limits
 
 - Configurable storage limits per user
-- **Local:** Default uses actual available disk space. Limits validated against disk capacity.
 - **S3:** No disk; default is unlimited when no limit set. Display: "X used of Unlimited" or "X used of Y" (when limit set). Only per-user limit enforced.
 - Set by administrators; real-time usage tracking
 
@@ -32,7 +30,6 @@ Storage limits and management in TMA Cloud.
 ### Tracking
 
 - Real-time usage calculation (sum of file sizes in DB)
-- **Local:** Total/free derived from disk and per-user limit.
 - **S3:** Total = per-user limit or null (Unlimited). Free = limit − used or null. No disk.
 - Visual charts and indicators; per-user usage statistics
 
@@ -58,18 +55,18 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 ### Behavior
 
-- **Scope:** Files in `UPLOAD_DIR` (local) or S3 object key (S3) are encrypted
+- **Scope:** File contents in the S3-compatible bucket are encrypted
 - **Transparent:** Encryption and decryption happen automatically
 - **Streaming:** Large files processed in streams to avoid memory issues
 - **Seekable:** Because segments are independent, a single-file download can serve an HTTP `Range` request by decrypting only the overlapping segments
 
 ### File Operations
 
-- **Read/Write:** All file operations use streaming (local path or S3 key)
+- **Read/Write:** All file operations use streaming (S3 object keys)
 - **Upload:** Files streamed from client to storage (S3: multipart upload when needed)
 - **Download:** Files streamed from storage to client (S3: GetObject stream); supports HTTP `Range` for partial reads
 - **Copy:** Files streamed from source to destination (S3: stream copy with re-encrypt)
-- **Share:** Share link download uses same path/key resolution; works for both local and S3
+- **Share:** Share link downloads use the same bucket object keys and streaming decryption
 
 ### Key Configuration
 
@@ -84,23 +81,6 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 - Rotating the KEK only rewraps each file's stored DEK; the encrypted objects are never read or rewritten
 - Set a new `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>`, then run `rotate-kek.js`. Remove the old key once it reports `Remaining=0`
 - A deployment created before envelope encryption runs `backfill-envelope-encryption.js` once to give existing files a DEK. See [CLI Commands](/docs/reference/cli-commands)
-
-## Disk Space Monitoring (Local only)
-
-### System-Level
-
-- Total disk space available
-- Used space calculation
-- Free space tracking
-- Base path configuration
-
-### User-Level
-
-- Per-user storage usage
-- Limit enforcement
-- Usage visualization
-
-**Note:** S3 has no disk; total/free in UI come from per-user limit or "Unlimited" when no limit set.
 
 ## Storage Operations
 
@@ -124,7 +104,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 An orphan is either an object in storage that no `files` row points at, or a `files` row whose stored object is missing. Both are reported by an on-demand scan.
 
-- Scanning is read-only and makes a single pass over the bucket or upload directory, with no per-row HEAD requests. Memory is bounded by the number of database rows, not the number of stored objects.
+- Scanning is read-only and makes a single pass over the bucket, with no per-row HEAD requests. Memory is bounded by the number of database rows, not the number of stored objects.
 - A grace window (1 hour minimum, 24 hours default, 1 year maximum) hides anything younger on either side, so an upload or paste still in progress is never reported.
 - Row age comes from `files.created_at`, not `files.modified`, because uploads and copies preserve the client's original mtime.
 - Deletion is itemised. Every entry is re-verified against the database and the storage timestamp at the moment of deletion, so a stale scan cannot remove a live file.
@@ -132,7 +112,7 @@ An orphan is either an object in storage that no `files` row points at, or a `fi
 
 See [Orphan Review](/docs/guides/admin/orphan-review) for the admin workflow.
 
-## S3 Bucket Protection (when STORAGE_DRIVER=s3)
+## S3 Bucket Protection
 
 Backend scripts apply bucket settings using the project S3 config. Run from backend directory.
 

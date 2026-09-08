@@ -67,7 +67,7 @@ All incoming data from clients is strictly validated and sanitized on the backen
 - **Algorithm:** AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`)
 - **Segmented:** Objects are split into 1 MB segments, each authenticated on its own. This lets downloads serve HTTP `Range` requests without reading the whole file
 - **Envelope keys:** Each file has its own random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps it. Rotating the KEK rewraps the stored DEKs without re-encrypting the objects
-- **Scope:** Stored file contents in `UPLOAD_DIR` or S3 bucket. File names and metadata live in the database
+- **Scope:** Stored file contents in the S3-compatible bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
 - **Stream Processing:** Memory-efficient for large files
 - **Automatic:** Encryption on upload, decryption on download
@@ -93,7 +93,7 @@ All incoming data from clients is strictly validated and sanitized on the backen
 - **Recommended:** Use HTTPS in production
 - **Cookie Security:** Secure flag for cookies
 - **Headers:** Security headers configured
-- **S3 (when STORAGE_DRIVER=s3):** Bucket policy can enforce HTTPS-only access; run `npm run s3:policy-https` or `npm run s3:protect-all` from backend (see [Storage Management](/docs/concepts/storage-management)).
+- **S3:** Bucket policy can enforce HTTPS-only access; run `npm run s3:policy-https` or `npm run s3:protect-all` from backend (see [Storage Management](/docs/concepts/storage-management)).
 
 ### Rate Limiting
 

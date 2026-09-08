@@ -220,7 +220,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 │(FormData)│                                └────┬─────┘
 └──────────┘                                     │
                                                  │ Validate & save file
-                                                 │ Stream to storage (local or S3)
+                                                 │ Stream to S3 bucket
                                                  │ Create database record
                                                  │ Update cache
                                                  │
@@ -229,7 +229,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 └─────────┘
 ```
 
-**Storage:** Local disk (`UPLOAD_DIR`) or S3-compatible object storage (when `STORAGE_DRIVER=s3`). Same streaming and encryption for both.
+**Storage:** S3-compatible object storage is required. File contents stream to the bucket with encryption.
 
 ### Share Link Flow
 

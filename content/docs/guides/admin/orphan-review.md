@@ -9,7 +9,7 @@ Review and delete orphaned files and broken records in TMA Cloud (admin only).
 
 Storage and the database are written separately, so a failed or interrupted operation can leave one side without the other. There are two cases:
 
-- **Orphaned data** --- An object in the bucket (or a file in `UPLOAD_DIR`) that no row in `files` points at. It takes up space but is not visible to any user.
+- **Orphaned data** --- An object in the bucket that no row in `files` points at. It takes up space but is not visible to any user.
 - **Broken record** --- A row in `files` whose `path` points at storage that no longer exists. It shows in the file list but cannot be downloaded.
 
 Nothing is deleted automatically. The scan is read-only and only the first user (admin) can run it.

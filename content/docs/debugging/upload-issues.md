@@ -14,7 +14,7 @@ Troubleshooting file upload problems.
 1. Storage limit not exceeded
 2. File size within max upload size (admin-configurable in **Settings** → **Storage**)
 3. Network connection stable
-4. Disk space available
+4. Bucket available and within provider limits
 
 ### Storage Limit
 
@@ -45,20 +45,20 @@ The file exceeds the max upload size setting.
 2. Delete old files
 3. Empty trash permanently
 4. Admin: Increase storage limit (if custom limit set)
-5. Check actual disk space available
+5. Check the bucket provider quota and account status
 
 ### "Upload failed"
 
 **Check:**
 
 1. File size limits
-2. Disk space: `df -h`
-3. File permissions on upload directory
+2. Bucket endpoint and credentials
+3. Bucket access permissions
 4. Network connectivity
 
 ### "Upload cancelled by client" (499 REQUEST_ABORTED)
 
-Returned when the user cancels an upload. The request is aborted before completion. Partial temp files on disk will be removed by the system. This is expected behavior, not an error
+Returned when the user cancels an upload. The request is aborted before completion. The upload middleware aborts incomplete multipart uploads and cleans up uncommitted bucket objects. This is expected behavior, not an error
 
 ### Folder uploads missing files
 
@@ -73,10 +73,10 @@ Returned when the user cancels an upload. The request is aborted before completi
 
 **Solutions:**
 
-1. Check upload directory permissions
-2. Verify user has write access
-3. Docker: Check volume mount permissions
-4. Set correct ownership: `chown -R user:user uploads/`
+1. Check that the configured bucket credentials allow uploads and deletion
+2. Verify the user has upload permission
+3. Check bucket policies and endpoint reachability
+4. Review backend logs for the provider error
 
 ## Related Topics
 

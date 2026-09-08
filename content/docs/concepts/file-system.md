@@ -42,7 +42,7 @@ File system architecture and organization in TMA Cloud.
 ### Large File Handling
 
 - **Streaming:** Files streamed without loading into memory
-- **Upload:** Temp files streamed directly to destination
+- **Upload:** Files encrypted and streamed directly to the bucket
 - **Download:** Files streamed from storage to client; single-file downloads support HTTP `Range` (partial content) for seeking
 - **ZIP Archives:** Files streamed into archive without buffering
 - **Rename:** Change file/folder names
@@ -50,13 +50,13 @@ File system architecture and organization in TMA Cloud.
 ### Performance
 
 - Streaming prevents memory exhaustion for large files (>1GB)
-- Rename operations use OS-level rename when available
+- Rename operations update database metadata without moving stored objects
 - No file size limits imposed by memory constraints
 
 ### Path Management
 
 - Renaming or moving an item changes its `parent_id` and `name`, not its storage key, so no stored object is touched
-- Every resolved path is checked to stay inside `UPLOAD_DIR`, which is what blocks traversal attempts
+- Stored object keys are validated as flat keys without path separators or traversal sequences
 
 ## Last Access Time
 
@@ -97,9 +97,8 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 
 ### Physical Storage
 
-- **Local:** Files stored in `UPLOAD_DIR`. Database stores path.
 - **S3:** Files stored in S3-compatible object storage. Database stores object key.
-- Set `STORAGE_DRIVER=local` (default) or `s3`. Same operations (upload, download, copy, share) work for both.
+- Bucket configuration is required before starting the backend.
 - Original filenames preserved in database
 
 ### File Encryption

@@ -54,7 +54,7 @@ Frequently encountered errors and step-by-step diagnosis.
 ### Symptom: "Storage limit exceeded"
 
 1. **Check the user's quota in Settings → Storage.** If it's close to full, delete files or empty trash — trash counts toward quota.
-2. **Is it the per-user quota or the disk?** If the backend host itself is out of disk (`df -h` shows 100%), no quota increase will help — free disk first.
+2. **Check provider limits.** A full bucket quota or suspended provider account must be resolved with the storage provider.
 3. **Admin override.** An admin can raise the limit for a specific user in **Settings → Registered Users**.
 
 ### Symptom: "This file is too large" on a single upload
@@ -69,8 +69,8 @@ The file exceeds the per-request max upload size (separate from storage quota).
 
 ### Symptom: "Upload failed" (generic)
 
-1. **Check disk space** on the backend host: `df -h`.
-2. **Check `UPLOAD_DIR` permissions** — the backend process must be able to write to it.
+1. **Check bucket availability** and provider quotas.
+2. **Check bucket credentials and policies** — allow the backend to upload, read, list, and delete objects.
 3. **Network stability** — retry once; transient drops cause this too.
 
 See [Upload Issues](/docs/debugging/upload-issues) for upload-specific problems.

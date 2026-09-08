@@ -20,7 +20,7 @@ Troubleshooting Docker deployment problems.
 
 1. Check logs for specific errors
 2. Verify `.env` file exists and is correct
-3. Check upload directory permissions: `chown -R 1001:1001 uploads/`
+3. Check bucket configuration, credentials, and network access from the app container
 4. Verify ports are available
 
 ### Health Check Failing

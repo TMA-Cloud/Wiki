@@ -8,7 +8,7 @@ Backup and restore procedures for TMA Cloud.
 ## What to Backup
 
 - **Database:** PostgreSQL database (all schemas including `pgboss`)
-- **Files:** Upload directory or S3 bucket contents
+- **Files:** S3 bucket contents
 - **Configuration:** `.env` file
 
 ## Backup Script
@@ -141,15 +141,7 @@ The backup script only covers the PostgreSQL database. It does **not** back up u
 
 You must back up file storage separately:
 
-### Upload Directory (local)
-
-Back up the `UPLOAD_DIR` directory (default `./uploads`). Preserve the full directory structure.
-
-```bash
-tar -czf uploads_backup_$(date +%Y%m%d).tar.gz uploads/
-```
-
-### S3-compatible (when STORAGE_DRIVER=s3)
+### S3-compatible
 
 Use your storage vendor's replication or snapshot tools. The application stores object keys in the database; the bucket holds the blobs. Both must be backed up together to stay in sync.
 

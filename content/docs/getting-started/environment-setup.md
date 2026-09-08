@@ -57,11 +57,11 @@ Environment variable reference for TMA Cloud.
 
 ## File Storage
 
-| Variable              | Required | Default           | Description                    |
-| --------------------- | -------- | ----------------- | ------------------------------ |
-| `STORAGE_DRIVER`      | No       | `local`           | `local` or `s3`                |
-| `UPLOAD_DIR`          | No       | `backend/uploads` | Upload directory (local only)  |
-| `FILE_ENCRYPTION_KEY` | No       | -                 | Encryption key (see reference) |
+Configure a required S3-compatible bucket using R2, RustFS, or AWS environment variables. See [Environment Variables](/docs/reference/environment-variables#s3-compatible) for all provider settings.
+
+| Variable              | Required | Default | Description                    |
+| --------------------- | -------- | ------- | ------------------------------ |
+| `FILE_ENCRYPTION_KEY` | No       | -       | Encryption key (see reference) |
 
 **Note:** Storage limits are configured per-user in Settings (admin only). For S3-compatible storage, see [Environment Variables](/docs/reference/environment-variables).
 

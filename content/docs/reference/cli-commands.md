@@ -81,7 +81,7 @@ Same, with a coverage report in `backend/coverage-integration`.
 npm run test:s3
 ```
 
-Run the storage driver suite against the configured S3 bucket. Requires `STORAGE_DRIVER=s3` credentials.
+Run the storage driver suite against the configured S3 bucket. Requires bucket credentials.
 
 ```bash
 npm run test:all
@@ -117,7 +117,7 @@ npm run format:check
 
 Check code formatting without making changes.
 
-### S3 bucket (when STORAGE_DRIVER=s3)
+### S3 bucket
 
 Run from backend directory. Uses project S3 config.
 
@@ -163,30 +163,6 @@ To check current lifecycle config from project root: `node backend/scripts/check
 
 **Requirement:** the database must be reachable from the host. If the app runs in Docker, uncomment the postgres `ports` in `docker-compose.yml` (e.g. `127.0.0.1:5432:5432`) so the host can connect.
 
-#### Bulk import drive to local
-
-Use when you have existing data on disk and want it in the app's **local** storage with encryption and DB records. Requires `STORAGE_DRIVER=local` and `FILE_ENCRYPTION_KEY` in `.env`. Files land in `UPLOAD_DIR`.
-
-From the **backend** directory:
-
-```bash
-# Dry run: list folders/files and total size only
-node scripts/bulk-import-drive-to-local.js --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --dry-run
-
-# Import (creates folder hierarchy in DB, encrypts and copies each file)
-node scripts/bulk-import-drive-to-local.js --source-dir "D:\MyDrive" --user-id YOUR_USER_ID
-
-# Use email instead of user ID
-node scripts/bulk-import-drive-to-local.js --source-dir "D:\MyDrive" --user-email "you@example.com"
-
-# Optional: more concurrent copies (default 2)
-node scripts/bulk-import-drive-to-local.js --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --concurrency 4
-```
-
-- Preserves folder structure; invalid file names are sanitized with a warning.
-- Enforces per-user storage limit and max file size (checked before any copy).
-- Preserves file and folder modification times (mtime).
-
 #### Bulk import drive to S3
 
 Use when you have existing data on disk and want it in the app's S3 bucket with encryption and DB records. Copying files directly into the bucket would skip encryption and the `files` table. Requires S3 env vars and `FILE_ENCRYPTION_KEY` in `.env`.
@@ -218,7 +194,7 @@ Stored files use Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1
 
 - Run it with the app **stopped**, before deploying the upgrade
 - Uses the same `FILE_ENCRYPTION_KEY` but it re-wraps the bytes, not the key
-- Auto-detects the storage driver (local or S3)
+- Uses the configured S3-compatible bucket
 - Safe to re-run: objects already in the streaming format are detected and skipped
 
 From the **backend** directory:
@@ -229,7 +205,7 @@ node scripts/migrate-to-streaming-encryption.js
 
 ### Rotate FILE_ENCRYPTION_KEY (KEK)
 
-`FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps each file's data key (DEK). Rotating it only rewraps the stored DEKs — a database update per file — and never reads or rewrites the encrypted objects, so it works the same for local and S3.
+`FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps each file's data key (DEK). Rotating it only rewraps the stored DEKs — a database update per file — and never reads or rewrites the encrypted objects.
 
 Steps:
 

@@ -66,7 +66,7 @@ npm run test:s3
 ```
 
 Exercise the storage driver against the bucket configured in `.env`. Requires
-`STORAGE_DRIVER=s3` credentials to be set.
+bucket credentials to be set.
 
 ### Everything
 
@@ -134,14 +134,15 @@ mounted, no window opens, and it runs the same on Windows and on the Linux CI ru
 ## Integration Setup
 
 The integration suite reads connection details from the project `.env`, then overrides
-three of them so it never touches working data. Setup fails with an error if an
+database and cache settings and replaces bucket storage with an in-memory double so it never touches working data. Setup fails with an error if an
 override has not taken effect.
 
-| Override                            | Reason                                                         |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `DB_NAME=tma_cloud_test`            | Its own database. Setup stops unless the name ends in `_test`. |
-| `REDIS_DB=15`                       | Its own cache. Setup stops if the value is `0`.                |
-| `UPLOAD_DIR=backend/tests/.tmp/...` | Setup stops if the path is outside the tests directory.        |
+| Override                 | Reason                                                         |
+| ------------------------ | -------------------------------------------------------------- |
+| `DB_NAME=tma_cloud_test` | Its own database. Setup stops unless the name ends in `_test`. |
+| `REDIS_DB=15`            | Its own cache. Setup stops if the value is `0`.                |
+
+Bucket operations use an isolated in-memory double in this suite. Run `npm run test:s3` separately to verify the actual provider.
 
 Create the database once:
 
@@ -150,7 +151,7 @@ createdb tma_cloud_test
 ```
 
 Migrations run against it on the first test run, so the schema matches production. Each
-test starts from a truncated database, an empty upload directory, and a flushed cache.
+test starts from a truncated database, an empty in-memory bucket, and a flushed cache.
 
 The S3 suite writes every object under a `tma-test/<run-id>/` prefix and deletes them
 when the run finishes.

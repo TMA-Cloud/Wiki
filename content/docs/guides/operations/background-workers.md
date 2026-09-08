@@ -94,7 +94,7 @@ The audit worker runs as its own container, sharing the app image:
 
 ```bash
 docker compose up -d
-# Starts init-permissions, postgres, redis, app, and worker
+# Starts postgres, redis, app, and worker
 ```
 
 ## Monitoring Workers

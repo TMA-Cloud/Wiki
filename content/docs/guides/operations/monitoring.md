@@ -47,7 +47,7 @@ There are no HTTP request counters, latency histograms, error-rate metrics, cach
 - `time() - audit_last_processed_timestamp` above a few minutes — same signal, from the other direction
 - `audit_queue_failed_depth` greater than zero — events are being lost
 - `/health` not answering `200` — the process is down
-- Disk usage on the volume behind `UPLOAD_DIR`, checked at the host level
+- Bucket usage, provider quotas, and request failures, checked through your storage provider
 
 ## Monitoring Beyond the App
 

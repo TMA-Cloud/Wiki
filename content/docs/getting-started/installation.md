@@ -86,7 +86,7 @@ cp ../.env.example ../.env
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` - Database connection
 - `REDIS_HOST`, `REDIS_PORT` - Redis connection (optional)
 - `BPORT` - Backend port (default: 3000)
-- `UPLOAD_DIR` - Upload directory
+- Bucket endpoint, name, and credentials - Required; configure R2, RustFS, or AWS variables (see [Environment Variables](/docs/reference/environment-variables))
 
 **Optional:**
 

@@ -11,8 +11,8 @@ Every error response carries a `message`. Only some carry a machine-readable `er
 
 ```json
 {
-  "message": "File too large",
-  "error": "FILE_TOO_LARGE"
+  "message": "Upload cancelled by client",
+  "error": "REQUEST_ABORTED"
 }
 ```
 
@@ -22,8 +22,6 @@ The list below is the complete set of `error` values the backend emits. Anything
 
 | Code                     | Status | When                                                                          |
 | ------------------------ | ------ | ----------------------------------------------------------------------------- |
-| `FILE_TOO_LARGE`         | 400    | Upload exceeds the configured max upload size (multer `LIMIT_FILE_SIZE`)      |
-| `UNEXPECTED_FILE`        | 400    | File arrived on a form field the endpoint does not accept                     |
 | `STORAGE_LIMIT_EXCEEDED` | 413    | The upload would push the account past its quota                              |
 | `STORAGE_CHECK_FAILED`   | 500    | The quota could not be read, so the upload is refused rather than let through |
 | `REQUEST_ABORTED`        | 499    | Client cancelled the upload mid-request                                       |

@@ -87,7 +87,7 @@ Moving a file to trash rather than removing it from storage. Trashed files are a
 
 ### Storage driver
 
-How and where uploaded files live. `local` stores them in `UPLOAD_DIR` on the backend host; `s3` streams them to an S3-compatible bucket. Controlled by `STORAGE_DRIVER`.
+Uploaded file contents stream to an S3-compatible bucket. Configure its endpoint, bucket name, and credentials with the R2, RustFS, or AWS environment variables.
 
 ### Sub-user
 

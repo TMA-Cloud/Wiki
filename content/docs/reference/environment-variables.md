@@ -65,8 +65,6 @@ Complete reference for all environment variables in TMA Cloud.
 
 | Variable              | Required | Default             | Description                        |
 | --------------------- | -------- | ------------------- | ---------------------------------- |
-| `STORAGE_DRIVER`      | No       | `local`             | `local` or `s3`                    |
-| `UPLOAD_DIR`          | No       | `backend/uploads`   | Upload directory (local only)      |
 | `FILE_ENCRYPTION_KEY` | No       | Development default | Key-encryption key (KEK) for files |
 | `FILE_KEK_VERSION`    | No       | `1`                 | Version of the current KEK         |
 
@@ -74,7 +72,9 @@ Complete reference for all environment variables in TMA Cloud.
 
 **Key rotation:** To rotate, set a new `FILE_ENCRYPTION_KEY`, increment `FILE_KEK_VERSION`, and keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (e.g. `FILE_ENCRYPTION_KEY_V1`) until `rotate-kek.js` reports `Remaining=0`. See [CLI Commands](/docs/reference/cli-commands).
 
-## S3-compatible (when STORAGE_DRIVER=s3)
+## S3-compatible
+
+A bucket is required. The backend stops at startup if its endpoint, bucket name, access key, or secret key is missing.
 
 Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** (AWS\_). Use one set of vars.
 
@@ -104,7 +104,7 @@ Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** 
 | Region     | No       | `us-east-1` | `RUSTFS_REGION` or `AWS_REGION`                    |
 | Path style | No       | `true`      | `RUSTFS_FORCE_PATH_STYLE` (set `false` to disable) |
 
-\*Required when `STORAGE_DRIVER=s3` and not using R2. Use one set of names consistently.
+\*Required when not using R2. Use one set of names consistently.
 
 **Note:** From backend, `npm run s3:protect-all` applies bucket protections (public access block, HTTPS-only policy, versioning, optional encryption, lifecycle). Lifecycle aborts incomplete multipart after 1 day and deletes noncurrent versions after 7 days. Review orphans periodically from **Settings** → **Administration**; see [Orphan Review](/docs/guides/admin/orphan-review).
 
