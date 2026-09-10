@@ -9,7 +9,7 @@ Rate limiting configuration and limits for TMA Cloud API.
 
 Rate limits are enforced per IP address and/or user for different endpoint types to prevent abuse and ensure service stability.
 
-**Behind a reverse proxy:** limits keyed by IP need `TRUST_PROXY` set correctly, otherwise every request looks like it came from the proxy and all users share a single bucket. See [Environment Variables](/docs/reference/environment-variables). Sub-users count separately from their account owner, since keys use the individual login.
+**Behind a reverse proxy:** add every proxy under **Settings** → **Administration** → **Known Proxies** and restart the server. If the connecting proxy is not trusted, every request looks like it came from that proxy and all users share one bucket. See [Known Proxies](/docs/guides/admin/known-proxies). Sub-users count separately from their account owner, since keys use the individual login.
 
 ## Endpoint Limits
 
@@ -117,5 +117,5 @@ A regeneration request therefore hits `429` for either of two reasons: the 3-per
 ## Related Topics
 
 - [API Overview](/docs/api/overview) - API reference
-- [Environment Variables](/docs/reference/environment-variables) - `TRUST_PROXY` and other settings
+- [Known Proxies](/docs/guides/admin/known-proxies) - Reverse proxy client IP handling
 - [Error Codes](/docs/reference/error-codes) - Error reference

@@ -99,6 +99,10 @@ All incoming data from clients is strictly validated and sanitized on the backen
 
 The API employs rate limiting to prevent abuse and ensure service stability. Different limits are applied to authentication, file uploads, and general API endpoints. For detailed information, see the [Rate Limits](/docs/reference/rate-limits) reference.
 
+### Forwarded Client IPs
+
+The backend ignores forwarded client IP headers unless the connecting reverse proxy is listed under **Settings** → **Administration** → **Known Proxies**. This prevents a direct client from supplying its own `X-Forwarded-For` value.
+
 ### Desktop app only access (optional)
 
 - Admins can place an instance into a mode where the backend requires a custom HTTP header that only the Electron desktop app sends

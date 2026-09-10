@@ -6,6 +6,7 @@
     "signup-control",
     "orphan-review",
     "mfa-management",
+    "known-proxies",
     "share-base-url"
   ]
 }

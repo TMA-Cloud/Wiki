@@ -38,12 +38,13 @@ Environment variable reference for TMA Cloud.
 
 ## Authentication
 
-| Variable                 | Required | Default | Description                                              |
-| ------------------------ | -------- | ------- | -------------------------------------------------------- |
-| `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                                |
-| `SESSION_IDLE_DAYS`      | No       | `30`    | Days of inactivity before a session ends                 |
-| `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, the auth cookie has no `Secure` flag          |
-| `TRUST_PROXY`            | No       | `1`     | Reverse proxy hops to trust when resolving the client IP |
+| Variable                 | Required | Default | Description                                     |
+| ------------------------ | -------- | ------- | ----------------------------------------------- |
+| `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                       |
+| `SESSION_IDLE_DAYS`      | No       | `30`    | Days of inactivity before a session ends        |
+| `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, the auth cookie has no `Secure` flag |
+
+Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known Proxies**. See [Known Proxies](/docs/guides/admin/known-proxies).
 
 ## Google OAuth (Optional)
 

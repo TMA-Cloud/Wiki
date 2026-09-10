@@ -50,7 +50,7 @@ Troubleshooting authentication problems.
 
 Sessions end after `SESSION_IDLE_DAYS` of inactivity (30 by default), and the token is re-issued while the user is active, so an active user should not be logged out mid-use. When it happens anyway:
 
-1. **Check `TRUST_PROXY`.** Behind a reverse proxy without it, every request looks like it came from the proxy, so all users share one rate-limit bucket. Once it is exhausted the API returns `429`. See [Environment Variables](/docs/reference/environment-variables).
+1. **Check Known Proxies.** Behind a reverse proxy that is not listed under **Settings** → **Administration** → **Known Proxies**, every request looks like it came from the proxy, so all users share one rate-limit bucket. Once it is exhausted the API returns `429`. Restart the server after changing the list. See [Known Proxies](/docs/guides/admin/known-proxies).
 2. **Check for `429` in the backend logs.** Rate-limited responses are not authentication failures, but they interrupt the session.
 3. **Check whether someone changed the password or used Logout All.** Both increment `token_version` and end every session for that login. On a shared login this affects everyone using it — giving each person their own [sub-user](/docs/guides/user/sub-users) avoids it.
 4. **Check backend availability.** The frontend retries a failed profile check a few times before giving up, but a backend that stays unreachable ends with the login screen.

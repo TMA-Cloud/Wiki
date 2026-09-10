@@ -45,6 +45,10 @@ The signed token used to authenticate API requests. Delivered as an httpOnly coo
 
 When a file or folder was last read. Downloads, document opens and share-link reads update it; searching, renaming and viewing Get Info do not. Opening a folder marks the folder, not the files inside it. The value is written at most once per hour per item, so it can lag a read by that much. The [Cloud Drive](#cloud-drive) reports it as the NTFS last-access time. See [Last Access Time](/docs/concepts/file-system#last-access-time).
 
+### Known proxy
+
+A reverse proxy allowed to supply `X-Forwarded-For` and related headers. Entries are stored in `app_settings.known_proxies` as IP addresses, CIDR ranges, or hostnames and loaded when the server starts. See [Known Proxies](/docs/guides/admin/known-proxies).
+
 ### MFA (Multi-Factor Authentication)
 
 Optional second factor (TOTP) on top of the password. Managed per user; admins can enforce it — see [MFA Management](/docs/guides/admin/mfa-management).

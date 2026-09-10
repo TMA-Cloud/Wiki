@@ -428,6 +428,48 @@ Update the max upload size (admin only).
 }
 ```
 
+## Known Proxies Configuration
+
+### GET `/api/user/known-proxies-config`
+
+Get the reverse proxies trusted to supply forwarded client IP headers (admin only).
+
+**Response:**
+
+```json
+{
+  "knownProxies": ["10.1.2.100", "172.18.0.0/16", "proxy.example.com"]
+}
+```
+
+### PUT `/api/user/known-proxies-config`
+
+Replace the known proxy list (admin only).
+
+**Request Body:**
+
+```json
+{
+  "knownProxies": ["10.1.2.100", "proxy.example.com"]
+}
+```
+
+**Validation:**
+
+- `knownProxies`: Required. Array with at most 100 entries.
+- Each entry must be an IP address, CIDR range, or hostname with at most 253 characters.
+
+**Response:**
+
+```json
+{
+  "knownProxies": ["10.1.2.100", "proxy.example.com"],
+  "restartRequired": true
+}
+```
+
+The backend loads this list at startup. Restart every backend instance after an update.
+
 ## Hide File Extensions Configuration
 
 ### GET `/api/user/hide-file-extensions-config`

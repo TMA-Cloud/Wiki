@@ -118,6 +118,7 @@ Application-wide settings.
 | `hide_file_extensions`    | BOOLEAN     | When true, file names are shown without extensions (default false) |
 | `require_electron_client` | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
 | `allow_password_change`   | BOOLEAN     | When true, users may change their own password (default false)     |
+| `known_proxies`           | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart  |
 | `onlyoffice_url`          | TEXT        | OnlyOffice Document Server URL (null = integration off)            |
 | `onlyoffice_jwt_secret`   | TEXT        | Shared secret for signing OnlyOffice payloads                      |
 | `updated_at`              | TIMESTAMPTZ | Default now()                                                      |

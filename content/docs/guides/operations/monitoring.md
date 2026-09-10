@@ -17,7 +17,7 @@ To check the database from outside the app, use `pg_isready` against the Postgre
 
 **Endpoint:** `GET /metrics` — Prometheus text format.
 
-**Access:** restricted to the addresses in `METRICS_ALLOWED_IPS`. The default is loopback only (`127.0.0.1,::ffff:127.0.0.1,::1`), and a request from anywhere else is answered `403 Forbidden` and logged as an unauthorized access attempt. Behind a reverse proxy, `TRUST_PROXY` has to be right or the check sees the proxy's address rather than the caller's.
+**Access:** restricted to the addresses in `METRICS_ALLOWED_IPS`. The default is loopback only (`127.0.0.1,::ffff:127.0.0.1,::1`), and a request from anywhere else is answered `403 Forbidden` and logged as an unauthorized access attempt. Behind a reverse proxy, add that proxy under **Settings** → **Administration** → **Known Proxies** or the check sees the proxy's address rather than the caller's.
 
 ### What is exposed
 
