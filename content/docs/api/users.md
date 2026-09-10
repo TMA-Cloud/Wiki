@@ -155,7 +155,7 @@ Replace a sub-user's permissions. The array is the complete new set, not a delta
 
 ### DELETE `/api/user/sub-users/:id`
 
-Remove a sub-user. Files are not affected — they belong to the owner. The sub-user's sessions and desktop heartbeats are dropped immediately.
+Remove a sub-user. Files are not affected — they belong to the owner. The sub-user's sessions and presence heartbeats are dropped immediately.
 
 **Response:**
 
@@ -551,6 +551,8 @@ List active Electron desktop clients seen in the last 5 minutes (first user/admi
 ### POST `/api/user/client-heartbeat`
 
 Record or refresh an Electron desktop client heartbeat (authenticated users).
+
+This endpoint supplies the desktop rows shown by `GET /api/user/active-clients` and the heartbeat used by Active Sessions. Browser presence uses `POST /api/sessions/heartbeat` instead.
 
 **Request Body:**
 

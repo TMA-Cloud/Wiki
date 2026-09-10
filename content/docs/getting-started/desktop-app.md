@@ -91,9 +91,10 @@ The server URL is embedded at build time only. No config file is needed after in
 
 ## Active desktop clients (admin view)
 
-- Signed-in desktop clients send periodic heartbeats to the backend.
+- Signed-in desktop clients send a heartbeat every two minutes.
 - The admin can view active clients in **Settings → Administration → Active Desktop Clients**.
 - Each row includes user, platform, app version, IP, and last seen time.
+- This admin list excludes browser-session presence rows.
 - Revoking sessions removes related heartbeat rows; stale rows are also purged automatically.
 
 ## Desktop Editing and Open on Desktop (Windows)

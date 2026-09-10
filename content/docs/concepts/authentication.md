@@ -50,10 +50,12 @@ Set `SESSION_IDLE_DAYS` to change the window. See [Environment Variables](/docs/
 
 ### Active Sessions
 
-- View all active sessions
+- View every valid session with device, IP, creation time, and last activity
+- Refresh the list without its two-minute cache to read the latest reported IPs
+- See **Online** only when a session heartbeat arrived in the last three minutes; recent login or request activity alone does not count
 - Revoke individual sessions
 - Logout from all devices
-- Session activity tracking
+- Browser and desktop clients report presence every two minutes while signed in
 
 ## Security Features
 

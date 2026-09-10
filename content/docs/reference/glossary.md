@@ -35,7 +35,7 @@ An OnlyOffice command that tells the document server to flush the current editor
 
 ### Heartbeat
 
-A periodic signal the desktop app (or a long-running client) sends so the server knows the client is still connected. Absence of heartbeats is how stale sessions get cleaned up.
+A presence signal sent every two minutes by a signed-in browser or desktop client. A session is shown as online when its latest heartbeat is less than three minutes old. Missing heartbeats change the displayed status to offline; they do not revoke the session.
 
 ### JWT (JSON Web Token)
 

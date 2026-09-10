@@ -29,7 +29,7 @@ Rate limits are enforced per IP address and/or user for different endpoint types
 - **Purpose:** Limits general API usage. Keying on the user means colleagues sharing an office IP do not share a bucket.
 - **Endpoints:**
   - Public endpoints (e.g. `GET /api/signup-status`).
-  - Authenticated auth and profile endpoints (e.g. `/api/profile`, `/api/sessions`, `/api/mfa/*`, `/api/logout`).
+  - Authenticated auth and profile endpoints (e.g. `/api/profile`, `/api/sessions`, `/api/sessions/heartbeat`, `/api/sessions/offline`, `/api/mfa/*`, `/api/logout`).
   - All file operation endpoints under `/api/files/`.
   - All user management endpoints under `/api/user/` (including `GET /api/user/signup-status`).
   - All version check endpoints under `/api/version/`.

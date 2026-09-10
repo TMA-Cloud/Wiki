@@ -9,7 +9,9 @@ Session management endpoints for TMA Cloud.
 
 ### GET `/api/sessions`
 
-Get all active sessions for authenticated user.
+Get all active sessions for the authenticated user.
+
+Pass `refreshIp=true` to bypass the two-minute session-list cache. The Settings **Refresh** button uses this option.
 
 **Response:**
 
@@ -24,9 +26,41 @@ Get all active sessions for authenticated user.
       "ip_address": "192.168.1.1",
       "created_at": "2024-01-01T00:00:00Z",
       "last_activity": "2024-01-01T12:00:00Z",
+      "is_online": true,
       "isCurrent": true
     }
   ]
+}
+```
+
+- `ip_address` is the latest address observed for the session. A recent heartbeat takes precedence over the stored session address.
+- `is_online` is `true` only when the server received a heartbeat for that session in the last three minutes.
+- Browsers and desktop clients send a heartbeat every two minutes while signed in. A normal page or window exit sends an offline request.
+- `isCurrent` marks the session used for the request.
+
+## Session Presence
+
+### POST `/api/sessions/heartbeat`
+
+Record or refresh the current browser session's presence, IP, and last activity.
+
+**Response:**
+
+```json
+{
+  "ok": true
+}
+```
+
+### POST `/api/sessions/offline`
+
+Remove the current session's presence heartbeat without revoking the session. The client sends this request when its page or window exits.
+
+**Response:**
+
+```json
+{
+  "ok": true
 }
 ```
 
@@ -36,7 +70,7 @@ Get all active sessions for authenticated user.
 
 Revoke a specific session.
 
-When a session is revoked, its matching desktop heartbeat entry is removed from `client_heartbeats`.
+When a session is revoked, its matching presence entries are removed from `client_heartbeats`.
 
 **Response:**
 
@@ -52,7 +86,7 @@ When a session is revoked, its matching desktop heartbeat entry is removed from 
 
 Revoke all other active sessions except the current one.
 
-This also removes other desktop heartbeat entries for the same user.
+This also removes other presence entries for the same user.
 
 **Response:**
 

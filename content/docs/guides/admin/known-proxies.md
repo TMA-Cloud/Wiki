@@ -45,7 +45,7 @@ proxy_set_header Host $host;
 
 ## Verify the Result
 
-After restarting, sign in through the reverse proxy and open **Settings** → **Security** → **Active Sessions**. The IP should be the client address. New session and heartbeat records use the corrected address; existing records are not rewritten.
+After restarting, sign in through the reverse proxy and open **Settings** → **Security** → **Active Sessions**, then click **Refresh**. The IP should be the client address. Authenticated requests and heartbeats update an existing session's stored IP, so an online device does not need to sign in again.
 
 ## Related Topics
 

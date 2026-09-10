@@ -22,7 +22,7 @@ Overall security architecture and practices in TMA Cloud.
 
 ### Session Security
 
-- **Active Session Management:** View and revoke sessions
+- **Active Session Management:** View device, current reported IP, heartbeat-based online status, and revoke sessions
 - **Logout All:** Invalidate all tokens
 - **Idle Expiry:** Sessions end after an inactivity window (30 days by default)
 - **CSRF:** State-changing requests must carry `X-Requested-With: XMLHttpRequest`, Checkout [API Overview](/docs/api/overview#csrf-header)

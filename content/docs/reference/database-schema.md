@@ -136,7 +136,7 @@ Active user sessions.
 | `user_id`       | TEXT        | FK → users.id                           |
 | `token_version` | INTEGER     | Token version when created              |
 | `user_agent`    | TEXT        | Browser user agent                      |
-| `ip_address`    | INET        | Client IP                               |
+| `ip_address`    | INET        | Latest client IP observed on a request  |
 | `created_at`    | TIMESTAMPTZ | Default now()                           |
 | `last_activity` | TIMESTAMPTZ | Default now() (updates on each request) |
 
@@ -163,21 +163,23 @@ Codes are stored hashed, never in plain text, so a lost code cannot be recovered
 
 ### `client_heartbeats`
 
-Active Electron desktop client heartbeat records.
+Browser-session presence and Electron desktop client heartbeat records.
 
-| Column         | Type         | Description                     |
-| -------------- | ------------ | ------------------------------- |
-| `id`           | VARCHAR(64)  | Primary key                     |
-| `user_id`      | VARCHAR(255) | FK → users.id                   |
-| `session_id`   | VARCHAR(255) | JWT session ID (nullable)       |
-| `app_version`  | VARCHAR(64)  | Electron app version            |
-| `platform`     | VARCHAR(64)  | Client platform (`win32`, etc.) |
-| `user_agent`   | TEXT         | Electron request user agent     |
-| `ip_address`   | VARCHAR(45)  | Client IP                       |
-| `last_seen_at` | TIMESTAMPTZ  | Last heartbeat timestamp        |
-| `created_at`   | TIMESTAMPTZ  | First heartbeat timestamp       |
+| Column         | Type         | Description                         |
+| -------------- | ------------ | ----------------------------------- |
+| `id`           | VARCHAR(64)  | Primary key                         |
+| `user_id`      | VARCHAR(255) | FK → users.id                       |
+| `session_id`   | VARCHAR(255) | JWT session ID (nullable)           |
+| `app_version`  | VARCHAR(64)  | Electron version or `web`           |
+| `platform`     | VARCHAR(64)  | `win32`, another platform, or `web` |
+| `user_agent`   | TEXT         | Client request user agent           |
+| `ip_address`   | VARCHAR(45)  | Client IP                           |
+| `last_seen_at` | TIMESTAMPTZ  | Last heartbeat timestamp            |
+| `created_at`   | TIMESTAMPTZ  | First heartbeat timestamp           |
 
 **Indexes:** `user_id`, `last_seen_at`
+
+The Active Sessions list treats a session as online only when a matching row was seen in the last three minutes. Browser presence rows use `web` for `app_version` and `platform`; the Active Desktop Clients admin list excludes them.
 
 ### `audit_log`
 

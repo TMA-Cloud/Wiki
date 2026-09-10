@@ -59,8 +59,9 @@ A job that is still running when its interval comes round again is skipped rathe
 
 #### Heartbeat Cleanup
 
-- Purges desktop client heartbeats older than 10 minutes
-- This is what makes `GET /api/user/active-clients` reflect who is actually connected
+- Purges browser and desktop heartbeat rows older than 10 minutes
+- Active Sessions does not wait for cleanup: it marks a session offline after three minutes without a heartbeat
+- `GET /api/user/active-clients` returns recent desktop rows and excludes browser presence rows
 
 ### Access Time Writer
 
