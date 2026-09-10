@@ -81,6 +81,10 @@ An optional separate domain you can point at `/s/*` routes, so share links don't
 
 A public URL (e.g. `https://example.com/s/abc123`) that lets anyone with the link view or download a file or folder, without a TMA Cloud account.
 
+### Shared at (`shared_at`)
+
+When a file or folder most recently joined a share. It is shown under **Shared** in Get Info. Re-sharing an active item keeps the value; unsharing clears it. Items inside a shared folder receive their own value when they join that share.
+
 ### Signup control
 
 The admin toggle that decides whether new accounts can be created. See [Signup Control](/docs/guides/admin/signup-control).

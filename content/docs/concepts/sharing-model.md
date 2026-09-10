@@ -99,9 +99,13 @@ A background job removes expired share links from the database. It runs once at 
 ### Viewing Shares
 
 - Go to the **Shared** section in the file manager
-- Active links show the green share icon
+- Active links show the green share icon with a compact countdown in days, hours, or minutes
+- Links with no expiration show `∞` beside the share icon
 - Expired links show a red clock icon and "Link expired" label
+- **Get Info** shows when the item was shared, the remaining duration, and the exact expiration time
 - Copy share links from the share modal
+
+The shared time is set when an item joins a share. Re-sharing an active item keeps that time. Unsharing clears it, and sharing the item again starts a new time. Descendants of a shared folder and items added to it later receive their own shared time.
 
 ### Revoking Shares
 

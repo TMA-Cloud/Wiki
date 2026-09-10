@@ -24,6 +24,7 @@ File system architecture and organization in TMA Cloud.
 - **Path:** The storage key, not a user-visible path
 - **User ID:** The account the item belongs to
 - **Last Access Time:** When the item was last read (`accessed_at`), shown in the UI as "Last opened"
+- **Shared At:** When the item most recently became shared (`shared_at`); null while the item is not shared
 
 ## File Operations
 

@@ -59,7 +59,8 @@ Files and folders.
 | `parent_id`       | TEXT        | FK → files.id (null for root)                         |
 | `path`            | TEXT        | S3 object key. Null for folders                       |
 | `starred`         | BOOLEAN     | Default false                                         |
-| `shared`          | BOOLEAN     | Default false; true while an active share link exists |
+| `shared`          | BOOLEAN     | Default false; true while the item belongs to a share |
+| `shared_at`       | TIMESTAMPTZ | When the item joined a share; null when not shared    |
 | `deleted_at`      | TIMESTAMPTZ | Soft delete timestamp                                 |
 | `modified`        | TIMESTAMPTZ | Last modification time, not null, default now()       |
 | `created_at`      | TIMESTAMPTZ | Row creation time, not null, default now()            |
@@ -71,7 +72,7 @@ Files and folders.
 
 Name search is backed by trigram GIN indexes from `pg_trgm` (`name`, `lower(name)`) and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
 
-**The three timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
+**File timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. `shared_at` is set when an item joins a share and cleared when it is unshared. Re-sharing an active item does not change it. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
 
 **`accessed_at` precision:** The value is written at most once per hour per item, so it can lag a read by up to that long. This follows NTFS, which guarantees its last-access time only to within an hour, and Linux's `relatime`. Writes are buffered in memory and flushed in batches, so a read never waits on the update. See [File System](/docs/concepts/file-system#last-access-time).
 

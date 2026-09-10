@@ -60,13 +60,18 @@ An array of file and folder objects.
     "mimeType": "application/pdf",
     "parentId": "folder_456",
     "starred": false,
+    "shared": true,
     "modified": "2024-01-01T00:00:00Z",
-    "accessedAt": "2024-01-02T09:15:00Z"
+    "accessedAt": "2024-01-02T09:15:00Z",
+    "sharedAt": "2024-01-03T10:30:00Z",
+    "expiresAt": "2024-01-10T10:30:00Z"
   }
 ]
 ```
 
 **`accessedAt`:** When the item was last read. Listing a folder updates that folder's own `accessedAt`, not the entries returned. The value is approximate — it is written at most once per hour per item and may lag by the cache TTL of this response. See [File System](/docs/concepts/file-system#last-access-time).
+
+**Share fields:** `sharedAt` is when the item joined a share. `expiresAt` is when access ends, or `null` for a link with no expiration. Both are `null` when `shared` is false. For an item that belongs to more than one share, `expiresAt` is `null` if any link has no expiration; otherwise it is the latest expiration.
 
 ## File Statistics
 
@@ -115,8 +120,11 @@ An array of file and folder objects matching the search query.
     "mimeType": "application/pdf",
     "parentId": "folder_456",
     "starred": false,
+    "shared": true,
     "modified": "2024-01-01T00:00:00Z",
-    "accessedAt": "2024-01-02T09:15:00Z"
+    "accessedAt": "2024-01-02T09:15:00Z",
+    "sharedAt": "2024-01-03T10:30:00Z",
+    "expiresAt": "2024-01-10T10:30:00Z"
   }
 ]
 ```
@@ -564,7 +572,7 @@ List files and folders shared by the current user. Includes share link expiry in
 
 **Response:**
 
-An array of shared file and folder objects. Each object includes `expiresAt` from the associated share link (`null` if the link has no expiration).
+An array of shared file and folder objects. Each object includes `sharedAt` and `expiresAt`. `expiresAt` is `null` if the link has no expiration.
 
 ```json
 [
@@ -578,6 +586,7 @@ An array of shared file and folder objects. Each object includes `expiresAt` fro
     "shared": true,
     "modified": "2024-01-01T00:00:00Z",
     "accessedAt": "2024-01-02T09:15:00Z",
+    "sharedAt": "2024-01-03T10:30:00Z",
     "expiresAt": "2024-01-08T00:00:00Z"
   }
 ]
@@ -769,6 +778,9 @@ Get basic metadata for a single file or folder.
   "size": 1024,
   "modified": "2024-01-01T00:00:00Z",
   "accessedAt": "2024-01-02T09:15:00Z",
+  "shared": true,
+  "sharedAt": "2024-01-03T10:30:00Z",
+  "expiresAt": "2024-01-10T10:30:00Z",
   "parentId": "folder_456"
 }
 ```
@@ -795,6 +807,8 @@ Get basic metadata for a single file or folder.
 - `size` and `folderInfo.totalSize` are in bytes.
 - For folders, `size` may be `null`; use `folderInfo.totalSize` for the recursive size.
 - `accessedAt` is the last read time. Calling this endpoint does not update it.
+- `sharedAt` is when the item joined a share.
+- `expiresAt` is the effective share expiration, or `null` when the item is unshared or at least one associated link has no expiration.
 
 **Errors:**
 

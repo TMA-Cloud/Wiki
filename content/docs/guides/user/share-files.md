@@ -54,8 +54,11 @@ Re-sharing an already-shared file lets you change the expiry.
 ### Viewing Shares
 
 - Go to **"Shared"** section
-- Active links show the green share icon
+- Active links show the green share icon with the remaining time: days, hours, or minutes
+- Links with no expiration show `∞` beside the share icon
 - Expired links show a red clock icon and "Link expired" label
+
+Open **Get Info** on a shared file or folder to see when it was shared, how much time remains, and the exact expiration time. A link with no expiration shows **Never expires**.
 
 ### Copying Links
 
