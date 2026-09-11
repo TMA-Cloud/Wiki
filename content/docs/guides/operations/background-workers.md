@@ -7,13 +7,9 @@ Background services and workers in TMA Cloud.
 
 ## Overview
 
-TMA Cloud uses background workers for asynchronous processing and maintenance tasks.
+TMA Cloud uses one standalone worker process for audit writes, large file-tree operations, scheduled maintenance, admin-requested orphan work, and OnlyOffice force-save commands. Jobs are stored in PostgreSQL by pg-boss, so schedules and retries survive process restarts.
 
-## Workers
-
-### Audit Worker
-
-**Purpose:** Process audit events asynchronously
+## Background Worker
 
 **Command:**
 
@@ -23,59 +19,60 @@ npm run worker
 
 **Configuration:**
 
-- `AUDIT_WORKER_CONCURRENCY` - Concurrent events processed
-- `AUDIT_JOB_TTL_SECONDS` - Job TTL
+- `AUDIT_WORKER_CONCURRENCY` - Audit batch size and concurrency cap. OnlyOffice force-save concurrency is capped at four.
+- `AUDIT_JOB_TTL_SECONDS` - Audit job TTL.
 
-**Important:** Must run in production. Audit events queued but not written until processed.
+The worker must run in production. Without it, queued audit events and large file operations are not processed, maintenance does not run, and open OnlyOffice documents do not receive periodic force-save commands.
 
-### Cleanup Services
+### Queues
 
-All four run inside the main application process, not the audit worker. Each runs once at startup and then on its own interval.
+| Queue                    | Work                                                               |
+| ------------------------ | ------------------------------------------------------------------ |
+| `audit-events`           | Validates audit events and inserts each fetched batch in one query |
+| `background-maintenance` | Runs singleton cleanup jobs                                        |
+| `onlyoffice-forcesave`   | Sends force-save commands with per-document ordering               |
+| `orphan-maintenance`     | Runs admin-requested orphan scans and selected cleanup             |
+| `file-operations`        | Moves, restores, or permanently deletes large trees                |
 
-| Job                | Interval | What it removes                                          |
-| ------------------ | -------- | -------------------------------------------------------- |
-| Trash cleanup      | 24 hours | Files trashed more than 15 days ago                      |
-| Audit log cleanup  | 24 hours | `audit_log` rows older than 30 days                      |
-| Share link cleanup | 7 days   | Share links whose `expires_at` has passed                |
-| Heartbeat cleanup  | 1 hour   | `client_heartbeats` rows not seen in the last 10 minutes |
+Failed jobs retry with backoff. Queue policies prevent the same scheduled maintenance task or document force-save from running concurrently.
 
-A job that is still running when its interval comes round again is skipped rather than started twice.
+### Maintenance Schedule
 
-#### Trash Cleanup
+Schedules use UTC.
 
-- Deletes rows where `deleted_at` is more than 15 days old
-- Removes the stored object as well as the database row
+| Job                | Schedule        | What it removes                                          |
+| ------------------ | --------------- | -------------------------------------------------------- |
+| Trash cleanup      | Daily at 02:00  | Files trashed more than 15 days ago                      |
+| Audit log cleanup  | Daily at 02:15  | `audit_log` rows older than 30 days                      |
+| Share link cleanup | Sunday at 03:00 | Share links whose `expires_at` has passed                |
+| Heartbeat cleanup  | Hourly          | `client_heartbeats` rows not seen in the last 10 minutes |
+| Quota reservations | Hourly at :30   | Expired `storage_reservations` rows                      |
 
-#### Audit Log Cleanup
+Trash is read in batches of 500. Stored objects are deleted with the S3 multi-object API before their database rows are removed. One run is capped by batch count and runtime; if work remains, the worker queues another slice. If object deletion fails, the rows remain for retry.
 
-- Calls the `cleanup_old_audit_logs(30)` PostgreSQL function
-- The deleted count is logged, so the retention window is visible in the logs
+Move-to-trash, restore, and permanent-delete requests stay synchronous for trees up to 1,000 items. Larger trees use `file-operations`. Empty Trash always uses the queue. The web request counts the tree but does not load every descendant or storage key into application memory.
 
-#### Share Link Cleanup
+Audit retention deletes at most 10,000 rows per database call and at most 20 batches per scheduled run. This bounds locks and WAL volume while allowing later runs to continue a large backlog.
 
-- Deletes expired share links (`expires_at < NOW()`)
-- Sets `shared = false` on files that no longer have an active share link
-- Invalidates related caches after cleanup
+Share cleanup updates file sharing state and invalidates related caches. Heartbeat cleanup removes stale browser and desktop presence rows; Active Sessions marks a session offline after three minutes without waiting for cleanup.
 
-#### Heartbeat Cleanup
+Quota reservation cleanup deletes at most 1,000 rows per database call and at most 100 batches per run. Reservations normally disappear in the operation's metadata transaction; expiry cleanup covers interrupted processes.
 
-- Purges browser and desktop heartbeat rows older than 10 minutes
-- Active Sessions does not wait for cleanup: it marks a session offline after three minutes without a heartbeat
-- `GET /api/user/active-clients` returns recent desktop rows and excludes browser presence rows
+Orphan jobs are not scheduled and never delete anything unless the first user selects entries. A scan stages paged storage inventory in a temporary database table; cleanup re-verifies selected entries before batching storage and database deletes.
 
-### Access Time Writer
+### OnlyOffice Force-Save
 
-**Purpose:** Write buffered `accessed_at` timestamps to the `files` table
+Opening an editable document creates one durable pg-boss schedule for its document key. The default interval is five minutes. The worker calls the OnlyOffice `/command` service, and the callback streams the returned document through encryption to object storage. Closing the document removes its schedule; an OnlyOffice response that says the document is no longer open also removes it.
 
-Runs inside the main application process, not as a separate worker. Reads are recorded in memory and written in one batched statement every `ACCESS_TIME_FLUSH_SECONDS` (default 10). Each item is written at most once per `ACCESS_TIME_WINDOW_MINUTES` (default 60), so the write volume is set by the flush interval rather than by request traffic.
+`ONLYOFFICE_AUTOSAVE_INTERVAL_MS` is optional. Omit it to use five minutes. See [OnlyOffice API](/docs/api/onlyoffice#auto-save).
 
-**Configuration:**
+## Process-Local Services
 
-- `ACCESS_TIME_TRACKING` - Set to `0` to disable
-- `ACCESS_TIME_WINDOW_MINUTES` - Per-item suppression window
-- `ACCESS_TIME_FLUSH_SECONDS` - Buffer flush interval
+These remain in the main application because they own HTTP-process state:
 
-Buffered timestamps are written on shutdown. A failed flush is logged at `warn` with the message `[AccessTime] Failed to flush access times` and does not affect the request that triggered it. See [Last Access Time](/docs/concepts/file-system#last-access-time).
+- Access times are buffered from requests and flushed in one statement every `ACCESS_TIME_FLUSH_SECONDS`.
+- Audit queue gauges are refreshed for the Prometheus registry exposed by that process.
+- Redis pub/sub, SSE keepalives, and rate-limit timers stay with the web process.
 
 ## Running Workers
 
@@ -85,13 +82,13 @@ Buffered timestamps are written on shutdown. A failed flush is logged at `warn` 
 # Terminal 1 - Main application
 npm start
 
-# Terminal 2 - Audit worker (required)
+# Terminal 2 - Background worker (required)
 npm run worker
 ```
 
 ### Docker
 
-The audit worker runs as its own container, sharing the app image:
+The worker runs as its own container and shares the app image:
 
 ```bash
 docker compose up -d
@@ -100,24 +97,10 @@ docker compose up -d
 
 ## Monitoring Workers
 
-### Monitoring Audit Worker
-
-- Check logs for processing status
-- Monitor queue size
-- Verify events being written
-
-### Monitoring Cleanup Services
-
-- Check logs for cleanup operations
-- Monitor disk space
-- Verify cleanup schedules
-
-## Best Practices
-
-- Always run audit worker in production
-- Monitor worker health
-- Check logs regularly
-- Verify background tasks completing
+- Check `docker compose logs -f worker` or the worker process logs.
+- Monitor `audit_queue_depth` and `audit_queue_failed_depth`.
+- Check recent rows in the pg-boss job table for `background-maintenance`, `file-operations`, `orphan-maintenance`, and `onlyoffice-forcesave` failures.
+- Verify cleanup counts and OnlyOffice command errors in worker logs.
 
 ## Related Topics
 

@@ -35,7 +35,7 @@ To check the database from outside the app, use `pg_isready` against the Postgre
 | `audit_processing_duration_seconds` | Histogram | Per-event processing time                                     |
 | `audit_last_processed_timestamp`    | Gauge     | Staleness — alert when the gap from now grows                 |
 
-The two gauges are refreshed every 30 seconds from the pg-boss job table.
+The two gauges are refreshed every 60 seconds by default from one aggregate query against the pg-boss job table. Scraping `/metrics` returns the latest values without starting another database count. Change the interval with `QUEUE_METRICS_INTERVAL_SECONDS`.
 
 ### What is not exposed
 
@@ -43,7 +43,7 @@ There are no HTTP request counters, latency histograms, error-rate metrics, cach
 
 ## Suggested Alerts
 
-- `audit_queue_depth` above a few hundred and climbing — the audit worker is not running
+- `audit_queue_depth` above a few hundred and climbing — the background worker is not running
 - `time() - audit_last_processed_timestamp` above a few minutes — same signal, from the other direction
 - `audit_queue_failed_depth` greater than zero — events are being lost
 - `/health` not answering `200` — the process is down

@@ -25,6 +25,8 @@ User accounts and sub-users.
 | `token_version`                 | INTEGER     | Token version for revocation, default 1                      |
 | `last_token_invalidation`       | TIMESTAMP   | Last token invalidation time                                 |
 | `storage_limit`                 | BIGINT      | Storage limit (nullable, bytes)                              |
+| `storage_used`                  | BIGINT      | Account usage counter in bytes, default 0                    |
+| `storage_reserved`              | BIGINT      | Bytes reserved by in-progress object operations, default 0   |
 | `parent_user_id`                | TEXT        | Account owner for sub-users (null for owners), FK → users.id |
 | `permissions`                   | TEXT[]      | Granted permissions for sub-users, default `{}`              |
 | `created_at`                    | TIMESTAMPTZ | Default now()                                                |
@@ -44,33 +46,55 @@ User accounts and sub-users.
 
 **Indexes:** Partial index on `parent_user_id` where `parent_user_id IS NOT NULL`
 
+### `storage_reservations`
+
+Short-lived quota reservations for object-store work that cannot hold a database transaction open.
+
+| Column       | Type        | Description              |
+| ------------ | ----------- | ------------------------ |
+| `id`         | TEXT        | Primary key              |
+| `user_id`    | TEXT        | FK → users.id            |
+| `bytes`      | BIGINT      | Reserved plaintext bytes |
+| `purpose`    | TEXT        | Operation label          |
+| `expires_at` | TIMESTAMPTZ | Worker cleanup deadline  |
+| `created_at` | TIMESTAMPTZ | Default now()            |
+
+Statement-level insert and delete triggers maintain `users.storage_reserved`. The worker removes expired rows hourly in bounded batches.
+
 ### `files`
 
 Files and folders.
 
-| Column            | Type        | Description                                           |
-| ----------------- | ----------- | ----------------------------------------------------- |
-| `id`              | TEXT        | Primary key                                           |
-| `name`            | TEXT        | Not null                                              |
-| `type`            | TEXT        | 'file' or 'folder'                                    |
-| `size`            | BIGINT      | File size in bytes (null for folders)                 |
-| `mime_type`       | TEXT        | MIME type                                             |
-| `user_id`         | TEXT        | FK → users.id, the account the row belongs to         |
-| `parent_id`       | TEXT        | FK → files.id (null for root)                         |
-| `path`            | TEXT        | S3 object key. Null for folders                       |
-| `starred`         | BOOLEAN     | Default false                                         |
-| `shared`          | BOOLEAN     | Default false; true while the item belongs to a share |
-| `shared_at`       | TIMESTAMPTZ | When the item joined a share; null when not shared    |
-| `deleted_at`      | TIMESTAMPTZ | Soft delete timestamp                                 |
-| `modified`        | TIMESTAMPTZ | Last modification time, not null, default now()       |
-| `created_at`      | TIMESTAMPTZ | Row creation time, not null, default now()            |
-| `accessed_at`     | TIMESTAMPTZ | Last read time, not null, default now()               |
-| `dek_wrapped`     | BYTEA       | Wrapped per-file data key (DEK); null for folders     |
-| `dek_kek_version` | INTEGER     | Version of the KEK the DEK is wrapped under           |
+| Column                   | Type        | Description                                           |
+| ------------------------ | ----------- | ----------------------------------------------------- |
+| `id`                     | TEXT        | Primary key                                           |
+| `name`                   | TEXT        | Not null                                              |
+| `type`                   | TEXT        | 'file' or 'folder'                                    |
+| `size`                   | BIGINT      | File size in bytes (null for folders)                 |
+| `mime_type`              | TEXT        | MIME type                                             |
+| `user_id`                | TEXT        | FK → users.id, the account the row belongs to         |
+| `parent_id`              | TEXT        | FK → files.id (null for root)                         |
+| `path`                   | TEXT        | S3 object key. Null for folders                       |
+| `starred`                | BOOLEAN     | Default false                                         |
+| `shared`                 | BOOLEAN     | Default false; true while the item belongs to a share |
+| `shared_at`              | TIMESTAMPTZ | When the item joined a share; null when not shared    |
+| `deleted_at`             | TIMESTAMPTZ | Soft delete timestamp                                 |
+| `modified`               | TIMESTAMPTZ | Last modification time, not null, default now()       |
+| `created_at`             | TIMESTAMPTZ | Row creation time, not null, default now()            |
+| `accessed_at`            | TIMESTAMPTZ | Last read time, not null, default now()               |
+| `dek_wrapped`            | BYTEA       | Wrapped per-file data key (DEK); null for folders     |
+| `dek_kek_version`        | INTEGER     | Version of the KEK the DEK is wrapped under           |
+| `aggregate_size`         | BIGINT      | Total bytes below a folder; zero for files            |
+| `aggregate_file_count`   | INTEGER     | Descendant file count maintained for folders          |
+| `aggregate_folder_count` | INTEGER     | Descendant folder count maintained for folders        |
 
-**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, `dek_kek_version` for encrypted files (used by key rotation), plus several partial indexes supporting trash listing and the recursive folder CTEs.
+**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, `dek_kek_version` for encrypted files, `(deleted_at, id)` for bounded trash cleanup, covering indexes for active-file statistics and storage-usage reconciliation, and folder-list page indexes for name, modified time, last access, and effective size.
 
-Name search is backed by trigram GIN indexes from `pg_trgm` (`name`, `lower(name)`) and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
+**Hierarchy constraint:** `files_parent_not_self` rejects a row whose `parent_id` equals its own `id`. Move operations also reject indirect descendant cycles, and recursive reads keep a visited-ID path so legacy bad data cannot loop forever.
+
+**Triggers:** `files_storage_insert`, `files_storage_update`, and `files_storage_delete` update the account owner's `storage_used` counter once per statement from transition tables. `files_aggregate_insert`, `files_aggregate_update`, and `files_aggregate_delete` adjust ancestor folder totals when a row is inserted, moved, resized, changes type, or is removed.
+
+Name search is backed by a trigram GIN index from `pg_trgm` on `lower(name)` and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
 
 **File timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. `shared_at` is set when an item joins a share and cleared when it is unshared. Re-sharing an active item does not change it. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
 
@@ -130,15 +154,15 @@ The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `
 
 Active user sessions.
 
-| Column          | Type        | Description                             |
-| --------------- | ----------- | --------------------------------------- |
-| `id`            | TEXT        | Primary key                             |
-| `user_id`       | TEXT        | FK → users.id                           |
-| `token_version` | INTEGER     | Token version when created              |
-| `user_agent`    | TEXT        | Browser user agent                      |
-| `ip_address`    | INET        | Latest client IP observed on a request  |
-| `created_at`    | TIMESTAMPTZ | Default now()                           |
-| `last_activity` | TIMESTAMPTZ | Default now() (updates on each request) |
+| Column          | Type        | Description                            |
+| --------------- | ----------- | -------------------------------------- |
+| `id`            | TEXT        | Primary key                            |
+| `user_id`       | TEXT        | FK → users.id                          |
+| `token_version` | INTEGER     | Token version when created             |
+| `user_agent`    | TEXT        | Browser user agent                     |
+| `ip_address`    | INET        | Latest client IP observed on a request |
+| `created_at`    | TIMESTAMPTZ | Default now()                          |
+| `last_activity` | TIMESTAMPTZ | Default now()                          |
 
 **Indexes:** `(user_id, created_at DESC)`, `(user_id, token_version)`, `last_activity`
 
@@ -205,9 +229,9 @@ Audit trail events.
 
 `user_id` is always the login that acted. For a sub-user, `account_owner_id` is the owner whose files were touched; for an owner the two match.
 
-**Indexes:** `(user_id, created_at DESC)` where `user_id IS NOT NULL`, `(account_owner_id, created_at DESC)`, `action`, `created_at DESC`, `request_id`, `(resource_type, resource_id)` where both are set, `(created_at DESC, action, error_message)` where status is `failure` or `error`, and a GIN index on `metadata` using `jsonb_path_ops`.
+**Indexes:** `(user_id, created_at DESC)` where `user_id IS NOT NULL`, `(account_owner_id, created_at DESC)`, `action`, `created_at DESC`, `request_id`, `(resource_type, resource_id)` where both are set, and `(created_at DESC, action, error_message)` where status is `failure` or `error`. There is no general `metadata` GIN index; application queries use the indexed columns, avoiding the write cost of maintaining an index for administrative JSON searches.
 
-**Retention:** rows older than 30 days are removed by the `cleanup_old_audit_logs(30)` function, called by a cleanup job every 24 hours.
+**Retention:** rows older than 30 days are removed by the daily 02:15 UTC worker job. `cleanup_old_audit_logs(30)` deletes at most 10,000 rows per call, and one job processes at most 20 batches.
 
 ## Views
 
@@ -239,6 +263,10 @@ LIMIT 100;
 
 pg-boss job queue tables (managed automatically).
 
+### `bulk_import_items`
+
+Durable rollback records used by the administrative bulk-import scripts. Each row records the import run, created file or folder ID, storage key when present, item type, and tree depth. A completed import removes its rows. A failed import consumes them in batches, deleting files before folders.
+
 ### `migrations`
 
 Migration tracking.
@@ -247,6 +275,8 @@ Migration tracking.
 | ------------ | ------------ | ------------- |
 | `version`    | VARCHAR(255) | Primary key   |
 | `applied_at` | TIMESTAMPTZ  | Default now() |
+
+Applied versions are not run again. Changes needed by an existing installation must be shipped in a new forward migration rather than only editing an older file.
 
 ## Relationships
 
@@ -300,8 +330,7 @@ SELECT * FROM files
 WHERE user_id = $1 AND deleted_at IS NULL
   AND (
     lower(name) LIKE lower($2) || '%'
-    OR (lower(name) LIKE '%' || lower($2) || '%'
-        AND similarity(lower(name), lower($2)) > 0.15)
+    OR lower(name) % lower($2)
   )
 ORDER BY
   CASE

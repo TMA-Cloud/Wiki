@@ -9,7 +9,7 @@ Storage limits and management in TMA Cloud.
 
 - **S3:** Files stored in S3-compatible object storage. Object keys stored in database.
 - Set the bucket endpoint, name, and credentials (see [Environment Variables](/docs/reference/environment-variables)). Missing or incomplete configuration stops backend startup.
-- Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage.
+- Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage. Bulk deletion uses the S3 multi-object API in batches of up to 1,000 keys.
 
 ## Storage Limits
 
@@ -21,7 +21,7 @@ Storage limits and management in TMA Cloud.
 
 ### Storage Calculation
 
-- **Files:** Sum of all file sizes
+- **Files:** The account owner's `users.storage_used` counter tracks the sum of all file sizes
 - **Folders:** Counted as 0 bytes
 - **Trash:** Counted until permanently deleted
 
@@ -29,7 +29,8 @@ Storage limits and management in TMA Cloud.
 
 ### Tracking
 
-- Real-time usage calculation (sum of file sizes in DB)
+- Reads are constant-time from `users.storage_used`; statement-level database triggers update the counter after file inserts, updates, and deletes
+- Upload and replacement transactions lock the account row before checking quota. Long object-store copies reserve their bytes first and release the reservation in the metadata transaction, so concurrent API instances cannot approve the same free space twice.
 - **S3:** Total = per-user limit or null (Unlimited). Free = limit − used or null. No disk.
 - Visual charts and indicators; per-user usage statistics
 
@@ -51,7 +52,7 @@ This ensures that guessing or enumerating file IDs does not grant access to anot
 
 ## File Encryption
 
-Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`), which splits each object into 1 MB segments, each with its own authentication tag. Each file has its own random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps the DEK, and the wrapped DEK is stored on the file's database row.
+Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`), which splits each object into 1 MB segments, each with its own authentication tag. Each newly encrypted object version receives a random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps the DEK, and the wrapped DEK is stored on the file's database row.
 
 ### Behavior
 
@@ -65,8 +66,11 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 - **Read/Write:** All file operations use streaming (S3 object keys)
 - **Upload:** Files streamed from client to storage (S3: multipart upload when needed)
 - **Download:** Files streamed from storage to client (S3: GetObject stream); supports HTTP `Range` for partial reads
-- **Copy:** Files streamed from source to destination (S3: stream copy with re-encrypt)
+- **Copy:** The object store copies ciphertext directly. Objects up to 5 GiB use one copy request; larger objects use bounded multipart copy. A logical copy reuses the source object's wrapped DEK because its ciphertext is unchanged.
+- **Deep copies:** The recursive plan is kept in a PostgreSQL temporary table. The application reads one cursor page at a time and copies at most four objects concurrently.
 - **Share:** Share link downloads use the same bucket object keys and streaming decryption
+- **Folder ZIP:** Authenticated and public-share folder archives read database cursor pages and append one decrypted file stream at a time.
+- **OnlyOffice save:** A callback writes to a new object key, rechecks replacement quota under row locks, commits the metadata swap, then removes the old object. A rejected or failed save leaves the old version intact.
 
 ### Key Configuration
 
@@ -104,7 +108,8 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 An orphan is either an object in storage that no `files` row points at, or a `files` row whose stored object is missing. Both are reported by an on-demand scan.
 
-- Scanning is read-only and makes a single pass over the bucket, with no per-row HEAD requests. Memory is bounded by the number of database rows, not the number of stored objects.
+- Scanning is read-only and makes a single paged pass over the bucket. Each storage page is staged in a temporary PostgreSQL table, so application memory is bounded to one storage page plus the capped report.
+- Scan and delete work runs on the standalone worker. The API queues the job and the admin client polls its status.
 - A grace window (1 hour minimum, 24 hours default, 1 year maximum) hides anything younger on either side, so an upload or paste still in progress is never reported.
 - Row age comes from `files.created_at`, not `files.modified`, because uploads and copies preserve the client's original mtime.
 - Deletion is itemised. Every entry is re-verified against the database and the storage timestamp at the moment of deletion, so a stale scan cannot remove a live file.

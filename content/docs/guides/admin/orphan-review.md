@@ -20,7 +20,7 @@ Nothing is deleted automatically. The scan is read-only and only the first user 
 2. Find **Orphaned files**
 3. Click **Review orphans**
 
-The scan runs when the modal opens and whenever you change the grace window or click **Rescan**.
+The scan is queued on the background worker when the modal opens and whenever you change the grace window or click **Rescan**. The screen waits for the job and shows the result when it finishes.
 
 ## Grace Window
 
@@ -51,7 +51,7 @@ Each category reports at most 2000 entries per scan. When there are more, a noti
 2. Click **Delete N selected**
 3. Click **Confirm delete N**
 
-Deletion is limited to 500 entries per category per request.
+Deletion is queued on the background worker in batches of at most 500 entries per category. The screen waits for each batch and reports overall progress.
 
 Every entry is re-verified at the moment of deletion, so a scan you have had open for hours cannot destroy a live file:
 
@@ -59,6 +59,8 @@ Every entry is re-verified at the moment of deletion, so a scan you have had ope
 - A row is skipped if it no longer exists, if it does not map to a storage key, if it was created inside the grace window, or if its object exists again.
 
 Skipped entries are listed after the delete with the reason each one was kept. Caches for affected users are invalidated automatically.
+
+If the worker is stopped, new scans and deletes stay queued and the screen eventually reports a timeout. Start the worker and retry.
 
 ## Audit Trail
 

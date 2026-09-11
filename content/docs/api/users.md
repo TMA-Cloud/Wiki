@@ -11,11 +11,16 @@ User management endpoints for TMA Cloud.
 
 ### GET `/api/user/all`
 
-List all users (admin only). Sub-users are listed after the owner they belong to.
+List users one account page at a time (admin only). Every returned owner is followed by all sub-users belonging to that account.
+
+**Query Parameters:**
+
+- `limit` - Number of owner accounts, from 1 to 100 (optional, defaults to 50)
+- `cursor` - Opaque `nextCursor` from the previous response
 
 **Response:**
 
-An object containing an array of all user objects.
+An object containing the current account page and the next cursor. `nextCursor` is `null` after the final page.
 
 ```json
 {
@@ -32,7 +37,8 @@ An object containing an array of all user objects.
       "parentUserId": null,
       "permissions": null
     }
-  ]
+  ],
+  "nextCursor": "eyJjcmVhdGVkQXQiOiIyMDI0LTAxLTAxVDAwOjAwOjAwLjAwMFoiLCJpZCI6InVzZXJfMTIzIn0"
 }
 ```
 
@@ -608,11 +614,23 @@ First user (admin) only. Any other caller receives `403 Only the first user can 
 
 ### GET `/api/user/orphans`
 
-Scan storage and the database for orphans. Read-only; nothing is deleted.
+Queue a read-only storage/database scan on the background worker. Nothing is deleted.
 
 **Query Parameters:**
 
 - `graceMinutes`: Optional. Integer between 60 and 525600 (1 year). Defaults to 1440 (24 hours). Items younger than this are held back on both sides so in-flight uploads are never reported.
+- `jobId`: Poll a scan started by an earlier request. Do not send it with `graceMinutes`.
+
+**Initial response (202):**
+
+```json
+{
+  "jobId": "2b9eec75-29a7-4aeb-a177-a52d4c497f2a",
+  "status": "created"
+}
+```
+
+Poll `GET /api/user/orphans?jobId=<jobId>`. A running job returns `202`; a completed job returns the report below.
 
 **Response:**
 
@@ -670,7 +688,7 @@ Scan storage and the database for orphans. Read-only; nothing is deleted.
 
 ### POST `/api/user/orphans/delete`
 
-Delete the orphans named in the request. Each entry is re-verified against the database and storage before removal; entries that no longer qualify come back as skipped with a reason.
+Queue deletion of the named orphans on the background worker. Each entry is re-verified against the database and storage before removal; entries that no longer qualify come back as skipped with a reason.
 
 **Request Body:**
 
@@ -689,6 +707,8 @@ Delete the orphans named in the request. Each entry is re-verified against the d
 - `graceMinutes`: Optional. Integer between 60 and 525600. Defaults to 1440.
 
 At least one of `storageKeys` or `fileIds` must be non-empty.
+
+The initial response is `202` with `jobId` and `status`. Poll the same endpoint with `{ "jobId": "..." }`; a running job returns `202`, and a completed job returns the result below.
 
 **Response:**
 
@@ -725,6 +745,7 @@ At least one of `storageKeys` or `fileIds` must be non-empty.
 
 - `400 Select at least one orphan to delete` - Both arrays empty
 - `403 Only the first user can review orphaned files` - Caller is not the first user
+- `503 Background worker queue is unavailable` - The application could not queue the work
 - `422 Validation failed` - Grace window out of range, array over 500 entries, or a non-string entry
 
 ## Related Topics

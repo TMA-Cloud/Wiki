@@ -68,11 +68,12 @@ Configure a required S3-compatible bucket using R2, RustFS, or AWS environment v
 
 ## Logging Configuration
 
-| Variable              | Required | Default                          | Description                                        |
-| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `LOG_FORMAT`          | No       | `json` (prod), `pretty` (dev)    | Log format (json, pretty)                          |
-| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`                   |
+| Variable                         | Required | Default                          | Description                                        |
+| -------------------------------- | -------- | -------------------------------- | -------------------------------------------------- |
+| `LOG_LEVEL`                      | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
+| `LOG_FORMAT`                     | No       | `json` (prod), `pretty` (dev)    | Log format (json, pretty)                          |
+| `METRICS_ALLOWED_IPS`            | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`                   |
+| `QUEUE_METRICS_INTERVAL_SECONDS` | No       | `60`                             | Audit queue gauge refresh interval                 |
 
 ## Audit Logging Configuration
 
@@ -80,6 +81,14 @@ Configure a required S3-compatible bucket using R2, RustFS, or AWS environment v
 | -------------------------- | -------- | ------------- | --------------------------------- |
 | `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Concurrent audit events processed |
 | `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)           |
+
+## OnlyOffice Background Save
+
+| Variable                          | Required | Default  | Description                |
+| --------------------------------- | -------- | -------- | -------------------------- |
+| `ONLYOFFICE_AUTOSAVE_INTERVAL_MS` | No       | `300000` | Worker force-save interval |
+
+Omit this variable to keep the five-minute default. See [Environment Variables](/docs/reference/environment-variables#onlyoffice-background-save) for accepted overrides.
 
 ## Last Access Time
 

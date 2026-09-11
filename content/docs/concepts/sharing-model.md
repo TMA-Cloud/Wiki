@@ -28,6 +28,7 @@ Share links provide public access to files and folders without requiring authent
 ## Accessing Shared Content
 
 - A shared folder opens a listing page. Files download on click. Subfolders open in place, with a breadcrumb back to the shared root.
+- Large public folders load in stable folder-first pages as the visitor scrolls; the page does not use Previous/Next controls.
 - A single-file share opens a landing page with the file name, size, and a download button.
 - Each folder page has a **Download all** action that zips the current folder.
 - Only items linked to the share are reachable. Browsing a folder that is not part of the share returns **404 Not Found**, even with a valid token.
@@ -92,7 +93,7 @@ Re-sharing an existing link updates its expiry to the newly selected value.
 
 ### Auto-Cleanup
 
-A background job removes expired share links from the database. It runs once at server startup and then every 7 days. Cleanup deletes the `share_links` and `share_link_files` rows and sets `shared = false` on files that no longer have an active share link.
+A worker job removes expired share links every Sunday at 03:00 UTC. Cleanup deletes the `share_links` and `share_link_files` rows and sets `shared = false` on files that no longer have an active share link.
 
 ## Share Management
 

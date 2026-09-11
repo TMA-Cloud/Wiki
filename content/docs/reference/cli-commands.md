@@ -23,13 +23,13 @@ npm run dev
 
 Start application in development mode with hot reload.
 
-### Audit Worker
+### Background Worker
 
 ```bash
 npm run worker
 ```
 
-Start the audit event processing worker (required in production).
+Start the audit, maintenance, and OnlyOffice job worker (required in production).
 
 ### Development Worker
 
@@ -37,7 +37,7 @@ Start the audit event processing worker (required in production).
 npm run dev:worker
 ```
 
-Start audit worker in development mode with hot reload.
+Start the background worker in development mode with hot reload.
 
 ### Tests
 
@@ -186,7 +186,9 @@ node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR
 
 - Preserves folder structure; invalid file names are sanitized with a warning.
 - Enforces per-user storage limit and max file size (checked before any upload).
-- Preserves file and folder modification times (mtime). On first error, S3 script rolls back created folders and uploaded files.
+- Scans the source twice: the first pass checks sizes and quota, and the second creates folders and uploads files. It does not keep the full file tree in memory.
+- Finalizes uploaded file metadata in batches of 250, with bounded upload concurrency and one quota lock per batch.
+- Preserves file and folder modification times (mtime). Created rows and storage keys are recorded in `bulk_import_items` in the same database transaction as their metadata. On the first error, rollback reads that manifest in batches and deletes files before folders.
 
 ### Migrate to streaming encryption (one-time)
 

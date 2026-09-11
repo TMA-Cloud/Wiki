@@ -66,7 +66,7 @@ All incoming data from clients is strictly validated and sanitized on the backen
 
 - **Algorithm:** AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`)
 - **Segmented:** Objects are split into 1 MB segments, each authenticated on its own. This lets downloads serve HTTP `Range` requests without reading the whole file
-- **Envelope keys:** Each file has its own random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps it. Rotating the KEK rewraps the stored DEKs without re-encrypting the objects
+- **Envelope keys:** Each newly encrypted object version receives a random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps it. A server-side logical copy reuses unchanged ciphertext and its wrapped DEK. Rotating the KEK rewraps stored DEKs without re-encrypting objects
 - **Scope:** Stored file contents in the S3-compatible bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
 - **Stream Processing:** Memory-efficient for large files

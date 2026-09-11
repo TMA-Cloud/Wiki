@@ -31,7 +31,7 @@ A new file exported from an existing one — e.g. saving a `.docx` as `.pdf` fro
 
 ### Forcesave
 
-An OnlyOffice command that tells the document server to flush the current editor state to storage immediately, rather than waiting for the user to close the document. TMA Cloud triggers a forcesave every 30 seconds while a document is open.
+An OnlyOffice command that tells the document server to flush the current editor state to storage without closing the document. TMA Cloud schedules a forcesave every five minutes by default while a document is open, and the background worker sends it.
 
 ### Heartbeat
 
@@ -71,7 +71,7 @@ One capability a sub-user can be granted: `files.download`, `files.upload`, `fil
 
 ### pg-boss
 
-The PostgreSQL-backed job queue used for background work (audit event writes, trash cleanup). You don't interact with it directly; it runs inside the backend process.
+The PostgreSQL-backed job queue used for audit writes, large file-tree operations, maintenance, orphan review, and OnlyOffice force-save commands. The web process submits jobs and maintains schedules; the standalone worker executes them.
 
 ### Share domain
 

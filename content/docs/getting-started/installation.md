@@ -39,7 +39,7 @@ Start all services
 docker compose up -d
 ```
 
-This starts: **app** (main API), **postgres**, **redis**, and **worker** (audit processor). Access at `http://localhost:3000` (or your `BPORT`).
+This starts: **app** (main API), **postgres**, **redis**, and **worker** (audit, maintenance, and OnlyOffice jobs). Access at `http://localhost:3000` (or your `BPORT`).
 
 Verify
 
@@ -137,7 +137,7 @@ npm run build
 cd backend
 npm start
 
-# Terminal 2 - Audit Worker (required)
+# Terminal 2 - Background Worker (required)
 cd backend
 npm run worker
 ```
@@ -174,7 +174,7 @@ Access at `http://localhost:5173`
 
 **OnlyOffice:** Configure via Settings page (admin-only). Requires `BACKEND_URL` environment variable.
 
-**Audit Worker:** Must run `npm run worker` in production. See [Audit Logs Documentation](/docs/guides/operations/audit-logs).
+**Background Worker:** Must run `npm run worker` in production. See [Background Workers](/docs/guides/operations/background-workers).
 
 ## Next Steps
 

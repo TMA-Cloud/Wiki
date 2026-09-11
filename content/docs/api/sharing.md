@@ -13,6 +13,8 @@ Share link endpoints for TMA Cloud.
 
 View a shared file or folder. A folder returns a listing page. A single-file share returns a landing page with a download button.
 
+Folder rows are returned in keyset pages of 100 and the page loads the next set automatically near the end of the list. A client sending `Accept: application/json` receives `{ items, nextCursor }`; pass that opaque value back as `?cursor=`. `limit` may be 1–200.
+
 **Validation:**
 
 - `token`: Required. Must be a non-empty string.
@@ -26,6 +28,8 @@ View a shared file or folder. A folder returns a listing page. A single-file sha
 ### GET `/s/:token/folder/:id`
 
 Browse a subfolder inside a shared folder. Returns the listing page for that folder. The folder must be part of the share.
+
+The same `cursor`, `limit`, and JSON response behavior used by the root folder applies here.
 
 **Validation:**
 

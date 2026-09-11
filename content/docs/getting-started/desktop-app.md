@@ -117,7 +117,7 @@ When you run the Windows desktop app, you can open supported files in their desk
 - The desktop app downloads an encrypted copy of the file to a temporary location (or reuses a copy for large files when the cloud version is unchanged).
 - The file is opened using the default application registered in Windows (for example, Word, Excel, PowerPoint, or another associated editor).
 - While the file is open, the desktop app watches it for changes.
-- When you press **Save** in the desktop editor, the updated content is uploaded back to TMA Cloud in the background.
+- When you press **Save** in the desktop editor, the app waits for 1.5 seconds without another file-change event, hashes the final content, and uploads it back to TMA Cloud in the background. A save that arrives during an upload is queued for another check.
 - The same file entry is updated (ID stays the same); the modified time and size reflect the new version.
 
 If you open a document and close it without saving, no upload is performed and the stored version is unchanged.
@@ -164,9 +164,9 @@ The Windows desktop app uses a single Copy / Cut / Paste model that bridges the 
 
 - **Copy:** Right-click one or more items → **Copy**. The selection goes to the in-app clipboard immediately so you can paste it into another folder inside TMA Cloud, and (in the desktop app) it is also written to the Windows clipboard in the background so you can paste in Explorer. Files larger than 200 MB total and folders are kept on the in-app clipboard only — those still paste between folders in TMA Cloud, but Explorer pastes are skipped. The toast tells you which path applied.
 - **Cut:** Right-click → **Cut**. In-app only. Cut items show a Windows-Explorer-style faded look until paste completes.
-- **Paste:** Right-click in a folder → **Paste**. If you copied or cut something inside TMA Cloud, the cloud clipboard is used (server-side copy/move — no re-upload). Otherwise files on the Windows clipboard are uploaded into the current folder. If you copy something in Explorer after a cloud Copy, Paste detects the change and uses the newer Windows-clipboard files instead.
+- **Paste:** Right-click in a folder → **Paste**. If you copied or cut something inside TMA Cloud, the cloud clipboard is used (server-side copy/move — no re-upload). Otherwise physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC. If you copy something in Explorer after a cloud Copy, Paste detects the change and uses the newer Windows-clipboard files instead.
 
-The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference").
+The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference"). Virtual OLE files have no disk path, so Electron extracts them in the main process and uploads them from bounded memory without writing a plaintext upload file to `%TEMP%` or sending file data through renderer IPC. Their limit is 50 MB per file and 100 MB total. The backend still performs the normal streaming encryption before object storage.
 
 ### Keyboard Shortcuts
 

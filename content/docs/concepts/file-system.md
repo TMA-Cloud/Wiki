@@ -45,13 +45,16 @@ File system architecture and organization in TMA Cloud.
 - **Streaming:** Files streamed without loading into memory
 - **Upload:** Files encrypted and streamed directly to the bucket
 - **Download:** Files streamed from storage to client; single-file downloads support HTTP `Range` (partial content) for seeking
-- **ZIP Archives:** Files streamed into archive without buffering
+- **ZIP Archives:** Archive entries are read through a database cursor and streamed one at a time, keeping database pages and open storage streams bounded
 - **Rename:** Change file/folder names
 
 ### Performance
 
 - Streaming prevents memory exhaustion for large files (>1GB)
 - Rename operations update database metadata without moving stored objects
+- Copy operations use server-side object-store copy with four transfers at most; folder trees are read once and inserted in batches
+- File lists use stable cursor batches and load continuously as the user scrolls. Only visible grid/list rows plus a small overscan are rendered
+- Folder sizes and descendant counts are maintained by database triggers. Size sorting uses those stored totals and the matching page-order index instead of walking a folder tree during a listing
 - No file size limits imposed by memory constraints
 
 ### Path Management
@@ -105,7 +108,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 ### File Encryption
 
 - Files encrypted with AES-256-GCM in Google Tink's AES-GCM-HKDF-STREAMING format (the `AES256_GCM_HKDF_1MB` scheme)
-- Each file is encrypted under its own random data key (DEK). `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps the DEK; the wrapped DEK and its KEK version are stored on the file's database row
+- Each newly encrypted object version uses a random data key (DEK). `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps the DEK; a server-side logical copy reuses the source ciphertext and wrapped DEK
 - Each object has a 40-byte header (a random salt and nonce prefix) followed by 1 MB segments, each sealed with its own authentication tag. The per-file encryption key is derived from the DEK with HKDF-SHA256
 - Segments make stored objects seekable: a download serves an HTTP `Range` request by fetching and decrypting only the overlapping segments, so a large file opens without reading all of it
 - Automatic decryption on download
@@ -138,7 +141,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 - PostgreSQL pg_trgm extension for fuzzy text matching
 - GIN index on file names for fast searches
 - Prefix matching for short queries
-- Similarity-based matching for longer queries
+- Indexed trigram matching for longer queries
 - Real-time search results
 - User-scoped searches
 

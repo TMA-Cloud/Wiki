@@ -35,7 +35,7 @@ Pass `refreshIp=true` to bypass the two-minute session-list cache. The Settings 
 
 - `ip_address` is the latest address observed for the session. A recent heartbeat takes precedence over the stored session address.
 - `is_online` is `true` only when the server received a heartbeat for that session in the last three minutes.
-- Browsers and desktop clients send a heartbeat every two minutes while signed in. A normal page or window exit sends an offline request.
+- Browsers and desktop clients send a heartbeat every two minutes while signed in and visible. Hidden pages pause heartbeats and mark their presence offline; becoming visible starts it again. A normal page or window exit also sends an offline request.
 - `isCurrent` marks the session used for the request.
 
 ## Session Presence

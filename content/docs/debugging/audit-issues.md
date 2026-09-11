@@ -11,13 +11,13 @@ Troubleshooting audit logging problems.
 
 **Check:**
 
-1. Verify audit worker is running: `npm run worker`
+1. Verify the background worker is running: `npm run worker`
 2. Check worker logs for errors
 3. Verify worker in Docker: `docker compose ps`
 
 **Solutions:**
 
-1. Start audit worker: `npm run worker`
+1. Start the background worker: `npm run worker`
 2. Check worker logs
 3. Verify environment variables
 
@@ -31,7 +31,7 @@ Troubleshooting audit logging problems.
 
 **Solutions:**
 
-1. Restart audit worker
+1. Restart the background worker
 2. Check database connection
 3. Verify `AUDIT_WORKER_CONCURRENCY` setting
 
@@ -43,7 +43,7 @@ Troubleshooting audit logging problems.
 
 ```sql
 SELECT * FROM pgboss.job
-WHERE name = 'audit-log' AND state = 'created'
+WHERE name = 'audit-events' AND state IN ('created', 'retry')
 ORDER BY createdon DESC;
 ```
 

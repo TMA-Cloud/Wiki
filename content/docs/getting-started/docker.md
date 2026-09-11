@@ -55,7 +55,7 @@ Starts four services:
 - **App** (`tma-cloud-app`) - Main application
 - **PostgreSQL** (`tma-cloud-postgres`) - Database
 - **Redis** (`tma-cloud-redis`) - Caching layer
-- **Worker** (`tma-cloud-worker`) - Audit event processor (required)
+- **Worker** (`tma-cloud-worker`) - Audit, maintenance, and OnlyOffice background jobs (required)
 
 Access at `http://localhost:3000` (or configured `BPORT`).
 

@@ -72,34 +72,35 @@ Troubleshooting OnlyOffice integration problems.
 
 ### Changes Not Saving Until Close
 
-**Expected behavior:** Documents save to storage every 30 seconds while being edited.
+**Expected behavior:** Documents save to storage every five minutes by default while being edited.
 
 **Check:**
 
-1. Backend logs show `[ONLYOFFICE-AUTOSAVE] Auto-save started` when document is opened
-2. Backend logs show `[ONLYOFFICE-AUTOSAVE] Triggering forcesave` every 30 seconds
+1. The background worker is running: `npm run worker` or `docker compose ps worker`
+2. The `onlyoffice-forcesave` queue has a schedule for the document key
 3. Callback logs show status 6 with `forcesavetype: 0`
 
-**If no auto-save logs appear:**
+**If no schedule appears:**
 
-1. Verify `onlyofficeAutoSave.js` is loaded (check for import errors on startup)
-2. Check that document registration runs in viewer/config controllers
+1. Check app logs for `[ONLYOFFICE-AUTOSAVE] Failed to schedule document`
+2. Verify PostgreSQL and the pg-boss schema are reachable from the app
+3. Open the document again after resolving the queue error
 
-**If forcesave commands fail silently:**
+**If force-save jobs fail:**
 
-1. Check OnlyOffice URL is correct and reachable from the backend
+1. Check the OnlyOffice URL is correct and reachable from the worker
 2. If OnlyOffice uses HTTPS with a self-signed certificate, verify `rejectUnauthorized: false` is set in the request options
 3. Check OnlyOffice container logs: `docker logs onlyoffice_documentserver`
 
 **If forcesave commands return non-200:**
 
 1. Status 403: JWT secret mismatch between backend and OnlyOffice server
-2. Status 404: Wrong command service URL (should be `/coauthoring/CommandService.ashx`)
-3. Check backend logs for `[ONLYOFFICE-AUTOSAVE] Forcesave command failed` with status code
+2. Status 404 on both `/command` and `/coauthoring/CommandService.ashx`: The proxy is not exposing the command service
+3. Check worker logs and failed jobs in the `onlyoffice-forcesave` queue
 
 ### Auto-Save Running After Document Closed
 
-**Cause:** Callback with status 2 or 4 was not received, so the document was not unregistered.
+**Cause:** Callback with status 2 or 4 was not received, so the document schedule was not removed. A later force-save response reporting that the document is closed also removes it.
 
 **Check:**
 
@@ -113,7 +114,7 @@ Troubleshooting OnlyOffice integration problems.
 
 **Check:**
 
-1. Backend logs for `[ONLYOFFICE-AUTOSAVE] Request error` or `Forcesave command failed`
+1. Failed jobs in the `onlyoffice-forcesave` queue and worker logs
 2. OnlyOffice JWT secret matches between backend settings and OnlyOffice server config
 3. OnlyOffice server is accessible from the backend host (not just from the browser)
 

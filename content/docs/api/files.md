@@ -5,7 +5,7 @@ description: 'File management endpoints for TMA Cloud.'
 
 File management endpoints for TMA Cloud.
 
-**Note:** All endpoints that accept `ids` arrays process multiple files in bulk operations. This includes move, copy, star, share, delete, restore, and download operations.
+**Note:** All endpoints that accept `ids` arrays process multiple files in bulk operations. This includes move, copy, star, share, delete, restore, and download operations. One request accepts at most 500 IDs; split larger selections into batches.
 
 ## Account Scope and Permissions
 
@@ -43,8 +43,12 @@ List files and folders.
 - `parentId` - Parent folder ID (optional)
 - `sortBy` - Sort field: `name`, `size`, `modified`, `accessedAt`, `deletedAt` (optional, defaults to `modified`)
 - `order` - Sort order: `asc`, `desc` (optional, defaults to `desc`)
+- `limit` - Page size from 1 to 500 (optional, defaults to 200)
+- `cursor` - Opaque value from the previous response's `X-Next-Cursor` header
 
 Any other `sortBy` value is ignored and the default is used. `deletedAt` is only meaningful on `/api/files/trash`.
+
+Pagination uses a stable folder-first cursor rather than row offsets. If another page exists, the response includes `X-Next-Cursor`; send that value unchanged as `cursor`. The web file list loads the next batch automatically near the bottom, keeps earlier items available, and renders only visible rows, so there are no Previous/Next pages. Size sorting uses exact folder totals maintained when files change and remains paginated.
 
 **Response:**
 
@@ -231,7 +235,7 @@ Upload a file.
 
 - The stored MIME type is detected from the file's content (magic bytes), not the filename or the client-sent `Content-Type` as both of which can lie. When the content is not recognisable, the client-sent type is kept.
 - A mismatch between content and extension never rejects the upload so all files are stored.
-- Downloads are always served as attachments with `X-Content-Type-Options: nosniff`, so a file whose content does not match its extension cannot be run by the browser.
+- Normal downloads are served as attachments. The authenticated image viewer can request `inline=1`; the server permits inline delivery only for a detected image type that is not executable content.
 
 **Duplicate names:** If a file with the same name already exists in the parent folder, the server assigns a unique display name (e.g. `document (1).pdf`). The client can instead overwrite the existing file by calling `POST /api/files/:id/replace` with the existing file's ID.
 
@@ -441,6 +445,8 @@ List all starred files and folders.
 
 - `sortBy` - Sort field (optional)
 - `order` - Sort order (optional)
+- `limit` - Page size from 1 to 500 (optional, defaults to 200)
+- `cursor` - Value from the previous `X-Next-Cursor` response header
 
 **Response:**
 
@@ -569,6 +575,8 @@ List files and folders shared by the current user. Includes share link expiry in
 
 - `sortBy` - Sort field (optional)
 - `order` - Sort order (optional)
+- `limit` - Page size from 1 to 500 (optional, defaults to 200)
+- `cursor` - Value from the previous `X-Next-Cursor` response header
 
 **Response:**
 
@@ -639,6 +647,8 @@ Move one or more files/folders to the trash.
 
 **Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
+If the selected roots contain more than 1,000 items, Move to Trash returns `202` with `queued: true` and a `jobId`; the `file-operations` worker completes it.
+
 ## Get Trash
 
 ### GET `/api/files/trash`
@@ -649,6 +659,8 @@ List all files and folders currently in the trash.
 
 - `sortBy` - Sort field (optional)
 - `order` - Sort order (optional)
+- `limit` - Page size from 1 to 500 (optional, defaults to 200)
+- `cursor` - Value from the previous `X-Next-Cursor` response header
 
 **Response:**
 
@@ -697,6 +709,8 @@ Restore one or more files/folders from the trash.
 
 **Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
+If the selected roots contain more than 1,000 items, Restore returns `202` with `queued: true` and a `jobId`; the `file-operations` worker completes it.
+
 ## Permanent Delete
 
 ### POST `/api/files/trash/delete`
@@ -725,6 +739,8 @@ Permanently delete one or more files/folders from the trash. This action is irre
 
 **Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
+If the selected roots contain more than 1,000 items, Permanent Delete returns `202` with `queued: true` and a `jobId`; the `file-operations` worker completes it.
+
 ## Empty Trash
 
 ### POST `/api/files/trash/empty`
@@ -735,11 +751,13 @@ Permanently delete all files and folders in the trash.
 
 ```json
 {
-  "message": "Deleted 5 file(s) from trash"
+  "message": "Deletion of 5 item(s) queued",
+  "queued": true,
+  "jobId": "..."
 }
 ```
 
-**Note:** If trash is already empty, returns: `{"message": "Trash is already empty"}`
+The worker deletes storage objects and database rows in batches. If the queue is unavailable, this endpoint returns `503` instead of doing the full purge in the web request. If trash is already empty, it returns `{"message": "Trash is already empty"}`.
 
 ## Download File
 
@@ -750,6 +768,10 @@ Download a single file or a folder (folders are returned as a ZIP archive).
 **Validation:**
 
 - `id`: Required. Must be a string.
+
+**Query Parameters:**
+
+- `inline=1` - Display a safe image inline. Other file types remain attachments.
 
 **Response:**
 The raw file content or a ZIP archive.

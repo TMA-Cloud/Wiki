@@ -99,9 +99,9 @@ backend/
 - **Controllers:** Handle HTTP requests and business logic
 - **Middleware:** Auth, error handling, rate limiting, share domain blocking
 - **Models:** Database abstraction layer
-- **Services:** Background processes (cleanup, scanning, audit logging, access time writes, OnlyOffice auto-save)
-- **Caching:** Redis-based caching with automatic invalidation
-- **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting
+- **Services:** pg-boss producers, worker tasks, access-time buffering, metrics, and storage operations
+- **Caching:** Redis-based caching with short-lived prefix registries for invalidation; request handlers never scan the Redis keyspace
+- **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting; a burst for one user is published as one batch envelope and causes one list refresh
 
 ## Frontend Structure
 
@@ -266,7 +266,7 @@ See [Database Schema](/docs/reference/database-schema) for details.
 ## Logging & Audit
 
 - **Structured Logging:** Pino with automatic secret masking
-- **Audit Trail:** Queue-based system (pg-boss) with async worker
+- **Background Work:** One pg-boss worker handles batched audit writes, durable maintenance schedules, admin-requested orphan work, and OnlyOffice force-save commands
 - **Request Logging:** All requests logged with context
 
 See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/operations/audit-logs) for details.

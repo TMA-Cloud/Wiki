@@ -107,20 +107,29 @@ Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** 
 
 **Note:** From backend, `npm run s3:protect-all` applies bucket protections (public access block, HTTPS-only policy, versioning, optional encryption, lifecycle). Lifecycle aborts incomplete multipart after 1 day and deletes noncurrent versions after 7 days. Review orphans periodically from **Settings** → **Administration**; see [Orphan Review](/docs/guides/admin/orphan-review).
 
+## OnlyOffice Background Save
+
+| Variable                          | Required | Default  | Description                              |
+| --------------------------------- | -------- | -------- | ---------------------------------------- |
+| `ONLYOFFICE_AUTOSAVE_INTERVAL_MS` | No       | `300000` | Interval for worker force-save schedules |
+
+The variable is an optional application override. Do not set it when the five-minute default is suitable. Valid overrides are 1-60 whole minutes that divide evenly into an hour; invalid values use five minutes. The standalone worker must be running for scheduled force-save commands.
+
 ## Logging Configuration
 
-| Variable              | Required | Default                          | Description                                        |
-| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `LOG_FORMAT`          | No       | `json` (prod), `pretty` (dev)    | Log format (json, pretty)                          |
-| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`   |
+| Variable                         | Required | Default                          | Description                                        |
+| -------------------------------- | -------- | -------------------------------- | -------------------------------------------------- |
+| `LOG_LEVEL`                      | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
+| `LOG_FORMAT`                     | No       | `json` (prod), `pretty` (dev)    | Log format (json, pretty)                          |
+| `METRICS_ALLOWED_IPS`            | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`   |
+| `QUEUE_METRICS_INTERVAL_SECONDS` | No       | `60`                             | Audit queue gauge refresh interval (minimum 10)    |
 
 ## Audit Logging Configuration
 
-| Variable                   | Required | Default       | Description                       |
-| -------------------------- | -------- | ------------- | --------------------------------- |
-| `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Concurrent audit events processed |
-| `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)           |
+| Variable                   | Required | Default       | Description                                 |
+| -------------------------- | -------- | ------------- | ------------------------------------------- |
+| `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Audit batch size and worker concurrency cap |
+| `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)                     |
 
 ## Last Access Time
 

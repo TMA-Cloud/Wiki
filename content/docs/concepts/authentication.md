@@ -52,7 +52,7 @@ Set `SESSION_IDLE_DAYS` to change the window. See [Environment Variables](/docs/
 
 - View every valid session with device, IP, creation time, and last activity
 - Refresh the list without its two-minute cache to read the latest reported IPs
-- See **Online** only when a session heartbeat arrived in the last three minutes; recent login or request activity alone does not count
+- See **Online** only when a visible page or desktop window sent a session heartbeat in the last three minutes; hidden pages pause heartbeats, and recent request activity alone does not count
 - Revoke individual sessions
 - Logout from all devices
 - Browser and desktop clients report presence every two minutes while signed in

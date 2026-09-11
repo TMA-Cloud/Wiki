@@ -15,6 +15,8 @@ Manage users in TMA Cloud (admin only).
 
 Sub-users appear in this list under the account they belong to. The list also reports `parentUserId` and, for sub-users, their granted permissions.
 
+Accounts load automatically in cursor batches as you scroll. Each batch keeps an owner and all of its sub-users together; there are no Previous/Next controls.
+
 ### Viewing Active Desktop Clients
 
 1. Go to **Settings** → **Administration** (admin only)

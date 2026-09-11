@@ -16,7 +16,7 @@ Configure storage limits for users in TMA Cloud (admin only).
 
 - Set custom limits for specific users
 - **S3:** Only per-user limit enforced; no disk cap.
-- Monitor usage in real-time
+- Monitor usage from the account's database-maintained counter
 
 ## Setting Storage Limits
 
@@ -79,7 +79,8 @@ Enforced on both frontend (before upload starts) and backend (during upload). Th
 
 - Files count toward limit
 - Trash counts until permanently deleted
-- Usage tracked in database
+- Usage tracked by statement-level database triggers
+- Uploads and replacements lock the account row while checking quota, preventing concurrent requests from overshooting a finite limit
 - Cache invalidated on file operations
 
 ## Best Practices

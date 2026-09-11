@@ -18,13 +18,13 @@ AUDIT_WORKER_CONCURRENCY=5  # Concurrent events processed
 AUDIT_JOB_TTL_SECONDS=82800  # Job TTL (must be < 24h)
 ```
 
-### Starting the Audit Worker
+### Starting the Background Worker
 
 ```bash
 npm run worker
 ```
 
-**Important:** Audit events are queued but not written to database until worker processes them. Always keep worker running in production.
+**Important:** Audit events are queued but not written to the database until the worker processes them. The same worker also runs maintenance and OnlyOffice force-save jobs, so keep it running in production.
 
 ## Audit Events
 
@@ -149,6 +149,7 @@ ORDER BY created_at DESC;
 -- Find operations on specific file
 SELECT * FROM audit_log
 WHERE metadata @> '{"fileId": "file_123"}'::jsonb
+  AND created_at >= NOW() - INTERVAL '30 days'
 ORDER BY created_at DESC;
 
 -- Find large file uploads
@@ -156,6 +157,7 @@ SELECT user_id, metadata->>'fileName' as file_name,
        (metadata->>'fileSize')::bigint as size, created_at
 FROM audit_log
 WHERE action = 'file.upload'
+  AND created_at >= NOW() - INTERVAL '30 days'
   AND (metadata->>'fileSize')::bigint > 10485760
 ORDER BY created_at DESC;
 
@@ -166,16 +168,19 @@ SELECT user_id,
        created_at
 FROM audit_log
 WHERE action = 'file.upload.bulk'
+  AND created_at >= NOW() - INTERVAL '30 days'
 ORDER BY created_at DESC;
 ```
 
-## Audit Worker Management
+`metadata` has no general GIN index because the application does not filter on arbitrary JSON fields. Constrain administrative searches by indexed columns such as `action`, `user_id`, `account_owner_id`, or `created_at` before inspecting metadata.
+
+## Background Worker Management
 
 ### Monitor Worker
 
 ```bash
 npm run worker
-# Logs show: "Audit worker started", "Processing audit event: ..."
+# Logs identify the service as "background-worker"
 ```
 
 ### Check Queue Status
@@ -198,7 +203,7 @@ These are the same two counts exposed as the `audit_queue_depth` and `audit_queu
 
 ### Worker Concurrency
 
-Higher values = faster processing but more database connections. Recommended: 5-10.
+Audit deliveries fetched together are validated and inserted in one multi-row statement. Higher values create larger batches and can increase database load. The default is 5; raise it only after measuring a sustained queue backlog.
 
 ## Related Topics
 
