@@ -44,7 +44,7 @@ Troubleshooting audit logging problems.
 ```sql
 SELECT * FROM pgboss.job
 WHERE name = 'audit-events' AND state IN ('created', 'retry')
-ORDER BY createdon DESC;
+ORDER BY created_on DESC;
 ```
 
 **Solutions:**

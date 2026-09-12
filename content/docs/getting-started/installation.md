@@ -39,7 +39,7 @@ Start all services
 docker compose up -d
 ```
 
-This starts: **app** (main API), **postgres**, **redis**, and **worker** (audit, maintenance, and OnlyOffice jobs). Access at `http://localhost:3000` (or your `BPORT`).
+This starts: **app** (main API), **postgres**, **redis**, and **worker** (Worker for background jobs and costly tasks). Access at `http://localhost:3000` (or your `BPORT`).
 
 Verify
 

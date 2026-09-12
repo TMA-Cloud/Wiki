@@ -191,12 +191,12 @@ The queue is named `audit-events`. If you set `PGBOSS_SCHEMA`, substitute it for
 -- View pending jobs
 SELECT * FROM pgboss.job
 WHERE name = 'audit-events' AND state IN ('created', 'retry')
-ORDER BY createdon DESC;
+ORDER BY created_on DESC;
 
 -- View failed jobs
 SELECT * FROM pgboss.job
 WHERE name = 'audit-events' AND state = 'failed'
-ORDER BY createdon DESC LIMIT 100;
+ORDER BY created_on DESC LIMIT 100;
 ```
 
 These are the same two counts exposed as the `audit_queue_depth` and `audit_queue_failed_depth` metrics on `/metrics`.

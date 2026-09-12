@@ -66,11 +66,11 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 - **Read/Write:** All file operations use streaming (S3 object keys)
 - **Upload:** Files streamed from client to storage (S3: multipart upload when needed)
 - **Download:** Files streamed from storage to client (S3: GetObject stream); supports HTTP `Range` for partial reads
-- **Copy:** The object store copies ciphertext directly. Objects up to 5 GiB use one copy request; larger objects use bounded multipart copy. A logical copy reuses the source object's wrapped DEK because its ciphertext is unchanged.
+- **Copy:** Copy runs on the background worker. The object store copies ciphertext directly. Objects up to 5 GiB use one copy request; larger objects use bounded multipart copy. A logical copy reuses the source object's wrapped DEK because its ciphertext is unchanged.
 - **Deep copies:** The recursive plan is kept in a PostgreSQL temporary table. The application reads one cursor page at a time and copies at most four objects concurrently.
 - **Share:** Share link downloads use the same bucket object keys and streaming decryption
 - **Folder ZIP:** Authenticated and public-share folder archives read database cursor pages and append one decrypted file stream at a time.
-- **OnlyOffice save:** A callback writes to a new object key, rechecks replacement quota under row locks, commits the metadata swap, then removes the old object. A rejected or failed save leaves the old version intact.
+- **OnlyOffice save:** A callback writes to a new object key, rechecks replacement quota under row locks, and commits the metadata swap. The old object is then queued for deletion. A rejected or failed save leaves the old version intact and queues any unused new object for deletion.
 
 ### Key Configuration
 
@@ -100,9 +100,10 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 ### Cleanup
 
 - Trash cleanup frees space
-- Automatic background processes handle trash, expired share links, and audit logs
+- Automatic background processes handle trash, expired share links, audit logs, old sessions, expired quota reservations, and expired file-operation results
+- Failed uploads, replacements, and OnlyOffice saves queue unused storage objects for retryable deletion
 - Orphaned files are **not** removed automatically; an admin reviews and deletes them from **Settings** → **Administration** → **Review orphans**
-- **S3:** Upload validation (e.g. `parentId`) runs after stream upload. The controller deletes failed bulk-upload objects when possible, but some rejected uploads can still leave orphan objects behind. Review them periodically.
+- **S3:** Upload validation (e.g. `parentId`) runs after stream upload. Failed bulk-upload and abandoned stream objects are queued for deletion. A process crash can still leave an orphan; review them periodically.
 
 ### Orphans
 

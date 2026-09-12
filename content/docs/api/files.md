@@ -370,9 +370,13 @@ Copy files and/or folders to a different location.
 
 ```json
 {
-  "message": "Files copied successfully."
+  "message": "Copy queued.",
+  "queued": true,
+  "jobId": "34d6ea50-2adb-4e4f-9dce-f97d1ab219db"
 }
 ```
+
+Copy always returns `202`. The `account-file-operations` worker copies the tree and publishes the normal file events after completion. If the queue is unavailable, the endpoint returns `503`.
 
 ## Rename File
 
@@ -602,7 +606,7 @@ An array of shared file and folder objects. Each object includes `sharedAt` and 
 
 ## Progress Streaming
 
-`POST /api/files/delete`, `POST /api/files/trash/restore`, and `POST /api/files/trash/delete` can stream progress for large selections. Send an `Accept: application/x-ndjson` request header and the response is `application/x-ndjson` — one JSON object per line — instead of a single JSON body.
+`POST /api/files/delete` and `POST /api/files/trash/restore` can stream progress for selections that remain in the web process. Send an `Accept: application/x-ndjson` request header and the response is `application/x-ndjson` — one JSON object per line — instead of a single JSON body.
 
 The selected ids are processed in batches. One line is written after each batch completes, followed by a final line:
 
@@ -617,7 +621,7 @@ The selected ids are processed in batches. One line is written after each batch 
 - `done` — the operation finished. Its remaining fields are the same body the endpoint returns without streaming (for example `message`).
 - `error` — the operation failed partway; `message` describes the failure. HTTP status is already `200`, so read the stream to detect this.
 
-Without the `Accept: application/x-ndjson` header, each endpoint returns the single JSON object documented for it below, and the behaviour is unchanged. The batches are not a single transaction: a failure after the first batch leaves earlier batches applied.
+Without the `Accept: application/x-ndjson` header, each endpoint returns the single JSON object documented for it below. Trees over 1,000 items are queued before streaming starts. The streamed batches are not a single transaction: a failure after the first batch leaves earlier batches applied.
 
 ## Delete Files
 
@@ -647,7 +651,7 @@ Move one or more files/folders to the trash.
 
 **Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
-If the selected roots contain more than 1,000 items, Move to Trash returns `202` with `queued: true` and a `jobId`; the `file-operations` worker completes it.
+If the selected roots contain more than 1,000 items, Move to Trash returns `202` with `queued: true` and a `jobId`; the `account-file-operations` worker completes it.
 
 ## Get Trash
 
@@ -709,7 +713,7 @@ Restore one or more files/folders from the trash.
 
 **Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
 
-If the selected roots contain more than 1,000 items, Restore returns `202` with `queued: true` and a `jobId`; the `file-operations` worker completes it.
+If the selected roots contain more than 1,000 items, Restore returns `202` with `queued: true` and a `jobId`; the `account-file-operations` worker completes it.
 
 ## Permanent Delete
 
@@ -733,13 +737,13 @@ Permanently delete one or more files/folders from the trash. This action is irre
 
 ```json
 {
-  "message": "Files permanently deleted."
+  "message": "Permanent deletion queued.",
+  "queued": true,
+  "jobId": "34d6ea50-2adb-4e4f-9dce-f97d1ab219db"
 }
 ```
 
-**Progress streaming:** With an `Accept: application/x-ndjson` request header, progress is streamed line by line. See [Progress Streaming](#progress-streaming).
-
-If the selected roots contain more than 1,000 items, Permanent Delete returns `202` with `queued: true` and a `jobId`; the `file-operations` worker completes it.
+Permanent Delete always returns `202`. The `account-file-operations` worker deletes storage objects and database rows in batches. If the queue is unavailable, the endpoint returns `503`.
 
 ## Empty Trash
 
@@ -757,7 +761,39 @@ Permanently delete all files and folders in the trash.
 }
 ```
 
-The worker deletes storage objects and database rows in batches. If the queue is unavailable, this endpoint returns `503` instead of doing the full purge in the web request. If trash is already empty, it returns `{"message": "Trash is already empty"}`.
+The `account-file-operations` worker deletes storage objects and database rows in batches. If the queue is unavailable, this endpoint returns `503` instead of doing the full purge in the web request. If trash is already empty, it returns `{"message": "Trash is already empty"}`.
+
+## Get Background File Job
+
+### GET `/api/files/jobs/:jobId`
+
+Get the state or result of a queued copy, move-to-trash, restore, permanent-delete, or Empty Trash operation.
+
+The job must belong to the authenticated account. A missing job or a job owned by another account returns `404`.
+
+**Pending response (`202`):**
+
+```json
+{
+  "jobId": "34d6ea50-2adb-4e4f-9dce-f97d1ab219db",
+  "status": "active"
+}
+```
+
+**Completed response (`200`):**
+
+```json
+{
+  "jobId": "34d6ea50-2adb-4e4f-9dce-f97d1ab219db",
+  "status": "completed",
+  "result": {
+    "count": 2,
+    "ids": ["file_789", "file_790"]
+  }
+}
+```
+
+`ids` is present for copy jobs. A failed or cancelled job returns `500`. An invalid job ID returns `400`, and an unavailable queue returns `503`.
 
 ## Download File
 

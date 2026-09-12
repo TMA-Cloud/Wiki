@@ -33,6 +33,7 @@ Organize your files with folders in TMA Cloud.
 - **Copy Option:** Right-click → Copy → Select destination
 - **Bulk Copy:** Select multiple folders and copy together
 - **Recursive:** All contents copied automatically
+- **Background job:** The copy continues on the worker if the request closes
 
 ### Renaming Folders
 

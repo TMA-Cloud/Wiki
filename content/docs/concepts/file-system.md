@@ -52,7 +52,7 @@ File system architecture and organization in TMA Cloud.
 
 - Streaming prevents memory exhaustion for large files (>1GB)
 - Rename operations update database metadata without moving stored objects
-- Copy operations use server-side object-store copy with four transfers at most; folder trees are read once and inserted in batches
+- Copy operations are queued on the background worker, use server-side object-store copy with four transfers at most, and read folder trees once before batched inserts
 - File lists use stable cursor batches and load continuously as the user scrolls. Only visible grid/list rows plus a small overscan are rendered
 - Folder sizes and descendant counts are maintained by database triggers. Size sorting uses those stored totals and the matching page-order index instead of walking a folder tree during a listing
 - No file size limits imposed by memory constraints
@@ -133,6 +133,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 - Trash items deleted after 15 days
 - Background worker handles cleanup
 - Permanent deletion after retention
+- Manual permanent deletion and Empty Trash run on background worker
 
 ## Search
 

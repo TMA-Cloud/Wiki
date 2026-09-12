@@ -5,6 +5,8 @@ description: 'Session management endpoints for TMA Cloud.'
 
 Session management endpoints for TMA Cloud.
 
+Session rows older than 30 days are removed by the daily background maintenance job. Token-version checks still invalidate revoked sessions immediately.
+
 ## Get Sessions
 
 ### GET `/api/sessions`

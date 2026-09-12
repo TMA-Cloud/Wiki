@@ -29,7 +29,7 @@ Start application in development mode with hot reload.
 npm run worker
 ```
 
-Start the audit, maintenance, and OnlyOffice job worker (required in production).
+Worker for background jobs and costly tasks.
 
 ### Development Worker
 

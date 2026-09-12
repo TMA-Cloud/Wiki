@@ -168,6 +168,24 @@ Active user sessions.
 
 A session is invalid once its `token_version` falls behind the user's current one, which is how "logout everywhere" and a password change end every session at once.
 
+**Retention:** rows older than 30 days are removed in bounded batches by the daily 02:45 UTC worker job.
+
+### `file_operation_results`
+
+Idempotency results for durable file operations.
+
+| Column         | Type        | Description                              |
+| -------------- | ----------- | ---------------------------------------- |
+| `job_id`       | UUID        | Primary key; the pg-boss job ID          |
+| `user_id`      | TEXT        | Account that owns the operation          |
+| `task`         | TEXT        | Operation type, currently `copy`         |
+| `output`       | JSONB       | Stable result returned by a worker retry |
+| `completed_at` | TIMESTAMPTZ | Default now()                            |
+
+**Indexes:** `completed_at`
+
+The copy transaction writes its result with the new file rows. If pg-boss retries the same job after that commit, the worker returns this result instead of inserting another copy. Rows older than 30 days are removed in bounded batches by the daily 02:50 UTC worker job.
+
 ### `mfa_backup_codes`
 
 One row per single-use MFA backup code.
@@ -286,6 +304,7 @@ Applied versions are not run again. Changes needed by an existing installation m
 - User → Share Links (one-to-many, CASCADE)
 - Share Link → Files (many-to-many via `share_link_files`)
 - User → Sessions (one-to-many, CASCADE)
+- User → File Operation Results (logical account ownership through `user_id`)
 - User → MFA Backup Codes (one-to-many, CASCADE)
 - User → Client Heartbeats (one-to-many, CASCADE)
 - User → Audit Log (one-to-many, SET NULL — on both `user_id` and `account_owner_id`)

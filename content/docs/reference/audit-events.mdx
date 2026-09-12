@@ -24,11 +24,15 @@ Complete list of audit event types in TMA Cloud.
 - `file.download.bulk` - Multiple files/folders downloaded as ZIP
 - `file.update` - File contents replaced in place, via `POST /api/files/:id/replace` (metadata: `fileName`, `size`)
 - `file.delete` - File moved to trash
-- `file.delete.permanent` - File permanently deleted
+- `file.delete.queued` - Large move-to-trash operation queued
+- `file.delete.permanent` - File permanently deleted by the earlier synchronous flow
+- `file.delete.permanent.queued` - Permanent deletion or Empty Trash operation queued
 - `file.restore` - File restored from trash
+- `file.restore.queued` - Large restore operation queued
 - `file.rename` - File/folder renamed
 - `file.move` - Files/folders moved
-- `file.copy` - Files/folders copied
+- `file.copy` - Files/folders copied by the earlier synchronous flow
+- `file.copy.queued` - File/folder copy operation queued
 - `file.star` - File starred
 - `file.unstar` - File unstarred
 

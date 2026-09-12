@@ -249,7 +249,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 
 ## Database Schema
 
-Key tables: `users`, `files`, `share_links`, `share_link_files`, `sessions`, `mfa_backup_codes`, `client_heartbeats`, `app_settings`, `audit_log`
+Key tables: `users`, `files`, `share_links`, `share_link_files`, `sessions`, `mfa_backup_codes`, `client_heartbeats`, `storage_reservations`, `file_operation_results`, `app_settings`, `audit_log`
 
 See [Database Schema](/docs/reference/database-schema) for details.
 
@@ -266,7 +266,7 @@ See [Database Schema](/docs/reference/database-schema) for details.
 ## Logging & Audit
 
 - **Structured Logging:** Pino with automatic secret masking
-- **Background Work:** One pg-boss worker handles batched audit writes, durable maintenance schedules, admin-requested orphan work, and OnlyOffice force-save commands
+- **Background Work:** One pg-boss worker handles batched audit writes, account-ordered file operations, object cleanup, durable maintenance schedules, admin-requested orphan work, and OnlyOffice force-save commands
 - **Request Logging:** All requests logged with context
 
 See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/operations/audit-logs) for details.
