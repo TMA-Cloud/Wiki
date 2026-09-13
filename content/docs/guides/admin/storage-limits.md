@@ -66,6 +66,8 @@ The maximum size for a single uploaded file. Applies to all users.
 
 Enforced on both frontend (before upload starts) and backend (during upload). The bulk import script also reads this setting from the database.
 
+The backend derives the largest possible encrypted object from this setting and selects a multipart part size that stays within the S3 and R2 limit of 10,000 parts.
+
 ## Limit Enforcement
 
 ### Upload Restrictions

@@ -219,8 +219,9 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 │ Browser  │ ─────────────────────────────> │ Backend  │
 │(FormData)│                                └────┬─────┘
 └──────────┘                                     │
-                                                 │ Validate & save file
-                                                 │ Stream to S3 bucket
+                                                 │ Enforce size while streaming
+                                                 │ Encrypt and write to bucket
+                                                 │ Validate request metadata
                                                  │ Create database record
                                                  │ Update cache
                                                  │
@@ -229,7 +230,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 └─────────┘
 ```
 
-**Storage:** S3-compatible object storage is required. File contents stream to the bucket with encryption.
+**Storage:** S3-compatible object storage is required. File contents stream through encryption to the bucket. Large files use multipart upload with a part size calculated to stay within the S3 and R2 10,000-part limit. If later validation rejects the request, the uploaded object is queued for deletion.
 
 ### Share Link Flow
 

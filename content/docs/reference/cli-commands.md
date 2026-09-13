@@ -81,7 +81,7 @@ Same, with a coverage report in `backend/coverage-integration`.
 npm run test:s3
 ```
 
-Run the storage driver suite against the configured S3 bucket. Requires bucket credentials.
+Run the storage driver suite against the configured S3-compatible bucket. It covers multipart upload, ranged reads, multipart copy, and multi-object deletion. Run it separately with each provider configuration, including R2. Requires bucket credentials.
 
 ```bash
 npm run test:all

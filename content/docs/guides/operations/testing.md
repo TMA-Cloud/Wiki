@@ -153,8 +153,8 @@ createdb tma_cloud_test
 Migrations run against it on the first test run, so the schema matches production. Each
 test starts from a truncated database, an empty in-memory bucket, and a flushed cache.
 
-The S3 suite writes every object under a `tma-test/<run-id>/` prefix and deletes them
-when the run finishes.
+The S3 suite writes every object under a `tma-test/<run-id>/` prefix and deletes the
+prefix objects in a multi-object request when the run finishes.
 
 ## What the Suites Cover
 
@@ -179,8 +179,11 @@ controllers and models, against PostgreSQL and Redis.
 
 ### S3
 
-Upload, multipart upload, copy, delete, stat, pagination, and encryption round trips
-against the configured bucket.
+Single-request and unknown-length multipart uploads, full and ranged reads, atomic and
+multipart copies, single and multi-object deletion, stat, pagination, and encryption
+round trips against the configured bucket. Run it once for each supported provider
+configuration, including R2, because the main integration suite uses an in-memory
+storage double.
 
 ### Frontend
 

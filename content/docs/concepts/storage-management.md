@@ -10,6 +10,8 @@ Storage limits and management in TMA Cloud.
 - **S3:** Files stored in S3-compatible object storage. Object keys stored in database.
 - Set the bucket endpoint, name, and credentials (see [Environment Variables](/docs/reference/environment-variables)). Missing or incomplete configuration stops backend startup.
 - Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage. Bulk deletion uses the S3 multi-object API in batches of up to 1,000 keys.
+- The driver uses operations supported by AWS S3 and Cloudflare R2: `PutObject`, `GetObject`, `HeadObject`, `ListObjectsV2`, `DeleteObject`, `DeleteObjects`, `CopyObject`, and multipart upload and copy operations.
+- A single upload or copy request is limited to 5,000,000,000 bytes. Larger objects use multipart operations, which is the lower portable boundary across AWS S3 and R2.
 
 ## Storage Limits
 
@@ -64,9 +66,9 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 ### File Operations
 
 - **Read/Write:** All file operations use streaming (S3 object keys)
-- **Upload:** Files streamed from client to storage (S3: multipart upload when needed)
+- **Upload:** Files stream from the client through encryption to storage. A known object over 5,000,000,000 bytes uses multipart upload. For an unknown-length encrypted stream, the part size is calculated from the configured maximum upload size.
 - **Download:** Files streamed from storage to client (S3: GetObject stream); supports HTTP `Range` for partial reads
-- **Copy:** Copy runs on the background worker. The object store copies ciphertext directly. Objects up to 5 GiB use one copy request; larger objects use bounded multipart copy. A logical copy reuses the source object's wrapped DEK because its ciphertext is unchanged.
+- **Copy:** Copy runs on the background worker. The object store copies ciphertext directly. Objects up to 5,000,000,000 bytes use one copy request; larger objects use multipart copy. Part size grows with object size so the copy stays within 10,000 parts. A logical copy reuses the source object's wrapped DEK because its ciphertext is unchanged.
 - **Deep copies:** The recursive plan is kept in a PostgreSQL temporary table. The application reads one cursor page at a time and copies at most four objects concurrently.
 - **Share:** Share link downloads use the same bucket object keys and streaming decryption
 - **Folder ZIP:** Authenticated and public-share folder archives read database cursor pages and append one decrypted file stream at a time.
@@ -91,6 +93,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 ### Upload Limits
 
 - **Max upload size:** Per-file size limit, configurable by admin in **Settings** → **Storage** (default 10 GB). Stored in `app_settings.max_upload_size_bytes`. Enforced on frontend (before upload) and backend (during upload).
+- Multipart upload sizing uses the maximum encrypted size derived from this setting. The default multipart part size is 16 MiB, parts are equal-sized except for the last, and the plan may not exceed 10,000 parts.
 - Pre-upload validation (Content-Length check)
 - Final safeguard check (actual file size)
 - Prevents file upload if limit exceeded
