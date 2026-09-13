@@ -9,7 +9,7 @@ Docker deployment guide for TMA Cloud.
 
 - Docker (v29.0+)
 - Docker Compose (v5.0+)
-- Node.js (v25+) - For version extraction during build (only if building from source)
+- Node.js (22, 24, or 26+) - For version extraction during source builds
 
 ## Quick Start
 
@@ -55,7 +55,7 @@ Starts four services:
 - **App** (`tma-cloud-app`) - Main application
 - **PostgreSQL** (`tma-cloud-postgres`) - Database
 - **Redis** (`tma-cloud-redis`) - Caching layer
-- **Worker** (`tma-cloud-worker`) - Worker for background jobs and costly tasks
+- **Worker** (`tma-cloud-worker`) - File operations, maintenance, audit writes, and OnlyOffice saves
 
 Access at `http://localhost:3000` (or configured `BPORT`).
 

@@ -514,11 +514,73 @@ Update the hide file extensions setting (admin only). When true, file names are 
 }
 ```
 
+## Desktop App Only Access Configuration
+
+### GET `/api/user/electron-only-access-config`
+
+Get the desktop-only access setting. Accessible to any authenticated user.
+
+**Response:**
+
+```json
+{
+  "electronOnlyAccess": false
+}
+```
+
+### PUT `/api/user/electron-only-access-config`
+
+Update the desktop-only access setting (admin only). When enabled, the backend blocks browser access to the main app. Share links, `/health`, and `/metrics` remain available.
+
+**Request Body:**
+
+```json
+{
+  "enabled": true
+}
+```
+
+**Validation:**
+
+- `enabled`: Required. Must be a boolean.
+
+**Response:**
+
+```json
+{
+  "electronOnlyAccess": true
+}
+```
+
 ## Password Change Configuration
 
 ### GET `/api/user/password-change-config`
 
 Get the current password change setting. Accessible to any authenticated user (used by the frontend for display).
+
+**Response:**
+
+```json
+{
+  "allowPasswordChange": true
+}
+```
+
+### PUT `/api/user/password-change-config`
+
+Update the password change setting (admin only). When enabled, users can change their password from **Settings** → **Security**.
+
+**Request Body:**
+
+```json
+{
+  "enabled": true
+}
+```
+
+**Validation:**
+
+- `enabled`: Required. Must be a boolean.
 
 **Response:**
 
@@ -581,30 +643,6 @@ This endpoint supplies the desktop rows shown by `GET /api/user/active-clients` 
 ```json
 {
   "ok": true
-}
-```
-
-### PUT `/api/user/password-change-config`
-
-Update the password change setting (admin only). When enabled, users can change their password from **Settings** → **Security**.
-
-**Request Body:**
-
-```json
-{
-  "enabled": true
-}
-```
-
-**Validation:**
-
-- `enabled`: Required. Must be a boolean.
-
-**Response:**
-
-```json
-{
-  "allowPasswordChange": true
 }
 ```
 

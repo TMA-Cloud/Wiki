@@ -62,10 +62,10 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 ## File Storage
 
-| Variable              | Required | Default             | Description                        |
-| --------------------- | -------- | ------------------- | ---------------------------------- |
-| `FILE_ENCRYPTION_KEY` | No       | Development default | Key-encryption key (KEK) for files |
-| `FILE_KEK_VERSION`    | No       | `1`                 | Version of the current KEK         |
+| Variable              | Required         | Default             | Description                        |
+| --------------------- | ---------------- | ------------------- | ---------------------------------- |
+| `FILE_ENCRYPTION_KEY` | Yes (production) | Development default | Key-encryption key (KEK) for files |
+| `FILE_KEK_VERSION`    | No               | `1`                 | Version of the current KEK         |
 
 **Note:** File contents use bounded streaming. The multipart uploader buffers at most four parts per active upload. Per-file size is controlled by the max upload size setting in **Settings** → **Storage**.
 
@@ -109,11 +109,23 @@ Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** 
 
 ## OnlyOffice Background Save
 
-| Variable                          | Required | Default  | Description                              |
-| --------------------------------- | -------- | -------- | ---------------------------------------- |
-| `ONLYOFFICE_AUTOSAVE_INTERVAL_MS` | No       | `300000` | Interval for worker force-save schedules |
+| Variable                          | Required | Default  | Description                                      |
+| --------------------------------- | -------- | -------- | ------------------------------------------------ |
+| `ONLYOFFICE_AUTOSAVE_INTERVAL_MS` | No       | `300000` | Interval for worker force-save schedules         |
+| `ONLYOFFICE_REJECT_UNAUTHORIZED`  | No       | `true`   | Set to `false` for a self-signed OnlyOffice cert |
 
-The variable is an optional application override. Do not set it when the five-minute default is suitable. Valid overrides are 1-60 whole minutes that divide evenly into an hour; invalid values use five minutes. The standalone worker must be running for scheduled force-save commands.
+`ONLYOFFICE_AUTOSAVE_INTERVAL_MS` is optional. Do not set it when the five-minute default is suitable. Valid overrides are 1-60 whole minutes that divide evenly into an hour; invalid values use five minutes. The standalone worker must be running for scheduled force-save commands.
+
+Keep `ONLYOFFICE_REJECT_UNAUTHORIZED` enabled unless the document server uses a self-signed certificate on a trusted network.
+
+## Desktop Development
+
+| Variable                    | Required | Default           | Description                                     |
+| --------------------------- | -------- | ----------------- | ----------------------------------------------- |
+| `TMA_CLOUDFS_EXE`           | No       | Build output path | Cloud Drive host executable override            |
+| `TMA_CLOUD_CLIPBOARD_DEBUG` | No       | `0`               | Set to `1` to log desktop clipboard diagnostics |
+
+These variables affect the Electron client and are not server settings. Clipboard diagnostics can contain local file paths; disable them outside development.
 
 ## Logging Configuration
 

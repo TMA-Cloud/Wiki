@@ -50,13 +50,7 @@ Share domain middleware blocks:
 
 - Separate share traffic from main app
 - Dedicated domain for public links
-- Improved security isolation
-
-### CDN Integration
-
-- Point custom domain to CDN
-- Faster share link delivery
-- Reduced main server load
+- Main application and API routes are blocked on the share domain
 
 ## Related Topics
 

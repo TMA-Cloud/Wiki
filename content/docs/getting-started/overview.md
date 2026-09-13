@@ -1,25 +1,25 @@
 ---
 title: 'Getting Started'
-description: 'Welcome to TMA Cloud! This guide will help you get up and running quickly.'
+description: 'Choose a deployment method and install TMA Cloud.'
 ---
 
-Welcome to TMA Cloud! This guide will help you get up and running quickly.
+Choose a deployment method and install TMA Cloud.
 
 ## What is TMA Cloud?
 
 TMA Cloud is a self-hosted cloud storage platform that provides:
 
-- Secure file storage and management
-- User authentication with MFA support
-- File sharing capabilities
-- Online document editing (OnlyOffice)
-- Comprehensive audit logging
+- AES-256-GCM-encrypted file storage in an S3-compatible bucket
+- A Windows cloud drive and desktop client
+- Read-only share links with expiry controls
+- Document editing through OnlyOffice or desktop applications
+- Sub-users with separate file permissions
 
 ## Prerequisites
 
 Before you begin, ensure you have:
 
-- **Node.js** (v25+)
+- **Node.js** (22, 24, or 26+)
 - **PostgreSQL** (v17+)
 - **Redis** (v6+) - Optional but recommended
 - **npm** or **yarn**

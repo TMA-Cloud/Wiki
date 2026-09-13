@@ -2,40 +2,40 @@ import Link from 'next/link';
 
 const features = [
   {
-    icon: '🔐',
-    title: 'Authentication & Security',
-    desc: 'JWT-based authentication with optional Google OAuth and multi-factor authentication.',
-    href: '/docs/concepts/authentication',
+    icon: '🔒',
+    title: 'Encrypted Storage',
+    desc: 'AES-256-GCM encryption for files stored in S3-compatible buckets.',
+    href: '/docs/concepts/file-system#storage',
   },
   {
-    icon: '📁',
-    title: 'File Management',
-    desc: 'Upload, organize, move, copy, and delete files and folders in a hierarchical structure.',
-    href: '/docs/guides/user/upload-files',
+    icon: '💽',
+    title: 'Windows Cloud Drive',
+    desc: 'Open and save cloud files from Windows applications.',
+    href: '/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive',
+  },
+  {
+    icon: '📝',
+    title: 'Document Editing',
+    desc: 'Edit with OnlyOffice or desktop applications and sync changes back.',
+    href: '/docs/guides/user/upload-files#document-editing-and-viewers',
   },
   {
     icon: '🔗',
-    title: 'Sharing & Collaboration',
-    desc: 'Public and private share links with optional expiry and a custom share domain.',
-    href: '/docs/guides/user/share-files',
+    title: 'Controlled Sharing',
+    desc: 'Create expiring, read-only links on the app or a separate domain.',
+    href: '/docs/concepts/sharing-model',
   },
   {
-    icon: '⚙️',
-    title: 'Admin Controls',
-    desc: 'User management, signup control, and per-user storage limits.',
-    href: '/docs/guides/admin/user-management',
+    icon: '👥',
+    title: 'Sub-user Access',
+    desc: 'Give each login separate permissions over the same account files.',
+    href: '/docs/guides/user/sub-users',
   },
   {
-    icon: '🔌',
-    title: 'API Integration',
-    desc: 'A complete REST API for automation and integration with external applications.',
-    href: '/docs/api/overview',
-  },
-  {
-    icon: '📊',
-    title: 'Audit & Monitoring',
-    desc: 'Structured application logs and queue-based audit events for full traceability.',
-    href: '/docs/guides/operations/audit-logs',
+    icon: '📦',
+    title: 'Large-file Workflows',
+    desc: 'Stream transfers and run bulk file operations through background jobs.',
+    href: '/docs/concepts/file-system#large-file-handling',
   },
 ];
 
@@ -77,9 +77,8 @@ export default function HomePage() {
             TMA Cloud
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-fd-muted-foreground">
-            Build, integrate, and extend your self-hosted cloud with TMA&apos;s
-            powerful and flexible APIs — file storage, sharing, document
-            editing, and full audit logging.
+            Store encrypted files in S3-compatible storage, open them through
+            the web or a Windows drive, and control how they are shared.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -127,7 +126,7 @@ export default function HomePage() {
             Quick start
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-fd-muted-foreground">
-            Get up and running with TMA Cloud in minutes.
+            Deploy the app and its background worker with Docker Compose.
           </p>
           <div className="grid gap-6 sm:grid-cols-3">
             {steps.map((s) => (

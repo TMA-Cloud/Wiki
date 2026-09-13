@@ -1,13 +1,13 @@
 ---
 title: 'Audit Logs'
-description: 'Comprehensive audit trail system in TMA Cloud.'
+description: 'Audit events recorded by TMA Cloud.'
 ---
 
-Comprehensive audit trail system in TMA Cloud.
+Audit events recorded by TMA Cloud.
 
 ## Overview
 
-Queue-based audit logging system using PostgreSQL and pg-boss. Tracks all critical user actions and system events asynchronously.
+TMA Cloud queues authentication, file, sharing, document, admin, and account events in pg-boss. The worker writes them to PostgreSQL.
 
 ## Configuration
 

@@ -39,18 +39,12 @@ Overall security architecture and practices in TMA Cloud.
 
 ### Input Validation
 
-All incoming data from clients is strictly validated and sanitized on the backend to protect against a wide range of attacks.
+Routes validate accepted fields with `express-validator` schemas or controller-specific checks.
 
-- **Schema-Based Validation:** The application uses `express-validator` to enforce strict, declarative validation rules for all API endpoints.
-- **Centralized Schemas:** Validation schemas are centrally managed, ensuring consistency and making the rules easy to audit and maintain.
-- **Sanitization:** In addition to validation, all user-provided input is sanitized to neutralize potentially malicious content (e.g., stripping HTML tags, normalizing email addresses).
-- **Strong Typing:** Rules include strict type checks, length limits, and format validation (e.g., for emails, URLs, and file names).
-- **Protection Measures:** This approach provides a strong defense against common vulnerabilities such as:
-  - SQL Injection (in combination with parameterized queries)
-  - Cross-Site Scripting (XSS)
-  - Path Traversal
-  - Insecure Deserialization
-- **MIME Type Handling:** The stored MIME type is detected from the file's content (magic bytes), not the filename or the client-sent header.
+- **Type and format checks:** Request fields have type, length, and format limits where required
+- **Database queries:** Values are passed through parameterized queries
+- **File paths:** Storage keys reject separators and traversal sequences
+- **MIME types:** Stored types come from file content (magic bytes), not client headers
 
 ## Data Security
 
@@ -69,7 +63,7 @@ All incoming data from clients is strictly validated and sanitized on the backen
 - **Envelope keys:** Each newly encrypted object version receives a random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps it. A server-side logical copy reuses unchanged ciphertext and its wrapped DEK. Rotating the KEK rewraps stored DEKs without re-encrypting objects
 - **Scope:** Stored file contents in the S3-compatible bucket. File names and metadata live in the database
 - **Key Management:** Environment variable configuration
-- **Stream Processing:** Memory-efficient for large files
+- **Stream Processing:** Files are processed in segments instead of being buffered in full
 - **Automatic:** Encryption on upload, decryption on download
 
 <Callout type="error" title="Key loss means data loss">
@@ -108,16 +102,16 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 - Admins can place an instance into a mode where the backend requires a custom HTTP header that only the Electron desktop app sends
 - The middleware checks this header for all main app routes and blocks requests that do not include it
 - Share links (`/s/*`), `/health`, and `/metrics` remain reachable without the header
-- This control is header-based. But yes a client that can replicate the header can bypass it, so cryptographic signing or an HMAC implementation will be added
+- This setting is an access policy, not client attestation. A client that reproduces the header can pass the check, so authentication and authorization remain required
 
 ## Audit & Logging
 
 ### Audit Trail
 
-- **Comprehensive Logging:** All critical operations
-- **Queue-Based:** Async audit event processing
-- **Retention:** Configurable retention periods
-- **Query Support:** Search and filter audit logs
+- **Recorded events:** Authentication, file, sharing, document, admin, and account actions
+- **Queue:** pg-boss stores events until the worker writes them
+- **Retention:** Rows older than 30 days are removed by the scheduled cleanup job
+- **Queries:** The `audit_log` table and `audit_activity` view expose stored events
 
 ### Logging Security
 

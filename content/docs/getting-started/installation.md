@@ -39,7 +39,7 @@ Start all services
 docker compose up -d
 ```
 
-This starts: **app** (main API), **postgres**, **redis**, and **worker** (Worker for background jobs and costly tasks). Access at `http://localhost:3000` (or your `BPORT`).
+This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, audit writes, and OnlyOffice saves). Access it at `http://localhost:3000` or your configured `BPORT`.
 
 Verify
 
@@ -56,7 +56,7 @@ For more Docker options (prebuilt images, building from source, volumes, etc.), 
 
 ### Manual-Installation Prerequisites
 
-- Node.js (v25+)
+- Node.js (22, 24, or 26+)
 - PostgreSQL (v17+)
 - Redis (v6+) - Optional but recommended
 - npm or yarn

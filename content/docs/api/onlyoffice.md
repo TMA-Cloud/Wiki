@@ -11,7 +11,7 @@ OnlyOffice integration endpoints for TMA Cloud.
 
 Get OnlyOffice editor configuration for a file.
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 **Validation:**
 
@@ -47,7 +47,7 @@ Get OnlyOffice editor configuration for a file.
 
 Get standalone viewer page for a file.
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 **Validation:**
 

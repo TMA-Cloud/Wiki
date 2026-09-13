@@ -117,7 +117,7 @@ Log out from all devices by invalidating all of the user's active sessions and t
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 ## Change Password
 
@@ -232,6 +232,36 @@ The callback endpoint for Google to redirect to after successful authentication.
 
 **Rate limiting:** 25 attempts per 15 minutes per IP/email.
 
+### POST `/api/google/mfa-verify`
+
+Complete Google OAuth sign-in when the account has MFA enabled. The Google callback sets a short-lived `mfa_pending` HTTP-only cookie that identifies the pending login.
+
+**Request Body:**
+
+```json
+{
+  "mfaCode": "123456"
+}
+```
+
+The code may be a six-digit TOTP or an unused backup code.
+
+**Response:**
+
+```json
+{
+  "success": true
+}
+```
+
+**Error cases:**
+
+- `400 MFA code required`
+- `401 Invalid MFA code`
+- `401 MFA session expired or missing. Please sign in again.`
+
+**Rate limiting:** 5 attempts per minute per IP.
+
 ## Multi-Factor Authentication
 
 ### GET `/api/mfa/status`
@@ -246,7 +276,7 @@ Get the MFA status for the current authenticated user.
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 ### POST `/api/mfa/setup`
 
@@ -261,7 +291,7 @@ Generate an MFA secret and a corresponding QR code for setup in an authenticator
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 ### POST `/api/mfa/verify`
 
@@ -371,7 +401,7 @@ Get the number of remaining unused backup codes for the user.
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 ## Related Topics
 

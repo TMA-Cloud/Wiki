@@ -7,7 +7,7 @@ Optional Windows desktop client for TMA Cloud. Loads the same web app from your 
 
 ## Prerequisites
 
-- **Node.js** (v25+)
+- **Node.js** (22, 24, or 26+)
 - **TMA Cloud server** running and reachable (e.g. `https://your-tma-cloud.example.com`)
 - **npm**
 
@@ -57,7 +57,7 @@ Builds a Windows installer with the server URL embedded so users do not need a c
 
    This runs `prepare-client-build.js` (copies `src/main` and `src/preload` into `dist-electron/` and injects `serverUrl` into main config), then `build-clouddrive.js` (compiles the [Cloud Drive](#cloud-drive-mounted-windows-drive) host and bundles the WinFsp installer), then runs electron-builder. Output is in `electron/dist-client/` (NSIS installer by default).
 
-   The Cloud Drive host is a .NET project (`desktop-fs`), so building the installer also requires the **.NET SDK (9+)**. The WinFsp redistributable is downloaded and verified automatically at build time.
+   The Cloud Drive host targets .NET 10, so building the installer also requires the **.NET 10 SDK**. The WinFsp redistributable is downloaded and verified at build time.
 
 3. For a portable executable (no installer):
 
