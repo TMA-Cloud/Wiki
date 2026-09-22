@@ -94,6 +94,8 @@ Files and folders.
 
 **Triggers:** `files_storage_insert`, `files_storage_update`, and `files_storage_delete` update the account owner's `storage_used` counter once per statement from transition tables. `files_aggregate_insert`, `files_aggregate_update`, and `files_aggregate_delete` adjust ancestor folder totals when a row is inserted, moved, resized, changes type, or is removed.
 
+**Aggregate columns:** These three columns are the only source of a folder's size and counts; no read path recomputes them. Incremental trigger maintenance can drift, because a delta that would take a counter below zero is clamped rather than carried. `reconcile_folder_aggregates(user_id)` recomputes them for one account from its own rows and returns how many folders were stored wrong. The worker runs it weekly. Trashed descendants are counted, matching the triggers.
+
 Name search is backed by a trigram GIN index from `pg_trgm` on `lower(name)` and a `text_pattern_ops` btree on `lower(name)` for prefix matching — not a PostgreSQL full-text index.
 
 **File timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. `shared_at` is set when an item joins a share and cleared when it is unshared. Re-sharing an active item does not change it. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
@@ -283,7 +285,7 @@ pg-boss job queue tables (managed automatically).
 
 ### `bulk_import_items`
 
-Durable rollback records used by the administrative bulk-import scripts. Each row records the import run, created file or folder ID, storage key when present, item type, and tree depth. A completed import removes its rows. A failed import consumes them in batches, deleting files before folders.
+Durable rollback records used by the administrative bulk-import scripts. Each row records the import run, created file or folder ID, storage key when present, item type, and tree depth. A completed import removes its rows. A failed import consumes them in batches, deleting files before folders. Only a killed process leaves rows behind; a daily worker job removes rows older than seven days.
 
 ### `migrations`
 

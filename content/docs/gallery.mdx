@@ -137,20 +137,21 @@ import { GalleryCard } from '@/components/GalleryCard';
   <span className="gallery-section__label">Settings</span>
   <h2>User & admin controls</h2>
   <div className="gallery-section__desc">
-    Every user gets Security and Session controls. The admin (first signup) sees
-    additional sections for signup, users, OnlyOffice, custom domain, and
-    updates.
+    Every section opens with the state of the thing, then groups its controls by
+    kind, and keeps anything destructive in a framed danger zone at the bottom.
+    Every user gets Profile, Storage, Updates and Security; the admin (first
+    signup) also sees Sub-users and Administration.
   </div>
   <div className="gallery-grid">
     <GalleryCard
       img="settings.png"
       title="Settings overview"
-      subtitle="Top-level navigation for account and app settings"
+      subtitle="Section navigation, with Profile open on the account's own details"
     />
     <GalleryCard
       img="security-section.png"
       title="Security"
-      subtitle="Password change and MFA controls (per user)"
+      subtitle="Sign-in and devices, with Logout everywhere in the danger zone"
     />
     <GalleryCard
       img="active-sessions.png"
@@ -160,7 +161,7 @@ import { GalleryCard } from '@/components/GalleryCard';
     <GalleryCard
       img="admin-section.png"
       title="Admin section"
-      subtitle="Signup, extensions, password change, desktop-only mode"
+      subtitle="Workspace totals, then policies, people, networking and maintenance"
     />
     <GalleryCard
       img="all-users.png"
@@ -168,19 +169,14 @@ import { GalleryCard } from '@/components/GalleryCard';
       subtitle="Admin view — storage usage per user and quota overrides"
     />
     <GalleryCard
-      img="only-office-section.png"
-      title="OnlyOffice"
-      subtitle="Connect the document server and set the JWT secret"
-    />
-    <GalleryCard
-      img="custom-share-url.png"
-      title="Custom share domain"
-      subtitle="Serve share links on a dedicated domain"
+      img="integrations.png"
+      title="Integrations"
+      subtitle="OnlyOffice document server and a custom share domain, each expanded to its fields"
     />
     <GalleryCard
       img="update-section.png"
       title="Updates"
-      subtitle="Version info and update controls"
+      subtitle="What each component runs, with its status, and a manual check"
     />
   </div>
 </div>

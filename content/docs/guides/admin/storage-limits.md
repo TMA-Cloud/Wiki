@@ -9,7 +9,7 @@ Configure storage limits for users in TMA Cloud (admin only).
 
 ### Default Behavior
 
-- **S3:** No disk; default is unlimited when no limit set. UI shows "X used of Unlimited" or "X used of Y" when limit set.
+- **S3:** No disk; default is unlimited when no limit set. **Settings** → **Storage** → **Usage** shows the amount used, and adds a bar with the percentage and free space once a limit is set.
 - No hardcoded limits; configurable per user; set via **Settings** → **Administration** → **Registered Users**
 
 ### Per-User Limits
@@ -38,8 +38,8 @@ Configure storage limits for users in TMA Cloud (admin only).
 ### User-Level
 
 - View current usage per user (used, total, free)
-- **S3:** total/free from per-user limit or "Unlimited" when no limit; percentage shown only when limit set.
-- Visual indicators
+- **S3:** total and free come from the per-user limit. With no limit, the account's own Storage section states that no quota is set and draws no bar.
+- The bar turns amber at 80% of the quota and red at 95%
 
 ### System-Level
 

@@ -166,7 +166,18 @@ The Windows desktop app uses a single Copy / Cut / Paste model that bridges the 
 - **Cut:** Right-click → **Cut**. In-app only. Cut items show a Windows-Explorer-style faded look until paste completes.
 - **Paste:** Right-click in a folder → **Paste**. If you copied or cut something inside TMA Cloud, the cloud clipboard is used (server-side copy/move — no re-upload). Otherwise physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC. If you copy something in Explorer after a cloud Copy, Paste detects the change and uses the newer Windows-clipboard files instead.
 
-The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference"). Virtual OLE files have no disk path, so Electron extracts them in the main process and uploads them from bounded memory without writing a plaintext upload file to `%TEMP%` or sending file data through renderer IPC. Their limit is 50 MB per file and 100 MB total. The backend still performs the normal streaming encryption before object storage.
+The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference"). Virtual OLE files have no disk path, so Electron extracts them in the main process and uploads them from bounded memory without writing a plaintext upload file to `%TEMP%` or sending file data through renderer IPC. Because that content is held whole in memory, one paste of virtual files is capped at 500 MB in total. The backend still performs the normal streaming encryption before object storage.
+
+Pasted files use the same size and quota checks as a normal upload — the max upload size setting and the account's remaining space — rather than separate clipboard limits. A file the server would refuse is reported in the upload-issues dialog and the rest of the paste continues.
+
+### Paste Progress
+
+Clipboard uploads run in the Electron main process and appear in the same floating upload panel as a browser upload.
+
+- One progress card per file, with the file name and size.
+- **Cancel** on a card stops that upload: the read stream and the network request both end.
+- A completed card clears after a few seconds; a failed one shows its error and stays longer.
+- Bodies stream from disk (or from main-process memory for virtual files) instead of being buffered, so the percentage reflects bytes actually sent.
 
 ### Keyboard Shortcuts
 

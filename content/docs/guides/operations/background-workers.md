@@ -7,7 +7,9 @@ Background services and workers in TMA Cloud.
 
 ## Overview
 
-TMA Cloud uses one standalone worker process for audit writes, file operations, object cleanup, scheduled maintenance, admin-requested orphan work, and OnlyOffice force-save commands. Jobs are stored in PostgreSQL by pg-boss, so schedules and retries survive process restarts.
+TMA Cloud uses one standalone worker process for audit writes, file operations, object cleanup, scheduled maintenance, admin-requested orphan work, share auto-linking, and OnlyOffice force-save commands. Jobs are stored in PostgreSQL by pg-boss, so schedules and retries survive process restarts.
+
+The worker is also the only supervising pg-boss instance: it owns job maintenance (retention, expiry, monitoring) and cron evaluation. The application process creates the queues it sends to and applies schema migrations so it can boot against a fresh database, but it only produces jobs.
 
 ## Background Worker
 
@@ -35,8 +37,9 @@ The worker must run in production. Without it, queued audit events, file operati
 | `account-file-operations` | Copies files, handles large moves and restores, and performs permanent deletion          |
 | `object-cleanup`          | Deletes unreferenced or superseded object versions after upload, replace, or save errors |
 | `file-operations`         | Drains jobs queued before the account queue was added and continues sliced trash cleanup |
+| `share-linking`           | Adds newly created items to the shares their parent folder belongs to                    |
 
-Failed jobs retry with backoff. `account-file-operations` uses strict FIFO ordering per account, so two mutations for one account cannot overtake each other while other accounts can run concurrently. Copy jobs use their pg-boss job ID as an idempotency key. A committed retry returns the original copied IDs from `file_operation_results` instead of creating another copy.
+Failed jobs retry with backoff. `account-file-operations` and `share-linking` use strict FIFO ordering per account, so two mutations for one account cannot overtake each other while other accounts can run concurrently. Copy jobs use their pg-boss job ID as an idempotency key. A committed retry returns the original copied IDs from `file_operation_results` instead of creating another copy.
 
 HTTP handlers keep validation, authorization, small metadata-only changes, and response streaming in the web process. They queue retryable object-store work and operations that can outlive an HTTP request.
 
@@ -44,15 +47,19 @@ HTTP handlers keep validation, authorization, small metadata-only changes, and r
 
 Schedules use UTC.
 
-| Job                      | Schedule        | What it removes                                          |
-| ------------------------ | --------------- | -------------------------------------------------------- |
-| Trash cleanup            | Daily at 02:00  | Files trashed more than 15 days ago                      |
-| Audit log cleanup        | Daily at 02:15  | `audit_log` rows older than 30 days                      |
-| Session cleanup          | Daily at 02:45  | `sessions` rows older than 30 days                       |
-| Operation-result cleanup | Daily at 02:50  | `file_operation_results` rows older than 30 days         |
-| Share link cleanup       | Sunday at 03:00 | Share links whose `expires_at` has passed                |
-| Heartbeat cleanup        | Hourly          | `client_heartbeats` rows not seen in the last 10 minutes |
-| Quota reservations       | Hourly at :30   | Expired `storage_reservations` rows                      |
+| Job                      | Schedule        | What it does                                                     |
+| ------------------------ | --------------- | ---------------------------------------------------------------- |
+| Folder aggregate check   | Sunday at 01:15 | Recomputes stored folder totals and reports how many were wrong  |
+| Trash cleanup            | Daily at 02:00  | Removes files trashed more than 15 days ago                      |
+| Audit log cleanup        | Daily at 03:40  | Removes `audit_log` rows older than 30 days                      |
+| Session cleanup          | Daily at 04:20  | Removes `sessions` rows older than 30 days                       |
+| Operation-result cleanup | Daily at 04:50  | Removes `file_operation_results` rows older than 30 days         |
+| Import-manifest cleanup  | Daily at 05:25  | Removes `bulk_import_items` rows older than 7 days               |
+| Share link cleanup       | Sunday at 06:10 | Removes share links whose `expires_at` has passed                |
+| Heartbeat cleanup        | Hourly at :07   | Removes `client_heartbeats` rows not seen in the last 10 minutes |
+| Quota reservations       | Hourly at :37   | Removes expired `storage_reservations` rows                      |
+
+Start times are spread across the window rather than stacked on the same minutes. One worker runs these serially, so coinciding schedules only queue behind each other and put their database load on the same few minutes.
 
 Trash is read in batches of 500. Stored objects are deleted with the S3 multi-object API before their database rows are removed. One run is capped by batch count and runtime; if work remains, the worker queues another slice. If object deletion fails, the rows remain for retry.
 
@@ -66,7 +73,11 @@ Share cleanup updates file sharing state and invalidates related caches. Heartbe
 
 Quota reservation cleanup deletes at most 1,000 rows per database call and at most 100 batches per run. Reservations normally disappear in the operation's metadata transaction; expiry cleanup covers interrupted processes.
 
-Session and operation-result cleanup use bounded batches of 5,000 rows, with at most 20 batches per run.
+Session and operation-result cleanup use bounded batches of 5,000 rows, with at most 20 batches per run. Import-manifest cleanup uses the same bounds and only removes `bulk_import_items` rows older than seven days, so an import that is still running or still rollback-able is never touched.
+
+The folder aggregate check recomputes `aggregate_size`, `aggregate_file_count`, and `aggregate_folder_count` from the rows themselves, one account at a time, and logs how many folders held a wrong value. Incremental trigger maintenance can drift because a negative delta is clamped at zero rather than carried, so this run both repairs the columns and makes the drift visible. A repaired count above zero is worth investigating: it means some write path is not maintaining the totals. The run is capped at 20 minutes and continues from the start of the account list on the next schedule.
+
+Share-linking jobs are not scheduled. An upload or folder creation inside a shared folder queues one, and the worker adds the new subtree to every share the parent belongs to. The job is keyed per account, so a burst of uploads serializes instead of racing, and it is safe to retry. The request itself pays only one indexed lookup to see whether the parent is shared at all. If the queue is unavailable, the producer links inline rather than leaving the items off the link.
 
 Object cleanup accepts storage keys only. Deletion is idempotent, is sent in S3 batches of up to 1,000 keys, and retries independently of the request that created or replaced the object. If the queue is unavailable, the producer attempts the deletion inline.
 
@@ -111,8 +122,9 @@ docker compose up -d
 
 - Check `docker compose logs -f worker` or the worker process logs.
 - Monitor `audit_queue_depth` and `audit_queue_failed_depth`.
-- Check recent rows in the pg-boss job table for `background-maintenance`, `account-file-operations`, `object-cleanup`, `file-operations`, `orphan-maintenance`, and `onlyoffice-forcesave` failures.
+- Check recent rows in the pg-boss job table for `background-maintenance`, `account-file-operations`, `object-cleanup`, `file-operations`, `share-linking`, `orphan-maintenance`, and `onlyoffice-forcesave` failures.
 - Verify cleanup counts and OnlyOffice command errors in worker logs.
+- Watch for `Repaired drifted folder aggregates` warnings from the weekly folder aggregate check.
 
 ## Related Topics
 

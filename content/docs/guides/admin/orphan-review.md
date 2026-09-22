@@ -17,8 +17,8 @@ Nothing is deleted automatically. The scan is read-only and only the first user 
 ## Opening the Review Screen
 
 1. Navigate to **Settings** → **Administration**
-2. Find **Orphaned files**
-3. Click **Review orphans**
+2. Scroll to the **Maintenance** group at the bottom of the section
+3. Find **Orphaned files** and click **Review orphans**
 
 The scan is queued on the background worker when the modal opens and whenever you change the grace window or click **Rescan**. The screen waits for the job and shows the result when it finishes.
 

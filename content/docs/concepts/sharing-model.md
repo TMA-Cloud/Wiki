@@ -53,6 +53,13 @@ Link multiple files to a single share link.
 Items added to a shared folder after it is shared are linked into the same
 share automatically.
 
+The link is written by the `share-linking` background queue, not by the upload
+request. The request runs one indexed lookup to see whether the parent folder
+belongs to a share, and queues the job only if it does. Jobs are keyed per
+account, so uploads into the same share are applied in order. A new item can
+therefore take a moment to appear on the public link after the upload finishes.
+If the queue is unavailable, the link is written inline instead.
+
 ## Share Link URLs
 
 ### Default Format

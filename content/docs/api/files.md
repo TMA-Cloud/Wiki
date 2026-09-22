@@ -547,6 +547,8 @@ Get existing share links for multiple files without creating new ones.
 
 Link files to their parent folder's share link. If the parent folder is shared, the files will be added to that share.
 
+This endpoint links synchronously and returns the resulting share URLs. Uploads and folder creations inside a shared folder are linked automatically as well, but on the `share-linking` background queue, so the link is written shortly after the response.
+
 **Request Body:**
 
 ```json

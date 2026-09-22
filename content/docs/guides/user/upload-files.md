@@ -37,7 +37,9 @@ Learn how to upload and manage files in TMA Cloud.
 - Single file uses standard upload; multiple files use bulk upload with progress
 - Same size and quota limits apply as for Upload
 - In the Windows desktop app, **Paste** is unified with the in-app clipboard: if you also did a Copy/Cut inside TMA Cloud, that takes priority. If you copy something new in Explorer afterwards, Paste detects the change and uploads the newer Explorer files instead
-- Physical clipboard files stream from their existing path. Pathless Outlook/Snipping Tool/OLE items upload from Electron's main-process memory with a 50 MB per-file and 100 MB total cap. Neither route creates a plaintext upload copy in the host temp directory
+- Physical clipboard files stream from their existing path. Pathless Outlook/Snipping Tool/OLE items upload from Electron's main-process memory, capped at 500 MB per paste because that content is held in memory. Neither route creates a plaintext upload copy in the host temp directory
+- Pasted files get the same progress cards as any other upload, one per file, each with its own **Cancel**. Canceling stops the transfer rather than only hiding the card
+- A file the server refuses is listed in the upload-issues dialog and the remaining files still upload
 
 ### Copy to Computer (Windows desktop app)
 

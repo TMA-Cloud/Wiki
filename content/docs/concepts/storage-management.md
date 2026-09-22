@@ -103,9 +103,9 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 ### Cleanup
 
 - Trash cleanup frees space
-- Automatic background processes handle trash, expired share links, audit logs, old sessions, expired quota reservations, and expired file-operation results
+- Automatic background processes handle trash, expired share links, audit logs, old sessions, expired quota reservations, expired file-operation results, leftover bulk-import manifests, and a weekly recheck of stored folder totals
 - Failed uploads, replacements, and OnlyOffice saves queue unused storage objects for retryable deletion
-- Orphaned files are **not** removed automatically; an admin reviews and deletes them from **Settings** → **Administration** → **Review orphans**
+- Orphaned files are **not** removed automatically; an admin reviews and deletes them from **Settings** → **Administration** → **Maintenance** → **Review orphans**
 - **S3:** Upload validation (e.g. `parentId`) runs after stream upload. Failed bulk-upload and abandoned stream objects are queued for deletion. A process crash can still leave an orphan; review them periodically.
 
 ### Orphans

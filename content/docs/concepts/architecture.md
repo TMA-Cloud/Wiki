@@ -267,7 +267,7 @@ See [Database Schema](/docs/reference/database-schema) for details.
 ## Logging & Audit
 
 - **Structured Logging:** Pino with automatic secret masking
-- **Background Work:** One pg-boss worker handles batched audit writes, account-ordered file operations, object cleanup, durable maintenance schedules, admin-requested orphan work, and OnlyOffice force-save commands
+- **Background Work:** One pg-boss worker handles batched audit writes, account-ordered file operations, object cleanup, durable maintenance schedules, admin-requested orphan work, share auto-linking, and OnlyOffice force-save commands. It is also the only supervising pg-boss instance, so job maintenance and cron evaluation stay off the API process
 - **Request Logging:** All requests logged with context
 
 See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/operations/audit-logs) for details.

@@ -197,12 +197,14 @@ Stored files use Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1
 - Run it with the app **stopped**, before deploying the upgrade
 - Uses the same `FILE_ENCRYPTION_KEY` but it re-wraps the bytes, not the key
 - Uses the configured S3-compatible bucket
+- Covers trashed files as well, since they still own objects and can be restored
+- Resolves each row's actual key material first, so files already converted to a per-file DEK are not mistaken for legacy ciphertext
 - Safe to re-run: objects already in the streaming format are detected and skipped
 
 From the **backend** directory:
 
 ```bash
-node scripts/migrate-to-streaming-encryption.js
+npm run migrate:streaming
 ```
 
 ### Rotate FILE_ENCRYPTION_KEY (KEK)
@@ -232,12 +234,29 @@ Notes:
 Run once on a deployment created before envelope encryption, to give existing files their own DEK. Reads each object, re-encrypts it under a fresh DEK, and records the wrapped DEK on the row.
 
 - Run with the app **stopped**, after applying migrations and taking a backup
+- Covers trashed files as well, so the upgrade leaves nothing on the legacy master-key path
 - Re-encrypts to a new storage key, flips the database row, then deletes the old object — safe to interrupt and re-run
 - Failures are written to an `envelope-backfill-failures-*.json` manifest
 - `--concurrency N` sets how many objects are re-encrypted at once (default 8). Each is a full download + re-encrypt + re-upload, so raise it for many small files on a fast link (16–32)
 
 ```bash
 npm run backfill:envelope
+```
+
+### Reconcile encrypted file sizes (one-time)
+
+Encrypted downloads derive their `Content-Length` from `files.size`, which must hold the exact plaintext byte length. Run this once when upgrading an installation whose rows predate that requirement. It reads each object's real length from storage, checks the streaming-format header, derives the plaintext length, and repairs rows that disagree. Object bytes are not rewritten.
+
+- Run with the app and worker **stopped**, or in maintenance mode
+- Dry run by default — nothing is written without `--apply`
+- Resumable and safe to re-run
+- A row reported as legacy format needs `npm run migrate:streaming` first; run this again afterwards
+- `--concurrency N` sets how many object-store HEAD requests run at once (default 16)
+
+```bash
+npm run migrate:sizes                      # dry run
+npm run migrate:sizes -- --apply           # prompt, then update
+npm run migrate:sizes -- --apply --yes     # non-interactive
 ```
 
 ## Docker Commands
