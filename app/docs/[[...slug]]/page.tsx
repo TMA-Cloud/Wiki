@@ -4,16 +4,17 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/layouts/docs/page';
-import {
   MarkdownCopyButton,
+  PageLastUpdate,
   ViewOptionsPopover,
-} from '@/components/page-actions';
+} from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { gitConfig } from '@/lib/shared';
+import { gitConfig, siteUrl } from '@/lib/shared';
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -21,10 +22,16 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   if (!page) notFound();
 
   const MDX = page.data.body;
-  const markdownUrl = getPageMarkdownUrl(page).url;
+  // Fumadocs only prefixes Vite's `base`, so hand it URLs that already carry
+  // the GitHub Pages base path.
+  const markdownUrl = basePath + getPageMarkdownUrl(page).url;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage
+      toc={page.data.toc}
+      full={page.data.full}
+      tableOfContent={{ style: 'block' }}
+    >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">
         {page.data.description}
@@ -33,6 +40,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
+          // Point AI tools at the public canonical URL, not localhost.
+          pageUrl={siteUrl + page.url}
           githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
         />
       </div>
@@ -44,6 +53,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
           })}
         />
       </DocsBody>
+      {page.data.lastModified && (
+        <PageLastUpdate date={new Date(page.data.lastModified)} />
+      )}
     </DocsPage>
   );
 }

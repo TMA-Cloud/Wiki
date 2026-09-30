@@ -1,3 +1,6 @@
+import { asMarkdown, md } from 'fumadocs-core/server';
+import { siteUrl } from '@/lib/shared';
+
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 export function GalleryCard({
@@ -13,6 +16,24 @@ export function GalleryCard({
   tag?: string;
   portrait?: boolean;
 }) {
+  if (asMarkdown()) {
+    // Absolute URL so the image resolves outside the site; parentheses in
+    // file names like `dashboard(mobile).png` would end the Markdown link.
+    const url = encodeURI(`${siteUrl}/img/${img}`)
+      .replaceAll('(', '%28')
+      .replaceAll(')', '%29');
+    const caption = [tag, title].filter(Boolean).join(' — ');
+    return md`![${caption}](${url})${
+      subtitle
+        ? `
+
+${subtitle}`
+        : ''
+    }
+
+`;
+  }
+
   const src = `${BASE}/img/${img}`;
   return (
     <a

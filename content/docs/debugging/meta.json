@@ -1,5 +1,6 @@
 {
   "title": "Debugging",
+  "icon": "Bug",
   "pages": [
     "overview",
     "common-errors",

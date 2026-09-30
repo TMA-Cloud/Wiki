@@ -1,4 +1,4 @@
-import { getLLMText, getPageMarkdownUrl, source } from '@/lib/source';
+import { docsLlms, getPageMarkdownUrl, source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 
 export const revalidate = false;
@@ -12,7 +12,7 @@ export async function GET(
   const page = source.getPage(slug?.slice(0, -1));
   if (!page) notFound();
 
-  return new Response(await getLLMText(page), {
+  return new Response(await docsLlms.page(page), {
     headers: {
       'Content-Type': 'text/markdown',
     },

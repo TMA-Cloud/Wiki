@@ -13,40 +13,53 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-export function useChangelogIndex(baseUrl: string) {
-  const normalizedBaseUrl = useMemo(() => normalizeBaseUrl(baseUrl), [baseUrl]);
-  const [index, setIndex] = useState<ChangelogIndexManifest | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+type FetchResult<T> = { url: string; data: T | null; error: string };
+
+// Results are keyed by URL and loading is derived during render, so the effect
+// only sets state from async callbacks and a stale result is never shown for
+// a new URL.
+function useFetchJson<T>(url: string | null) {
+  const [result, setResult] = useState<FetchResult<T> | null>(null);
 
   useEffect(() => {
-    if (!normalizedBaseUrl) return;
-
-    setError('');
-    setIndex(null);
-    setLoading(true);
+    if (!url) return;
 
     let cancelled = false;
-    fetchJson<ChangelogIndexManifest>(buildIndexUrl(normalizedBaseUrl))
-      .then((idx) => {
-        if (cancelled) return;
-        setIndex(idx);
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        setError(e instanceof Error ? e.message : String(e));
-      })
-      .finally(() => {
-        if (cancelled) return;
-        setLoading(false);
-      });
+    fetchJson<T>(url).then(
+      (data) => {
+        if (!cancelled) setResult({ url, data, error: '' });
+      },
+      (e) => {
+        if (!cancelled) {
+          setResult({
+            url,
+            data: null,
+            error: e instanceof Error ? e.message : String(e),
+          });
+        }
+      },
+    );
 
     return () => {
       cancelled = true;
     };
-  }, [normalizedBaseUrl]);
+  }, [url]);
 
-  return { index, loading, error };
+  const current = url && result?.url === url ? result : null;
+  return {
+    data: current?.data ?? null,
+    loading: !!url && !current,
+    error: current?.error ?? '',
+  };
+}
+
+export function useChangelogIndex(baseUrl: string) {
+  const normalizedBaseUrl = useMemo(() => normalizeBaseUrl(baseUrl), [baseUrl]);
+  const { data, loading, error } = useFetchJson<ChangelogIndexManifest>(
+    normalizedBaseUrl ? buildIndexUrl(normalizedBaseUrl) : null,
+  );
+
+  return { index: data, loading, error };
 }
 
 export function useChangelogRelease(
@@ -54,43 +67,11 @@ export function useChangelogRelease(
   releaseFile: string | null,
 ) {
   const normalizedBaseUrl = useMemo(() => normalizeBaseUrl(baseUrl), [baseUrl]);
-  const [release, setRelease] = useState<ChangelogReleaseFile | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const { data, loading, error } = useFetchJson<ChangelogReleaseFile>(
+    normalizedBaseUrl && releaseFile
+      ? `${normalizedBaseUrl}${releaseFile}`
+      : null,
+  );
 
-  useEffect(() => {
-    if (!normalizedBaseUrl || !releaseFile) {
-      setRelease(null);
-      setError('');
-      setLoading(false);
-      return;
-    }
-
-    setError('');
-    setRelease(null);
-    setLoading(true);
-
-    let cancelled = false;
-    const releaseUrl = `${normalizedBaseUrl}${releaseFile}`;
-
-    fetchJson<ChangelogReleaseFile>(releaseUrl)
-      .then((r) => {
-        if (cancelled) return;
-        setRelease(r);
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        setError(e instanceof Error ? e.message : String(e));
-      })
-      .finally(() => {
-        if (cancelled) return;
-        setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [normalizedBaseUrl, releaseFile]);
-
-  return { release, loading, error };
+  return { release: data, loading, error };
 }
