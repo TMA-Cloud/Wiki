@@ -1,9 +1,10 @@
 ---
 title: 'UI Gallery'
-description: "A visual tour of TMA Cloud — every screen you'll see as a user, admin, or API integrator."
+description: "A visual tour of TMA Cloud — every screen you'll see as a user, admin, or API integrator, plus a demo video."
 ---
 
 import { GalleryCard } from '@/components/GalleryCard';
+import { YouTubeVideo } from '@/components/YouTubeVideo';
 
 <div className="gallery-section">
   <span className="gallery-section__label">Authentication</span>
@@ -179,6 +180,16 @@ import { GalleryCard } from '@/components/GalleryCard';
       subtitle="What each component runs, with its status, and a manual check"
     />
   </div>
+</div>
+
+<div className="gallery-section">
+  <span className="gallery-section__label">Video</span>
+  <h2>Watch the demo</h2>
+  <YouTubeVideo
+    id="W7d4uEkANro"
+    title="TMA Cloud full demo"
+    poster="demo-video.jpg"
+  />
 </div>
 
 ---
