@@ -152,6 +152,27 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-fd-border">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-fd-muted-foreground sm:flex-row">
+          <p>TMA Cloud is open source under the MIT License.</p>
+          <nav className="flex gap-5">
+            <Link
+              href="/docs/legal/privacy-policy"
+              className="hover:text-fd-foreground"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/docs/legal/terms-of-use"
+              className="hover:text-fd-foreground"
+            >
+              Terms of Use
+            </Link>
+          </nav>
+        </div>
+      </footer>
     </main>
   );
 }
