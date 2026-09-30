@@ -17,17 +17,20 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 ## Database Configuration
 
-| Variable              | Required | Default             | Description                                       |
-| --------------------- | -------- | ------------------- | ------------------------------------------------- |
-| `DB_HOST`             | No       | `localhost`         | PostgreSQL host                                   |
-| `DB_PORT`             | No       | `5432`              | PostgreSQL port                                   |
-| `DB_USER`             | No       | `postgres`          | Database username                                 |
-| `DB_PASSWORD`         | Yes      | -                   | Database password                                 |
-| `DB_NAME`             | No       | `tma_cloud_storage` | Database name                                     |
-| `DB_SSLMODE`          | No       | `disable`           | SSL mode (`require` for TLS)                      |
-| `PGBOSS_SCHEMA`       | No       | `pgboss`            | pg-boss job queue schema                          |
-| `DB_CONTAINER`        | No       | auto-detected       | Docker container name for backup/restore script   |
-| `BACKUP_RETAIN_COUNT` | No       | `10`                | Number of database backups to keep before pruning |
+| Variable               | Required | Default             | Description                                                      |
+| ---------------------- | -------- | ------------------- | ---------------------------------------------------------------- |
+| `DB_HOST`              | No       | `localhost`         | PostgreSQL host                                                  |
+| `DB_PORT`              | No       | `5432`              | PostgreSQL port                                                  |
+| `DB_USER`              | No       | `postgres`          | Database username                                                |
+| `DB_PASSWORD`          | Yes      | -                   | Database password                                                |
+| `DB_NAME`              | No       | `tma_cloud_storage` | Database name                                                    |
+| `DB_SSLMODE`           | No       | `disable`           | SSL mode (`require` for TLS)                                     |
+| `PGBOSS_SCHEMA`        | No       | `pgboss`            | pg-boss job queue schema                                         |
+| `DB_CONTAINER`         | No       | auto-detected       | Docker container name for backup/restore script                  |
+| `BACKUP_RETAIN_COUNT`  | No       | `10`                | Number of database backups to keep before pruning                |
+| `DB_HELD_CURSOR_LIMIT` | No       | `3`                 | Folder ZIP downloads that may hold a database connection at once |
+
+**`DB_HELD_CURSOR_LIMIT`:** A folder ZIP lists its files through a database cursor. Trees of up to 20,000 entries are read at the start and the connection goes back to the pool within milliseconds. A larger tree keeps its connection for the whole download, and this variable caps how many such downloads can do that at once, per API process. Every folder ZIP takes a slot while it reads its tree, so when all slots are held by large downloads, new folder downloads wait for a free slot before they start. The API process uses the `pg` default pool of 10 connections, so keep this well below 10.
 
 ## Redis Configuration
 

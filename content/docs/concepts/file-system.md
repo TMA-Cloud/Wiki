@@ -45,7 +45,7 @@ File system architecture and organization in TMA Cloud.
 - **Streaming:** Files streamed without loading into memory
 - **Upload:** Files encrypted and streamed directly to the bucket
 - **Download:** Files streamed from storage to client; single-file downloads support HTTP `Range` (partial content) for seeking
-- **ZIP Archives:** Archive entries are read through a database cursor and streamed one at a time, keeping database pages and open storage streams bounded
+- **ZIP Archives:** Archive entries are read through a database cursor and streamed one at a time, keeping database pages and open storage streams bounded. Trees of up to 20,000 entries are read at the start so the database connection is released right away; larger trees are limited by `DB_HELD_CURSOR_LIMIT`. Each entry already carries its wrapped data key, so no per-file key lookup is made. The archive stops when the client disconnects
 - **Rename:** Change file/folder names
 
 ### Performance
@@ -127,6 +127,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 - Files moved to trash (not deleted)
 - `deleted_at` timestamp set
 - Restorable within retention period
+- Share links stop serving trashed items until they are restored
 
 ### Automatic Cleanup
 
@@ -145,6 +146,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 - Indexed trigram matching for longer queries
 - Real-time search results
 - User-scoped searches
+- `%` and `_` in a query match literally, not as wildcards
 
 ## Related Topics
 

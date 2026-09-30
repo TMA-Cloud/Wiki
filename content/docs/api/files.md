@@ -32,6 +32,8 @@ A request without the required permission returns `403` with a message naming it
 
 The check runs before the request body is read, so a rejected upload does not transfer its file. See [Authorization](/docs/concepts/authorization).
 
+Opening a document in OnlyOffice also requires `files.download`: `GET /api/onlyoffice/config/:id` and `GET /api/onlyoffice/viewer/:id` return `403` without it. See [OnlyOffice API](/docs/api/onlyoffice).
+
 ## List Files
 
 ### GET `/api/files`
@@ -132,6 +134,8 @@ An array of file and folder objects matching the search query.
   }
 ]
 ```
+
+Characters in `q` match literally. `%` and `_` are not wildcards, so searching for `50%` finds names that start with or resemble `50%`, not every name.
 
 Searching does not count as reading. The `accessedAt` values returned are unchanged by the search itself.
 
@@ -494,6 +498,8 @@ Share or unshare files. Creates share links if they don't exist, or removes shar
 - `shared`: Required. Must be a boolean.
 - `expiry`: Optional. One of `"7d"`, `"30d"`, or `"never"`.
 
+When sharing, every ID must be a file or folder in the caller's account that is not in Trash. Otherwise the request returns `404` with `{ "message": "File not found" }` and no link is created for any of the IDs.
+
 **Response (when sharing):**
 
 ```json
@@ -813,6 +819,8 @@ Download a single file or a folder (folders are returned as a ZIP archive).
 
 **Response:**
 The raw file content or a ZIP archive.
+
+Folder ZIPs are built as they stream. If the client disconnects, the server stops the archive and closes the storage and database resources it was using. A folder download does not block uploads or other operations on the account while it runs.
 
 Single-file downloads accept an HTTP `Range` header and reply `206 Partial Content` with `Content-Range` for the requested bytes; the response advertises `Accept-Ranges: bytes`. Only the segments overlapping the range are read and decrypted. Folder/bulk downloads are streamed ZIP archives and do not support ranges.
 

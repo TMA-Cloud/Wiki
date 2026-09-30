@@ -56,6 +56,8 @@ Configure reverse proxy trust after the first login under **Settings** → **Adm
 
 **Note:** All three must be set to enable Google OAuth.
 
+The sign-in flow uses a `state` value and PKCE, and only links or creates an account when Google reports the email as verified. See [Authentication](/docs/concepts/authentication#google-oauth-optional).
+
 ## File Storage
 
 Configure a required S3-compatible bucket using R2, RustFS, or AWS environment variables. See [Environment Variables](/docs/reference/environment-variables#s3-compatible) for all provider settings.

@@ -116,6 +116,8 @@ Share link metadata.
 
 **Indexes:** `file_id`; partial index on `expires_at` where `expires_at IS NOT NULL`
 
+`user_id` is always the owner of `file_id`. Links are only created for the caller's own files, and the public lookup joins on `files.user_id = share_links.user_id`. Migration `048_remove_cross_owner_share_links` deletes rows that break this rule.
+
 ### `share_link_files`
 
 Junction table linking share links to files.
@@ -297,6 +299,8 @@ Migration tracking.
 | `applied_at` | TIMESTAMPTZ  | Default now() |
 
 Applied versions are not run again. Changes needed by an existing installation must be shipped in a new forward migration rather than only editing an older file.
+
+Each migration and its `migrations` row are committed in one transaction, so a crash cannot leave a migration applied but unrecorded. An advisory lock keeps two instances from applying migrations at the same time.
 
 ## Relationships
 

@@ -69,7 +69,7 @@ When an instance is configured for desktop app access only, browser requests to 
 }
 ```
 
-Share links (`/s/*`) are not affected.
+Share links (`/s/*`), `/health`, `/metrics`, `/api/onlyoffice/file/*`, and `/api/onlyoffice/callback` are not affected. The two OnlyOffice endpoints are called by the Document Server, which does not send the desktop header.
 
 ## Error Handling Best Practices
 

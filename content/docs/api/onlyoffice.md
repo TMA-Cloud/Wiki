@@ -11,6 +11,8 @@ OnlyOffice integration endpoints for TMA Cloud.
 
 Get OnlyOffice editor configuration for a file.
 
+**Permission:** `files.download`. A sub-user without it receives `403`. Without `files.edit` the editor opens in view-only mode.
+
 **Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 **Validation:**
@@ -47,6 +49,8 @@ Get OnlyOffice editor configuration for a file.
 
 Get standalone viewer page for a file.
 
+**Permission:** `files.download`, as for the config endpoint.
+
 **Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 **Validation:**
@@ -57,7 +61,7 @@ Get standalone viewer page for a file.
 - The server will return a `400 Bad Request` (as JSON or HTML) if a MIME type mismatch is detected.
 
 **Response:**
-HTML page with OnlyOffice viewer
+HTML page with OnlyOffice viewer. Its inline script carries the request's CSP nonce, and the editor config embedded in it is escaped for use inside a `<script>` element. See [Security Model](/docs/concepts/security-model#content-security-policy).
 
 ## File Serving
 

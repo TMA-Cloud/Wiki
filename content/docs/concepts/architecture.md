@@ -101,7 +101,7 @@ backend/
 - **Models:** Database abstraction layer
 - **Services:** pg-boss producers, worker tasks, access-time buffering, metrics, and storage operations
 - **Caching:** Redis-based caching with short-lived prefix registries for invalidation; request handlers never scan the Redis keyspace
-- **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting; a burst for one user is published as one batch envelope and causes one list refresh
+- **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting; a burst for one user is published as one batch envelope and causes one list refresh. Each API process holds one Redis subscriber connection shared by all of its SSE streams, so open tabs do not add Redis connections
 
 ## Frontend Structure
 
@@ -161,7 +161,13 @@ electron/
 
 **Main process:** Creates a single BrowserWindow; loads a loading page, then the server URL. Resolves server URL from embedded constant (at build time) or `src/config/build-config.json` (when run from source).
 
-**Preload:** contextIsolation: true, nodeIntegration: false. Exposes a small API (e.g. `electronAPI.clipboard`) via contextBridge and ipcRenderer.invoke.
+**Preload:** contextIsolation: true, nodeIntegration: false, sandbox: true. Exposes a small API (e.g. `electronAPI.clipboard`) via contextBridge and ipcRenderer.invoke.
+
+**Main process checks:**
+
+- Navigation is allowed only to the exact origin of the server URL. A host that only starts with the server's origin, such as `https://cloud.example.com.evil.example`, is blocked
+- `window.open` is denied, and permission requests (camera, microphone, and so on) are refused
+- Every IPC handler checks the frame that sent the call and runs only when that frame is on the server URL's origin. A page from any other origin that ends up in the window cannot use the clipboard, file, update, or Cloud Drive handlers
 
 **Renderer:** Same React app as web. Detects Electron via `window.electronAPI` and uses it where needed; all API calls go to the same backend via fetch.
 
@@ -187,6 +193,10 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 **Bridge authentication.** The pipe name is random per session and every request on it carries a per-session token; the main process rejects anything else, so another local process that reaches the pipe cannot issue operations against the signed-in account. The main process passes the token to the host on stdin (`--token-stdin`), not as a command-line argument, because a command line is readable by any process running as the same user for as long as the drive is mounted.
 
 **Drive permissions.** Files and folders on the drive report a security descriptor granting the signed-in Windows user, `SYSTEM` and the local Administrators group but not `Everyone` so other accounts on a shared machine cannot read the mount.
+
+**Listings.** The main process reads every page of a folder listing from `/api/files` and sends the host only the fields it uses (`id`, `name`, `type`, `size`, `modified`, `accessedAt`). The host accepts reply lines up to 64 MB.
+
+**Concurrent saves.** Creating a file or folder is serialized per path, so an app's 0-byte placeholder and the real content resolve to one backend file. Saves to different paths do not wait for each other.
 
 **Local staging.** File bytes never travel on the pipe. Reads and writes stage through temp files under `%TEMP%\tma-cloud-fs\` whose paths are exchanged over the pipe. Staging files are deleted when their handle closes, and any survivors are removed when the drive unmounts.
 
@@ -239,6 +249,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 │ Browser │ ─────────────────────────────> │ Backend  │
 └─────────┘                                └────┬─────┘
                                                 │
+                                                │ Check items belong to account
                                                 │ Create share link
                                                 │ Generate token
                                                 │ Link files
@@ -262,7 +273,7 @@ See [Database Schema](/docs/reference/database-schema) for details.
 - XSS protection (HTML escaping)
 - Path traversal protection
 - Rate limiting
-- Security headers (CSP, X-Frame-Options, etc.)
+- Security headers (CSP with per-request nonces, X-Frame-Options, etc.). See [Security Model](/docs/concepts/security-model#security-headers)
 
 ## Logging & Audit
 

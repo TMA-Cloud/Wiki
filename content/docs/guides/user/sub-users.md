@@ -44,6 +44,8 @@ Each sub-user has its own set of permissions. Anything left unticked is denied.
 
 Browsing is always allowed. Every sub-user can open folders, search, and see file details, even with nothing ticked.
 
+Opening a file (the image viewer, OnlyOffice, or **Open on desktop**) needs **Download**, because each of these reads the file's contents. Without it, double-clicking a file shows "You don't have permission to open files".
+
 Two shortcuts are available above the list: **Allow all** ticks every permission, **Clear all** unticks them.
 
 ### Changing Permissions Later

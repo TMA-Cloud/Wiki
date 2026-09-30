@@ -348,6 +348,9 @@ Connect to PostgreSQL database. Substitute your `DB_NAME` if you changed it.
 
 Migrations run automatically on application startup.
 
+- Each migration file runs in one transaction together with its row in the `migrations` table. A migration that fails is rolled back completely, the app does not start, and the same migration runs again on the next start.
+- A PostgreSQL advisory lock is held while migrations run, so when several app instances start at once, only one applies migrations and the others wait for it.
+
 ### Backup & Restore
 
 ```bash

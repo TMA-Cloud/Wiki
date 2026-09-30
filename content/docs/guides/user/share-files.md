@@ -72,6 +72,8 @@ Open **Get Info** on a shared file or folder to see when it was shared, how much
 - Immediate access revocation
 - Link becomes invalid
 
+Moving a shared item to trash also stops the link from serving it. Unlike unsharing, the link is kept, so restoring the item makes it reachable again.
+
 ## Share Link Features
 
 ### Public Access

@@ -9,9 +9,10 @@ Overall security architecture and practices in TMA Cloud.
 
 ### Password Security
 
-- **Hashing:** bcrypt, 10 rounds
+- **Hashing:** bcrypt, 10 rounds, computed off the request thread so a hash does not delay other requests
 - **Storage:** Hashed passwords only but a Google-only account stores no password at all
-- **Validation:** 8–128 characters, enforced by the server and mirrored in the client
+- **Validation:** 8–128 characters and at most 72 bytes in UTF-8, enforced by the server and mirrored in the client. bcrypt reads only the first 72 bytes, so a longer password would match any other password that starts with the same 72 bytes
+- **Unknown accounts:** A login for an email with no password hash still runs a bcrypt comparison, so response time does not reveal which emails have accounts
 
 ### Token Security
 
@@ -35,7 +36,7 @@ Overall security architecture and practices in TMA Cloud.
 - **Role-Based:** Admin vs regular user permissions
 - **Per-Permission Grants:** Sub-users hold an explicit set of permissions; anything not granted is refused
 - **API Authorization:** Endpoint-level checks, run before request bodies are read
-- **Share Link Security:** Token-based access
+- **Share Link Security:** Token-based access. A link can only be created for items in the caller's own account
 
 ### Input Validation
 
@@ -102,6 +103,7 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 - Admins can place an instance into a mode where the backend requires a custom HTTP header that only the Electron desktop app sends
 - The middleware checks this header for all main app routes and blocks requests that do not include it
 - Share links (`/s/*`), `/health`, and `/metrics` remain reachable without the header
+- The OnlyOffice file and callback endpoints (`/api/onlyoffice/file/*`, `/api/onlyoffice/callback`) also skip the header check. The Document Server calls them itself and does not send the header; both are authenticated by the OnlyOffice JWT
 - This setting is an access policy, not client attestation. A client that reproduces the header can pass the check, so authentication and authorization remain required
 
 ## Audit & Logging
@@ -122,12 +124,27 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 
 ## Security Headers
 
-- **CSP:** Content Security Policy
-- **X-Frame-Options:** Prevent clickjacking
-- **X-Content-Type-Options:** MIME type sniffing prevention
-- **X-XSS-Protection:** XSS protection
-- **Referrer-Policy:** Referrer information control
-- **Permissions-Policy:** Feature permissions
+- **CSP:** Content Security Policy. See [Content Security Policy](#content-security-policy)
+- **X-Frame-Options:** `DENY`, prevents clickjacking
+- **X-Content-Type-Options:** `nosniff`, prevents MIME type sniffing
+- **X-XSS-Protection:** `0`, turns off the legacy browser XSS filter, as OWASP recommends. CSP replaces it
+- **Referrer-Policy:** `strict-origin-when-cross-origin`
+- **Permissions-Policy:** Camera, microphone, and geolocation disabled
+
+### Content Security Policy
+
+`script-src` does not include `'unsafe-inline'` or `'unsafe-eval'`, so an injected script does not run. Scripts are allowed when they come from:
+
+- The app's own origin
+- The configured OnlyOffice Document Server origin, when OnlyOffice is set up
+- A per-request nonce. Server-rendered pages (share folder listings, the OnlyOffice viewer) add the nonce to their inline scripts
+- A SHA-256 hash of each inline script in the built `frontend/dist/index.html`, computed when the backend starts
+
+The hashes are read once at startup. If a frontend build changes an inline script in `index.html`, restart the backend so the new hash is allowed. The Docker image ships both together, so a container restart covers this.
+
+The policy also sets `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, and `form-action 'self'`. `style-src` keeps `'unsafe-inline'` because the frontend sets inline styles.
+
+Values placed into server-rendered HTML are HTML-escaped. JSON embedded in an inline script has `<`, `>`, `&`, U+2028, and U+2029 escaped, so a value such as a display name containing `</script>` cannot close the script element.
 
 ## Best Practices
 

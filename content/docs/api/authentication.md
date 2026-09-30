@@ -24,7 +24,7 @@ Create a new user account. This endpoint respects the server's signup enabled/di
 **Validation:**
 
 - `email`: Must be a valid email format and not exceed 254 characters.
-- `password`: Must be between 8 and 128 characters.
+- `password`: Must be a string, between 8 and 128 characters, and at most 72 bytes in UTF-8. Characters outside ASCII take 2–4 bytes each.
 - `name`: Optional. Must not exceed 100 characters.
 
 **Response:**
@@ -64,7 +64,7 @@ Authenticate a user and receive a JWT token. If MFA is enabled for the user, `mf
 **Validation:**
 
 - `email`: Must be a valid email format.
-- `password`: Must not exceed 128 characters.
+- `password`: Must be a string and not exceed 128 characters. Any other type returns `422`.
 
 **Response:**
 
@@ -86,7 +86,13 @@ The authenticated user's object, including `isSubUser` and the login's `permissi
 
 **Note:** Sub-users log in through this endpoint like any other account.
 
-**Rate limiting:** 25 attempts per 15 minutes per IP/email.
+**Error cases:**
+
+- `401 Invalid credentials` - Wrong password, unknown email, or an account that has no password (Google-only). The three cases return the same message and take the same time.
+- `400 MFA code required` - The account has MFA and no `mfaCode` was sent.
+- `401 Invalid MFA code`
+
+**Rate limiting:** 25 attempts per 15 minutes per IP/email. Failed attempts are also limited to 100 per 15 minutes per IP and 20 per 15 minutes per email. See [Rate Limits](/docs/reference/rate-limits#failed-login-limiters).
 
 ## Logout
 
@@ -146,7 +152,7 @@ This endpoint:
 **Validation:**
 
 - `oldPassword`: Required. String, 1–128 characters.
-- `newPassword`: Required. String, 8–128 characters. Must be different from `oldPassword`.
+- `newPassword`: Required. String, 8–128 characters and at most 72 bytes in UTF-8. Must be different from `oldPassword`.
 - `mfaCode`: Optional at the schema level, 6–20 characters. Required by the handler when the account has MFA enabled. Accepts a 6-digit TOTP code or an 8-character backup code.
 
 **Response (success):**
@@ -226,9 +232,20 @@ Check if Google OAuth is configured and enabled on the server.
 
 Initiate the Google OAuth login flow. This will redirect the user to Google's authentication page.
 
+The response sets an HTTP-only `oauth_flow` cookie, valid for 10 minutes, holding a random `state` value and a PKCE code verifier. The redirect to Google carries the `state` and the `S256` code challenge. Scopes are `openid`, `profile`, and `email`, with `prompt=select_account`.
+
 ### GET `/api/google/callback`
 
 The callback endpoint for Google to redirect to after successful authentication.
+
+The callback clears the `oauth_flow` cookie and checks that the `state` query parameter matches it before redeeming the code with the PKCE verifier. Failures redirect to the app with an `error` query parameter, which the login page shows as a message:
+
+| Redirect                   | Cause                                                                                                 |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/?error=oauth_state`      | The `oauth_flow` cookie is missing or expired, or `state` does not match                              |
+| `/?error=email_unverified` | Google reports the email as unverified, and the Google account is not already linked                  |
+| `/?error=signup_disabled`  | No account exists for this Google login and signup is disabled                                        |
+| `/?mfa_required=true`      | The account has MFA. Complete sign-in with [`POST /api/google/mfa-verify`](#post-apigooglemfa-verify) |
 
 **Rate limiting:** 25 attempts per 15 minutes per IP/email.
 

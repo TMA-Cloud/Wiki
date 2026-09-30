@@ -23,6 +23,17 @@ Rate limits are enforced per IP address and/or user for different endpoint types
   - `POST /api/change-password`
   - `GET /api/google/callback`
 
+### Failed Login Limiters
+
+Two more limits apply to `POST /api/login` and count only failed attempts (any response with status 400 or above). A successful login does not use up the allowance.
+
+- **Per IP:** 100 failed logins per 15 minutes from one IP address, across all emails. Limits one client trying many accounts.
+- **Per account:** 20 failed logins per 15 minutes for one email, across all IP addresses. Limits many clients trying one account.
+
+A login that requires MFA and is sent without a code returns `400 MFA code required`, which counts as one failure.
+
+The per-account limit applies to anyone who knows the email, so repeated failed attempts can block that account's password login for up to 15 minutes. Google sign-in is not affected.
+
 ### General API Limiter
 
 - **Limit:** 10000 requests per 15 minutes, keyed per user when authenticated and per IP address otherwise.
@@ -94,7 +105,7 @@ When a rate limit is exceeded:
 }
 ```
 
-Note that the limiters put the sentence in an `error` field rather than a `message` field, unlike the rest of the API.
+Note that the limiters put the sentence in an `error` field rather than a `message` field, unlike the rest of the API. The failed login limiters use their own sentences: `Too many failed sign-in attempts from this network, please try again later` (per IP) and `Too many failed sign-in attempts for this account, please try again later` (per account).
 
 The backup-code cooldown is separate from the limiter above it and answers in the normal shape, with the remaining wait included:
 

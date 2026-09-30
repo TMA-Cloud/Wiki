@@ -99,7 +99,7 @@ The response format depends on the external update feed. Example:
 - `backend`: Latest backend version from the update feed
 - `electron`: Latest Windows Electron app version from the update feed
 
-**Note:** This endpoint proxies the response directly from the update feed. If the request fails, returns an error response.
+**Note:** This endpoint proxies the response from the update feed. A successful response is cached in the backend process for 10 minutes, so a release can take up to 10 minutes to appear. Failed requests are not cached and return an error response.
 
 ## Related Topics
 

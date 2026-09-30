@@ -24,6 +24,8 @@ Share links provide public access to files and folders without requiring authent
 - **Token-Based:** Access via unique token
 - **Read-Only:** Share links provide read access only
 - **Download:** Files can be downloaded via share link
+- **Own items only:** A link can only be created for files and folders in the caller's account that are not in Trash. A request that includes any other ID returns **404 Not Found** and creates no link
+- **Trash:** An item in Trash is not reachable through a link. Trashing the shared file or folder makes the link return **404 Not Found**; trashing an item inside a shared folder removes it from the listing and blocks its download. The link rows are kept, so restoring the item makes it reachable again, until the link expires
 
 ## Accessing Shared Content
 
@@ -127,6 +129,8 @@ The shared time is set when an item joins a share. Re-sharing an active item kee
 - No authentication required (by design)
 - Expiration enforced on every access (not just cleanup)
 - Redis cache TTL is capped at the link's remaining lifetime to prevent stale access
+- Moving an item to Trash clears the cached lookups of every share that contains it, so it stops resolving immediately
+- The public lookup requires the link's owner to match the file's owner
 - Share domain isolation (optional)
 
 ## Related Topics

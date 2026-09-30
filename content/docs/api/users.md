@@ -101,7 +101,7 @@ Create a sub-user under the current owner.
 **Validation:**
 
 - `email`: Required. Valid email, max 254 characters. Must not already exist on the instance.
-- `password`: Required. Between 8 and 128 characters.
+- `password`: Required. String, between 8 and 128 characters and at most 72 bytes in UTF-8.
 - `name`: Required. Non-empty after trimming, max 100 characters.
 - `permissions`: Required. Array of permission keys. May be empty. Unknown keys are rejected.
 
@@ -124,7 +124,7 @@ Create a sub-user under the current owner.
 
 - `403 Only the account owner can perform this action.` - Caller is a sub-user
 - `409 Email already in use`
-- `422 Validation failed` - Missing name, short password, or an unknown permission key; `details` names the field
+- `422 Validation failed` - Missing name, a password that is too short or over 72 bytes, or an unknown permission key; `details` names the field
 
 ### PUT `/api/user/sub-users/:id`
 
@@ -530,7 +530,7 @@ Get the desktop-only access setting. Accessible to any authenticated user.
 
 ### PUT `/api/user/electron-only-access-config`
 
-Update the desktop-only access setting (admin only). When enabled, the backend blocks browser access to the main app. Share links, `/health`, and `/metrics` remain available.
+Update the desktop-only access setting (admin only). When enabled, the backend blocks browser access to the main app. Share links, `/health`, `/metrics`, and the OnlyOffice file and callback endpoints (called by the Document Server) remain available.
 
 **Request Body:**
 

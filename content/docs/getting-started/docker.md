@@ -108,6 +108,8 @@ docker compose down -v
 docker compose restart
 ```
 
+On `SIGTERM` (sent by `docker compose down`, `stop`, and `restart`) the app stops accepting connections and waits up to 8 seconds for in-flight requests to finish before it closes the database pool. Open Server-Sent Events streams never finish on their own, so any connection still open after 8 seconds is closed. This stays inside Docker's default 10-second stop timeout.
+
 ## Monitoring
 
 **Health Check:**

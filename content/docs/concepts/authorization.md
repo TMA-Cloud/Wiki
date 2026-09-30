@@ -103,6 +103,8 @@ Anything not granted is denied. There is no deny list, because there is nothing 
 - Public access without authentication
 - Token-based access control
 - Optional expiration dates
+- Links can only be created for items in the caller's account
+- Items in Trash are not reachable through a link
 
 ## Where Permissions Are Enforced
 
@@ -110,7 +112,7 @@ Permission checks run on the server before the handler, and before any upload bo
 
 Two cases are worth noting:
 
-- **OnlyOffice** - The save callback arrives from the document server without a user session, so a sub-user without **Modify** gets the editor in view-only mode when the document is opened.
+- **OnlyOffice** - Opening a document requires **Download**, since the editor receives the file's contents and can download or print it. A sub-user without it gets `403`, and double-clicking a file in the file list shows a message instead of opening it. The save callback arrives from the document server without a user session, so a sub-user without **Modify** gets the editor in view-only mode when the document is opened.
 - **Share links** - Reading an existing link requires **Share**, because copying a link is how account content reaches people outside the account.
 
 ## Security Considerations

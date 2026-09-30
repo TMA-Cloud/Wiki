@@ -22,7 +22,7 @@ Folder rows are returned in keyset pages of 100 and the page loads the next set 
 **Responses:**
 
 - **200** - HTML page with shared files
-- **404** - Link does not exist or has been removed
+- **404** - Link does not exist, has been removed, or the shared item is in Trash
 - **410** - Link has expired
 
 ### GET `/s/:token/folder/:id`
@@ -39,7 +39,7 @@ The same `cursor`, `limit`, and JSON response behavior used by the root folder a
 **Responses:**
 
 - **200** - HTML page with the subfolder's contents
-- **404** - Link not found, or the folder is not part of this share
+- **404** - Link not found, the folder is not part of this share, or the folder is in Trash
 - **410** - Link has expired
 
 ### GET `/s/:token/file/:id`
@@ -54,7 +54,7 @@ Download an item from a share link. A file `id` downloads the file. A folder `id
 **Responses:**
 
 - **200** - File or ZIP download
-- **404** - Link or file not found
+- **404** - Link or file not found, or the item is in Trash
 - **410** - Link has expired
 
 ### GET `/s/:token/zip`
@@ -68,7 +68,7 @@ Download a folder as ZIP from a share link.
 **Responses:**
 
 - **200** - ZIP archive download
-- **404** - Link not found or not a folder
+- **404** - Link not found, not a folder, or the folder is in Trash
 - **410** - Link has expired
 
 ## Related Topics
