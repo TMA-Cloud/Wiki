@@ -55,7 +55,7 @@ Builds a Windows installer with the server URL embedded so users do not need a c
    npm run build:client
    ```
 
-   This runs `prepare-client-build.js` (copies `src/main` and `src/preload` into `dist-electron/` and injects `serverUrl` into main config), then `build-clouddrive.js` (compiles the [Cloud Drive](#cloud-drive-mounted-windows-drive) host and bundles the WinFsp installer), then runs electron-builder. Output is in `electron/dist-client/` (NSIS installer by default).
+   This runs `prepare-client-build.js` (copies `src/main` and `src/preload` into `dist-electron/` and injects `serverUrl` into main config), then `build-clouddrive.js` (compiles the [Cloud Drive](#cloud-drive-mounted-windows-drive) host and bundles the WinFsp installer), then runs electron-builder. Output is in `electron/dist-client/` (one-click NSIS installer by default).
 
    The Cloud Drive host targets .NET 10, so building the installer also requires the **.NET 10 SDK**. The WinFsp redistributable is downloaded and verified at build time.
 
@@ -75,7 +75,7 @@ Builds are unsigned by default. To sign the app, configure code signing and use 
 
 ## Install on Windows
 
-- **NSIS installer:** Run the `.exe` from `dist-client/`. Choose installation directory and complete the wizard.
+- **NSIS installer:** Run the `.exe` from `dist-client/` and accept the Windows UAC prompt. The installer has no pages: it installs to `C:\Program Files\TMA Cloud`, shows a progress bar, and starts the app when done. An existing install is upgraded in its current folder. Admin rights are needed because the app installs for all users and may install WinFsp.
 - **Portable:** Copy the portable build and run the executable. No install step.
 - **Unpacked:** Run the executable inside the unpacked folder.
 
@@ -87,11 +87,11 @@ The server URL is embedded at build time only. No config file is needed after in
 - The app uses the same update feed as the web UI (`/api/version/latest`), which returns `frontend`, `backend`, and `electron` versions.
 - When any signed-in user opens the app (web or desktop), a one-time background check compares the current versions to the feed.
 - If any component is outdated, an **Updates Available** notice appears in the left sidebar above **Settings**, listing the latest versions for backend, frontend, and Electron.
-- **Desktop (Electron) updates:** When the Electron version is outdated and `updatorUrl` was set at build time, a download icon appears next to **Electron** in that section. Any signed-in user can click it to download the update. After the download finishes, the installer is launched and the app quits so the user can complete setup. If `updatorUrl` is not configured, the sidebar still shows the latest version but the download action is not available.
+- **Desktop (Electron) updates:** When the Electron version is outdated and `updatorUrl` was set at build time, a download icon appears next to **Electron** in that section. Any signed-in user can click it to download the update. After the download finishes, the app starts the installer silently (`--updated /S --force-run`) through `elevate.exe`, which electron-builder ships with the app, and quits. Windows shows one UAC prompt; there are no installer pages. When the install finishes, the new version starts on its own. If the silent launch fails, the app opens the installer normally instead. If `updatorUrl` is not configured, the sidebar still shows the latest version but the download action is not available.
 - **Update download checks:** The app runs the downloaded file, so it checks the download first:
   - The version must look like `1.2.3` or `1.2.3-beta.1` (an optional leading `v` is removed). Anything else is refused before a URL is built.
   - `updatorUrl`, and the final URL after any redirects, must be `https://`.
-  - The saved file must end in `.exe` or `.msi`. If the server suggests any other name through `Content-Disposition`, the app saves it as `TMA-Cloud-Setup-<version>.exe` instead.
+  - The saved file must end in `.exe`. If the server suggests any other name through `Content-Disposition`, the app saves it as `TMA-Cloud-Setup-<version>.exe` instead.
   - The installer is not signature-checked, because builds are unsigned by default. Host installers only on a server you control.
 
 ## Active desktop clients (admin view)

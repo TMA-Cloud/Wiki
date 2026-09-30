@@ -206,7 +206,8 @@ The main process end of every desktop feature:
 - Cloud Drive — the per-session bridge token and that it reaches the host on stdin,
   the staging-directory confinement on every path the filesystem host sends, save-only mode, mount and unmount, and mounting from the auth cookie without unmounting on a token refresh
 - Updates — the installer URL, `Content-Disposition` filename sanitising, download
-  progress, and launching the installer
+  progress, and launching the installer silently through `elevate.exe`, falling back
+  to opening it through the shell
 - Save and bulk save dialogs, temp-directory cleanup, single-instance behaviour, and
   the packaging contract the build scripts depend on
 
