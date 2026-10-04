@@ -117,6 +117,20 @@ npm run format:check
 
 Check code formatting without making changes.
 
+### Unused Code
+
+```bash
+npm run knip
+```
+
+Run [knip](https://knip.dev) to find unused files, exports and dependencies. Exits non-zero when it finds any. The frontend and desktop app define the same script and run knip twice, once with tests and once without, so code that only its own tests use is also reported.
+
+```bash
+npm run knip:production
+```
+
+Backend only. Run knip without tests. This is a manual audit, not a CI check: the remaining findings should be exports that a module uses itself and that tests reach.
+
 ### S3 bucket
 
 Run from backend directory. Uses project S3 config.
@@ -301,6 +315,14 @@ make help
 ```
 
 List the available targets and configuration variables.
+
+## Git Hooks
+
+```bash
+make hooks
+```
+
+Use the repository's git hooks from `.githooks/`. Run once per clone. It sets `core.hooksPath` to `.githooks`. See [Testing — Git Hooks](/docs/guides/operations/testing#git-hooks) for what each hook checks.
 
 ### Docker Compose
 

@@ -638,6 +638,8 @@ This endpoint supplies the desktop rows shown by `GET /api/user/active-clients` 
 - `platform`: Optional. String.
 - `clientId`: Optional. String. When omitted, backend falls back to token `sessionId`.
 
+The heartbeat is linked to the session in the signed-in token. A `sessionId` in the request body is ignored, so a client cannot record presence for a session that is not its own.
+
 **Response:**
 
 ```json

@@ -35,6 +35,12 @@ Organize your files with folders in TMA Cloud.
 - **Recursive:** All contents copied automatically
 - **Background job:** The copy continues on the worker if the request closes
 
+### Name Conflicts
+
+When a moved or copied folder has the same name as a folder already in the destination, both are kept and the new one is renamed, for example `Photos (1)`. Names are compared without regard to case. Folders moved back into their own parent keep their names.
+
+A move or copy fails if the folder or the destination was deleted or moved to the trash in the meantime. Moving a folder into itself or one of its subfolders is refused.
+
 ### Renaming Folders
 
 - **Rename Option:** Right-click → Rename

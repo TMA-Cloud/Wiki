@@ -37,22 +37,21 @@ Two groups are exposed:
 - **Node.js process metrics** collected by `prom-client`, prefixed `nodejs_` — memory, CPU, event loop lag, garbage collection, handles.
 - **Audit queue metrics**, listed below.
 
-| Metric                              | Type      | Labels             | Meaning                                |
-| ----------------------------------- | --------- | ------------------ | -------------------------------------- |
-| `audit_events_queued_total`         | Counter   | `action`, `status` | Events handed to pg-boss               |
-| `audit_events_processed_total`      | Counter   | -                  | Events written to `audit_log`          |
-| `audit_events_failed_total`         | Counter   | `reason`           | Events that failed to process          |
-| `audit_queue_depth`                 | Gauge     | -                  | Jobs in `created` or `retry` state     |
-| `audit_queue_failed_depth`          | Gauge     | -                  | Jobs in `failed` state                 |
-| `audit_processing_duration_seconds` | Histogram | -                  | Time to process one event              |
-| `audit_last_processed_timestamp`    | Gauge     | -                  | Unix time of the last successful write |
+| Metric                              | Type      | Labels   | Meaning                                |
+| ----------------------------------- | --------- | -------- | -------------------------------------- |
+| `audit_events_processed_total`      | Counter   | -        | Events written to `audit_log`          |
+| `audit_events_failed_total`         | Counter   | `reason` | Events that failed to process          |
+| `audit_queue_depth`                 | Gauge     | -        | Jobs in `created` or `retry` state     |
+| `audit_queue_failed_depth`          | Gauge     | -        | Jobs in `failed` state                 |
+| `audit_processing_duration_seconds` | Histogram | -        | Time to process one event              |
+| `audit_last_processed_timestamp`    | Gauge     | -        | Unix time of the last successful write |
 
 The two queue depth gauges are refreshed every 60 seconds by default with one aggregate query against the pg-boss job table. Set `QUEUE_METRICS_INTERVAL_SECONDS` to change the interval.
 
 **Example:**
 
 ```bash
-audit_events_queued_total{action="file.upload",status="success"} 1234
+audit_events_processed_total 1234
 audit_queue_depth 0
 nodejs_heap_size_used_bytes 4.2e+07
 ```

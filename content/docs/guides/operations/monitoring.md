@@ -27,7 +27,6 @@ To check the database from outside the app, use `pg_isready` against the Postgre
 
 | Metric                              | Type      | Useful for                                                    |
 | ----------------------------------- | --------- | ------------------------------------------------------------- |
-| `audit_events_queued_total`         | Counter   | Event volume, broken down by `action` and `status`            |
 | `audit_events_processed_total`      | Counter   | Worker throughput                                             |
 | `audit_events_failed_total`         | Counter   | Processing failures, broken down by `reason`                  |
 | `audit_queue_depth`                 | Gauge     | Backlog — a rising value means the worker is down or too slow |

@@ -200,7 +200,8 @@ The main process end of every desktop feature:
 - The preload bridge: which channels it exposes, and that it never hands the page a
   generic way to reach the main process
 - Open on desktop — download, watch, throttled re-upload, exported "Save As" files,
-  and the size-based reuse of an already downloaded copy
+  the size-based reuse of an already downloaded copy, and refusing programs and scripts
+  before download
 - Clipboard — the file-drop, OLE and text-as-paths sources, size caps, name
   sanitising, and origin checks on server-side copies
 - Cloud Drive — the per-session bridge token and that it reaches the host on stdin,
@@ -211,11 +212,78 @@ The main process end of every desktop feature:
 - Save and bulk save dialogs, temp-directory cleanup, single-instance behaviour, and
   the packaging contract the build scripts depend on
 
+## Static Checks
+
+Each Node package runs [knip](https://knip.dev) to find unused files, exports and
+dependencies:
+
+```bash
+npm run knip
+```
+
+Run it from `backend`, `frontend` or `electron`. It exits non-zero when it finds
+anything. In `frontend` and `electron` it runs twice, once with tests and once without,
+so an export that only tests use is reported too. A frontend export kept for tests is
+tagged `/** @internal Exported for tests. */`. Configuration is in each package's
+`knip.jsonc`.
+
+The backend exports through `export { ... }` lists, which the `@internal` tag cannot
+mark, so its run without tests is a manual audit:
+
+```bash
+npm run knip:production
+```
+
+The Cloud Drive host in `desktop-fs` reports unused private members, unread fields and
+unused parameters as build warnings. Build with `-warnaserror` to fail on them:
+
+```bash
+dotnet build -warnaserror
+```
+
+## Git Hooks
+
+Hooks live in `.githooks/`. Turn them on once per clone from the repository root:
+
+```bash
+make hooks
+```
+
+### pre-commit
+
+Checks staged files only:
+
+- Prettier and ESLint, per package
+- `dotnet format whitespace` for `.cs` files
+- Blocks `.env` files, conflict markers and files over 5 MB
+
+### commit-msg
+
+- Subject starts with a capital letter and is at most 72 characters
+- No trailing period and no `type:` prefix on the subject
+- Blank line between the subject and the body
+- Body wrapped at 72 columns and at most 40 lines
+- A `Signed-off-by` line (`git commit -s`)
+
+### pre-push
+
+For each package the push changes:
+
+- Lint, format check and unit tests
+- Type checks (frontend only)
+- knip
+- `dotnet build -warnaserror` and `dotnet format` (`desktop-fs`)
+
+A partly staged file is checked on its staged content, which is what the commit
+contains. `pre-push` runs against the working tree and skips the integration suites,
+which need PostgreSQL and Redis. Bypass a hook with `--no-verify` only when you have a
+reason to.
+
 ## Continuous Integration
 
-`.github/workflows/test.yml` runs lint, format check, and every suite on each push and
-pull request. The integration job starts PostgreSQL and Redis service containers, so it
-does not need shared infrastructure.
+`.github/workflows/test.yml` runs lint, format check, knip, and every suite on each push
+and pull request. The integration job starts PostgreSQL and Redis service containers, so
+it does not need shared infrastructure. The `desktop-fs` checks are not part of CI.
 
 ## Related Topics
 

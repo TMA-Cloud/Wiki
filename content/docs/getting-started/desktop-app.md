@@ -104,17 +104,16 @@ The server URL is embedded at build time only. No config file is needed after in
 
 ## Desktop Editing and Open on Desktop (Windows)
 
-When you run the Windows desktop app, you can open supported files in their desktop applications and have changes sync back automatically.
+When you run the Windows desktop app, you can open files in their desktop applications and have changes sync back automatically.
 
-- **Supported:** `.docx`, `.xlsx`, `.pptx`, `.pdf`, and other types that Windows can open (including common image and video formats)
+- **Supported:** Any file type, as Explorer does for files on a network share. Windows opens the file with its default app, or shows the **Open with** dialog when no app is registered for the type.
+- **Blocked:** Programs, scripts, installers and shortcuts (for example `.exe`, `.msi`, `.bat`, `.cmd`, `.ps1`, `.vbs`, `.js`, `.lnk`, `.url`, `.reg`) are refused before download with "Programs and scripts can't be opened from the cloud. Download the file to run it." A file from the server does not run as code on a double-click. Trailing dots and spaces in the name do not bypass the check.
 - **Where it works:** Electron desktop app on Windows only
 
 ### Open on Desktop
 
-- Right-click a supported file (document, image, or video) → **Open on desktop**
-- Double-click behavior in the desktop app:
-  - Office/OnlyOffice-supported files open in the default desktop application
-  - Image and video files open in the default viewer for that type
+- Right-click a file → **Open on desktop**
+- Double-clicking a file in the desktop app does the same. Folders are not opened this way.
 - A progress indicator (e.g. "Opening file… X%") appears while the file is prepared. Clicking the same file again while it is opening shows "Already opening this file on desktop. Please wait...".
 
 ### How Sync Works
@@ -168,9 +167,28 @@ The Windows desktop app uses a single Copy / Cut / Paste model that bridges the 
 
 ### Context Menu
 
-- **Copy:** Right-click one or more items → **Copy**. The selection goes to the in-app clipboard immediately so you can paste it into another folder inside TMA Cloud, and (in the desktop app) it is also written to the Windows clipboard in the background so you can paste in Explorer. Files are downloaded for the Windows clipboard four at a time. Files larger than 200 MB total and folders are kept on the in-app clipboard only — those still paste between folders in TMA Cloud, but Explorer pastes are skipped. The toast tells you which path applied.
-- **Cut:** Right-click → **Cut**. In-app only. Cut items show a Windows-Explorer-style faded look until paste completes.
-- **Paste:** Right-click in a folder → **Paste**. If you copied or cut something inside TMA Cloud, the cloud clipboard is used (server-side copy/move — no re-upload). Otherwise physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC. If you copy something in Explorer after a cloud Copy, Paste detects the change and uses the newer Windows-clipboard files instead.
+- **Copy:** Right-click one or more items → **Copy**. The selection goes to the in-app clipboard immediately so you can paste it into another folder inside TMA Cloud, and it is also written to the Windows clipboard in the background so you can paste in Explorer. Files are downloaded for the Windows clipboard four at a time. Folders and selections over 200 MB are kept on the in-app clipboard only — those still paste between folders in TMA Cloud, but Explorer pastes are skipped. The toast tells you which path applied. If you copy something else before the download finishes, the finished download does not replace the newer copy.
+- **Cut:** Right-click → **Cut**. Moves within TMA Cloud only. Cut items show a Windows-Explorer-style faded look until paste completes.
+- **Paste:** Right-click in a folder → **Paste**. Paste uses whichever clipboard was written last, as Windows does. If another app put files on the Windows clipboard after your last in-app Copy or Cut, those files are uploaded. Otherwise the cloud clipboard is used (server-side copy or move, no re-upload). Physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC.
+
+Every in-app Copy or Cut also takes the Windows clipboard, including folder copies, copies over 200 MB and cuts. Those write the item names as text, so files copied in Explorer before the in-app Copy are not pasted by mistake.
+
+A copy can be pasted any number of times. A cut is used up by its paste. When a paste ends, the open folder is refreshed, even if you opened another folder while the server was still copying.
+
+A paste fails with a message when:
+
+- Some of the copied or cut items were deleted or moved to the trash since the Copy or Cut.
+- The folder you paste into was deleted or moved to the trash.
+- A folder would be moved into itself or one of its subfolders.
+
+When a pasted item has the same name as an item of the same type in the folder, both are kept and the pasted one gets a name such as `report (1).pdf`. Items pasted back into their own folder keep their names.
+
+Copy, Cut and Paste follow the same rules from the context menu and the keyboard:
+
+- Nothing in the **Trash** can be copied or cut.
+- Paste works only in **My Files**, because **Starred** and **Shared** have no current folder to paste into.
+- Sub-users need **Upload & create** to copy and to paste a copy, and **Modify** to cut and to paste a cut.
+- Holding down **Ctrl+C**, **Ctrl+X** or **Ctrl+V** acts once, not once per key repeat.
 
 The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference"). Virtual OLE files have no disk path, so Electron extracts them in the main process and uploads them from bounded memory without writing a plaintext upload file to `%TEMP%` or sending file data through renderer IPC. Because that content is held whole in memory, one paste of virtual files is capped at 500 MB in total. The backend still performs the normal streaming encryption before object storage.
 
@@ -188,9 +206,9 @@ Clipboard uploads run in the Electron main process and appear in the same floati
 ### Keyboard Shortcuts
 
 - **Ctrl+A / Cmd+A:** Select all files and folders in the current view.
-- **Ctrl+C / Cmd+C:** Unified Copy (cloud clipboard + Windows clipboard when files fit).
-- **Ctrl+X / Cmd+X:** Cut (cloud clipboard only).
-- **Ctrl+V / Cmd+V:** Smart Paste — cloud clipboard first, otherwise upload from the Windows clipboard.
+- **Ctrl+C / Cmd+C:** Copy (cloud clipboard, plus Windows clipboard when files fit).
+- **Ctrl+X / Cmd+X:** Cut (moves within TMA Cloud only).
+- **Ctrl+V / Cmd+V:** Paste from whichever clipboard was written last.
 - **Ctrl+Shift+I / Cmd+Shift+I:** Open **Get Info** for the currently selected file or folder (desktop app only and single selection).
 
 ## Folder navigation (back/forward)

@@ -36,7 +36,7 @@ Learn how to upload and manage files in TMA Cloud.
 - Press **Ctrl+V** in the file list; if you haven't recently copied something inside TMA Cloud, the OS-clipboard files upload to the current folder
 - Single file uses standard upload; multiple files use bulk upload with progress
 - Same size and quota limits apply as for Upload
-- In the Windows desktop app, **Paste** is unified with the in-app clipboard: if you also did a Copy/Cut inside TMA Cloud, that takes priority. If you copy something new in Explorer afterwards, Paste detects the change and uploads the newer Explorer files instead
+- In the Windows desktop app, **Paste** is unified with the in-app clipboard and uses whichever was written last: files copied in Explorer after an in-app Copy or Cut are uploaded, otherwise the in-app clipboard is pasted
 - Physical clipboard files stream from their existing path. Pathless Outlook/Snipping Tool/OLE items upload from Electron's main-process memory, capped at 500 MB per paste because that content is held in memory. Neither route creates a plaintext upload copy in the host temp directory
 - Pasted files get the same progress cards as any other upload, one per file, each with its own **Cancel**. Canceling stops the transfer rather than only hiding the card
 - A file the server refuses is listed in the upload-issues dialog and the remaining files still upload
@@ -83,11 +83,14 @@ You choose an action for each conflicting file; nothing is uploaded until you co
 
 - **Download:** Click to download single file
 - **Bulk Download:** Select multiple files → Download (creates ZIP archive)
-- **Copy:** Right-click → Copy (or **Ctrl+C**). One action: copies between folders inside TMA Cloud and (in the desktop app) also writes to the Windows clipboard so you can paste in Explorer. The 200 MB limit only affects the Windows-clipboard side
-- **Cut:** Right-click → Cut (or **Ctrl+X**). In-app only — cut items appear faded until you paste
+- **Copy:** Right-click → Copy (or **Ctrl+C**). One action: copies between folders inside TMA Cloud and (in the desktop app) also writes to the Windows clipboard so you can paste in Explorer. The 200 MB limit only affects the Windows-clipboard side. A copy can be pasted more than once
+- **Cut:** Right-click → Cut (or **Ctrl+X**). In-app only — cut items appear faded until you paste. A cut is used up by its paste
 - **Rename:** Right-click → Rename
 - **Move:** Drag and drop or use Cut + Paste
-- **Paste:** Right-click → Paste (or **Ctrl+V**). Smart paste: cloud clipboard wins if you copied/cut inside TMA Cloud, otherwise files from the Windows clipboard are uploaded. If you copied externally after a cloud Copy, Paste detects that and uses the newer Windows-clipboard files
+- **Paste:** Right-click → Paste (or **Ctrl+V**). Works in **My Files** only. In the desktop app, Paste uses whichever clipboard was written last: files copied in another app after your in-app Copy or Cut are uploaded, otherwise the in-app clipboard is pasted
+- **Name conflicts on paste:** A pasted file or folder with the same name as one already in the folder is kept beside it with a name such as `report (1).pdf`. Names are compared without regard to case
+- **Missing items:** If a copied or cut item, or the destination folder, was deleted or moved to the trash after the Copy or Cut, Paste fails with a message and nothing is pasted
+- **Trash:** Items in the trash cannot be copied or cut
 - **Delete:** Right-click → Delete (moves to trash)
 - **Star:** Mark files as favorites
 - **Select all (desktop app):** Press **Ctrl+A** / **Cmd+A** in the file list to select all items in the current folder
@@ -112,10 +115,10 @@ You choose an action for each conflicting file; nothing is uploaded until you co
 ### Document Editing and Viewers
 
 - **OnlyOffice Integration (browser):** Edit `.docx`, `.xlsx`, `.pptx` files in the browser when OnlyOffice is configured
-- **Desktop Editing (desktop app):** In the electron app, open supported documents on your computer (Word, Excel, PowerPoint, and other associated editors) and changes sync back automatically when you save
+- **Desktop Editing (desktop app):** In the Electron app, open any file in the Windows app registered for its type (Word, Excel, PowerPoint, an image viewer, and so on), and changes sync back automatically when you save. Windows shows **Open with** when no app is registered. Programs, scripts and shortcuts are not opened
 - **Export / Save As (desktop app):** When a document is opened via **Open on desktop** in the Windows app and you use Save As / Export to create a new file in the temporary folder opened by the desktop app (for example a `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.csv`, or `.rtf`), the new file is uploaded automatically as a separate file in the same cloud folder. If you save the new file to another location (for example Desktop or Documents), it is not uploaded automatically.
 - **Image Viewing (browser):** View images with zoom in the built-in viewer
-- **Image, Video, and Audio (desktop app):** In the Electron app, double-clicking images, videos, or audio files opens them in the default desktop application
+- **Double-click (desktop app):** In the Electron app, double-clicking any file opens it in the default desktop application
 
 ## Best Practices
 

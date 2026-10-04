@@ -350,6 +350,13 @@ Move files and/or folders to a different location.
 }
 ```
 
+**Name conflicts:** A moved item that has the same name as an item of the same type in the target folder gets a unique name, such as `document (1).pdf` or `Photos (1)`. Names are compared without regard to case. Items that are already in the target folder keep their names and are not moved.
+
+**Errors:**
+
+- `404`: One or more items are missing or in the trash, or the target folder is missing or in the trash. Nothing is moved.
+- `400`: A folder would be moved into itself or one of its subfolders.
+
 ## Copy Files
 
 ### POST `/api/files/copy`
@@ -381,6 +388,10 @@ Copy files and/or folders to a different location.
 ```
 
 Copy always returns `202`. The `account-file-operations` worker copies the tree and publishes the normal file events after completion. If the queue is unavailable, the endpoint returns `503`.
+
+**Name conflicts:** Each copied file or folder at the top of the selection gets a unique name in the target folder when its name is already taken by an item of the same type, such as `document (1).pdf` or `Photos (1)`. Names are compared without regard to case. Items inside a copied folder keep their names.
+
+If one or more items are missing or in the trash, or the target folder is missing or in the trash, the endpoint returns `404` and nothing is queued.
 
 ## Rename File
 
