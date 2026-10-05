@@ -210,12 +210,21 @@ Clipboard uploads run in the Electron main process and appear in the same floati
 - **Ctrl+X / Cmd+X:** Cut (moves within TMA Cloud only).
 - **Ctrl+V / Cmd+V:** Paste from whichever clipboard was written last.
 - **Ctrl+Shift+I / Cmd+Shift+I:** Open **Get Info** for the currently selected file or folder (desktop app only and single selection).
+- **Enter:** Open the selected file or folder.
+- **Backspace:** Go back to the previous folder.
+- **Alt+Up:** Go to the parent folder.
+- **Letters:** Type the first letters of a name to select it.
+- **Tab:** Move focus into the file list, and out again with the next **Tab**.
+- **Arrow keys, Home, End, Page Up, Page Down:** Move the selection. Add **Shift** to select a range, or **Ctrl** to move without selecting and **Ctrl+Space** to add or remove the outlined item.
+
+The last six also work in the browser. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation).
 
 ## Folder navigation (back/forward)
 
 In the Windows desktop app, the file manager supports back/forward folder navigation.
 
 - **Toolbar:** Back and Forward buttons appear in the file manager header (left of the breadcrumbs). They move through the folder history.
+- **Keyboard:** **Backspace** goes back, the same as the Back button. **Alt+Up** goes to the parent folder.
 - **Mouse:** Mouse back/forward (side buttons, e.g. typical browser back/forward) trigger folder back/forward when the file manager is in use. They are ignored when the pointer is over an input, textarea, select, or a dialog.
 
 Navigation history is updated when you open a folder, click a breadcrumb, or go to **My Files**. Forward history is cleared when you navigate to a new folder.

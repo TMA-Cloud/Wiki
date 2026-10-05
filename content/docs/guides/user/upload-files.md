@@ -79,6 +79,36 @@ You choose an action for each conflicting file; nothing is uploaded until you co
 - **List View:** Detailed list with metadata
 - **Sort Options:** Name, Modified, Last opened, Size — each ascending or descending. Folders are always listed before files
 
+### Keyboard Navigation
+
+These keys work in the browser and the desktop app, and follow Windows Explorer:
+
+- **Tab:** Moves keyboard focus into the file list. The outline returns to the item you were last on, which is the last item you clicked or moved to. If nothing is selected, the first item is selected and outlined, so the first **Down** goes to the second item. The list is one Tab stop: the next **Tab** leaves it and **Shift+Tab** returns to the toolbar. Leaving the list hides the outline, and tabbing back in shows it on the same item
+- **Arrow keys:** Up and Down move the selection by one row. In grid view, Left and Right move by one item, and Down from a short last row goes to the last item. With nothing selected, the first press selects the first item
+- **Home / End:** Select the first or last item
+- **Page Up / Page Down:** Move the selection by about one screen of rows
+- **Shift+Arrow, Shift+Home, Shift+End:** Select a range from the anchor (the item where the range started) to the new item. Turning back shrinks the range
+- **Ctrl+Arrow:** Moves an outline to another item without changing the selection
+- **Ctrl+Space:** Adds the outlined item to the selection, or removes it. Use it with **Ctrl+Arrow** to pick items that are not next to each other
+- **Type a name:** Typing the first letters of a name selects the next matching item and scrolls it into view. Case and accents are ignored, so **e** also finds `Été.txt`
+- **Same letter again:** Pressing one letter repeatedly (for example **r**, **r**, **r**) moves through every item that starts with it, then wraps to the top of the list
+- **Several letters:** Letters typed less than one second apart form one search (for example **rep** for `Report.pdf`). After a one-second pause, the next letter starts a new search. If nothing matches, the selection does not change
+- **Enter:** Opens the selected item, the same as a double-click. Works when exactly one item is selected. Items in the trash are not opened
+- **Backspace:** Goes back to the previous folder in the navigation history
+- **Alt+Up:** Goes to the parent folder and selects the folder you came from
+
+The search follows the current sort order and covers only the items loaded so far. In a large folder, scroll down to load more items first.
+
+The list is marked up as a listbox, so screen readers announce the outlined item and whether it is selected.
+
+A mouse click or marquee selection removes the outline, and the next arrow key starts from the clicked item.
+
+Mouse selection uses the same anchor, as in Explorer. A click or **Ctrl+click** sets the anchor. **Shift+click** replaces the selection with the items from the anchor to the clicked item, and **Ctrl+Shift+click** adds those items to the selection.
+
+As in Windows Explorer, the arrow keys, Home, End, Page Up, Page Down, Enter and typed letters act on the file list only while it has focus, or while nothing has focus (for example right after the page loads). Clicking a file gives the list focus. After **Tab** moves focus to a button or the sidebar, these keys no longer change the selection until you click a file or tab back into the list. **Backspace** and **Alt+Up** work anywhere in the window.
+
+None of these keys act while you type in a text field such as search, or while a dialog, menu or viewer is open. Holding down **Enter**, **Backspace** or **Alt+Up** acts once, not once per key repeat.
+
 ### File Operations
 
 - **Download:** Click to download single file
