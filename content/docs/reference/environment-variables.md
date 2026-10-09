@@ -49,26 +49,19 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 | ------------------------ | -------- | ------- | --------------------------------------------------------- |
 | `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                                 |
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, auth cookie has no `Secure` flag in production |
-| `SESSION_IDLE_DAYS`      | No       | `30`    | Days of inactivity before a session ends                  |
 
-**`SESSION_IDLE_DAYS`:** Tokens are issued for this window and re-issued while the user is active, so an active user is not logged out mid-use. A session ends after this many days with no requests. Values below 1 are ignored and fall back to 30. See [Authentication](/docs/concepts/authentication#session-lifetime).
+The session timeout is not an environment variable. The first user sets it in **Settings** → **Administration**; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
-## Google OAuth (Optional)
+## Google Sign-In (Optional)
 
-| Variable               | Required | Description                              |
-| ---------------------- | -------- | ---------------------------------------- |
-| `GOOGLE_CLIENT_ID`     | No       | Google OAuth Client ID                   |
-| `GOOGLE_CLIENT_SECRET` | No       | Google OAuth Client Secret               |
-| `GOOGLE_REDIRECT_URI`  | No       | Redirect URI (must match Google Console) |
-
-**Note:** All three must be set to enable Google OAuth.
+Google sign-in is not configured through environment variables. The first user enters the OAuth client in **Settings** → **Administration**, and its client secret is stored encrypted in the database. See [Google Sign-In](/docs/guides/admin/google-sign-in).
 
 ## File Storage
 
-| Variable                   | Required         | Default             | Description                                               |
-| -------------------------- | ---------------- | ------------------- | --------------------------------------------------------- |
-| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | Key-encryption keys (KEK) for files and the bucket secret |
-| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`              |
+| Variable                   | Required         | Default             | Description                                             |
+| -------------------------- | ---------------- | ------------------- | ------------------------------------------------------- |
+| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | KEKs for files, the bucket secret and the Google secret |
+| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`            |
 
 **`FILE_ENCRYPTION_KEY`:** A single key, or a keyring of `version:key` entries after a rotation: one per line in a key file, comma-separated in `.env`. A key without a version is version 1. The highest version encrypts new data and the others still decrypt. In production the newest key must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key from the `backend` directory with `npm run key:generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
 
@@ -90,12 +83,11 @@ The S3-compatible bucket is not configured through environment variables. The fi
 
 ## OnlyOffice Background Save
 
-| Variable                          | Required | Default  | Description                                      |
-| --------------------------------- | -------- | -------- | ------------------------------------------------ |
-| `ONLYOFFICE_AUTOSAVE_INTERVAL_MS` | No       | `300000` | Interval for worker force-save schedules         |
-| `ONLYOFFICE_REJECT_UNAUTHORIZED`  | No       | `true`   | Set to `false` for a self-signed OnlyOffice cert |
+| Variable                         | Required | Default | Description                                      |
+| -------------------------------- | -------- | ------- | ------------------------------------------------ |
+| `ONLYOFFICE_REJECT_UNAUTHORIZED` | No       | `true`  | Set to `false` for a self-signed OnlyOffice cert |
 
-`ONLYOFFICE_AUTOSAVE_INTERVAL_MS` is optional. Do not set it when the five-minute default is suitable. Valid overrides are 1-60 whole minutes that divide evenly into an hour; invalid values use five minutes. The standalone worker must be running for scheduled force-save commands.
+Force-save runs every five minutes. The standalone worker must be running for scheduled force-save commands.
 
 Keep `ONLYOFFICE_REJECT_UNAUTHORIZED` enabled unless the document server uses a self-signed certificate on a trusted network.
 
@@ -110,11 +102,10 @@ These variables affect the Electron client and are not server settings. Clipboar
 
 ## Logging Configuration
 
-| Variable                         | Required | Default                          | Description                                        |
-| -------------------------------- | -------- | -------------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`                      | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `METRICS_ALLOWED_IPS`            | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`   |
-| `QUEUE_METRICS_INTERVAL_SECONDS` | No       | `60`                             | Audit queue gauge refresh interval (minimum 10)    |
+| Variable              | Required | Default                          | Description                                        |
+| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
+| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
+| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`   |
 
 ## Audit Logging Configuration
 
@@ -122,20 +113,6 @@ These variables affect the Electron client and are not server settings. Clipboar
 | -------------------------- | -------- | ------------- | ------------------------------------------- |
 | `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Audit batch size and worker concurrency cap |
 | `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)                     |
-
-## Last Access Time
-
-| Variable                     | Required | Default | Description                                             |
-| ---------------------------- | -------- | ------- | ------------------------------------------------------- |
-| `ACCESS_TIME_TRACKING`       | No       | `1`     | Set to `0` or `false` to stop recording access times    |
-| `ACCESS_TIME_WINDOW_MINUTES` | No       | `60`    | How stale a stored value must be before it is rewritten |
-| `ACCESS_TIME_FLUSH_SECONDS`  | No       | `10`    | How long updates are buffered before being written      |
-
-**`ACCESS_TIME_WINDOW_MINUTES`:** Repeat reads of the same item inside this window are not written down at all. The default of 60 matches the one-hour accuracy NTFS guarantees for its last-access time. Lower it for finer timestamps at the cost of more writes, or set it to `0` to record every read.
-
-**`ACCESS_TIME_FLUSH_SECONDS`:** Updates are held in memory and written in one batched statement per interval, so a download never waits on the write. Raising it reduces the number of statements; lowering it makes timestamps appear sooner. Buffered updates are flushed on shutdown.
-
-**`ACCESS_TIME_TRACKING`:** Turning it off leaves existing `accessed_at` values in place but stops updating them. Windows offers the same switch as `NtfsDisableLastAccessUpdate`. See [File System](/docs/concepts/file-system#last-access-time).
 
 ## Related Topics
 

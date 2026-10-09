@@ -46,7 +46,7 @@ Two groups are exposed:
 | `audit_processing_duration_seconds` | Histogram | -        | Time to process one event              |
 | `audit_last_processed_timestamp`    | Gauge     | -        | Unix time of the last successful write |
 
-The two queue depth gauges are refreshed every 60 seconds by default with one aggregate query against the pg-boss job table. Set `QUEUE_METRICS_INTERVAL_SECONDS` to change the interval.
+The two queue depth gauges are refreshed every 60 seconds with one aggregate query against the pg-boss job table.
 
 **Example:**
 

@@ -77,7 +77,7 @@ Routes validate accepted fields with `express-validator` schemas or controller-s
 
 ### Key Placement
 
-The KEK is kept outside the database on purpose. The database holds every wrapped DEK and the encrypted bucket secret, so a KEK stored next to them would let anyone with a database dump or backup decrypt all files. With the KEK held separately, a leaked database alone exposes no file contents and no bucket credentials.
+The KEK is kept outside the database on purpose. The database holds every wrapped DEK and the encrypted bucket and Google client secrets, so a KEK stored next to them would let anyone with a database dump or backup decrypt all files. With the KEK held separately, a leaked database alone exposes no file contents and no credentials.
 
 To keep the key out of `docker inspect` output and the process environment, it is read from a file named by `FILE_ENCRYPTION_KEY_FILE`. `docker-compose.yml` does this with `secrets/file_encryption_key`, which `setup.sh` generates. See [Docker Deployment](/docs/getting-started/docker#secrets).
 
@@ -86,8 +86,8 @@ To keep the key out of `docker inspect` output and the process environment, it i
 The `kek_checks` table holds one check value per KEK version: an HMAC-SHA256 of a fixed label under a subkey derived from the KEK with HKDF. It confirms that a key is the right one without revealing anything about the key.
 
 - At startup the API, the worker, and `npm run rotate` compare every key in the keyring with its stored check value. On a mismatch they stop with a message naming the version, for example `FILE_ENCRYPTION_KEY (key version 2) does not match the key this deployment's data was encrypted with`.
-- They also stop when a file key or the bucket secret is wrapped under a version the keyring lacks, for example after an old key line was removed too early.
-- The first time a key version is seen, it must open a stored DEK or the bucket secret already sealed under that version before its check value is recorded.
+- They also stop when a file key, the bucket secret or the Google client secret is wrapped under a version the keyring lacks, for example after an old key line was removed too early.
+- The first time a key version is seen, it must open a stored DEK, the bucket secret or the Google client secret already sealed under that version before its check value is recorded.
 
 Without this check, a wrong key would let the server start and then fail every download.
 

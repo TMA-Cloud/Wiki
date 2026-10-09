@@ -44,7 +44,7 @@ Troubleshooting authentication problems.
 | Email not verified           | Google account email is unverified so verify in Google, then retry                    |
 | Signup is currently disabled | No account exists and new signups are off, Admin must enable                          |
 
-If `oauth_flow` never reaches the callback, check that `GOOGLE_REDIRECT_URI` uses the same host as the page the user started from, since the cookie is only sent back to that host.
+If `oauth_flow` never reaches the callback, check that the redirect URI under **Settings** → **Administration** → **Google Sign-In** uses the same host as the page the user started from, since the cookie is only sent back to that host. If Google shows `redirect_uri_mismatch`, add that exact URI to the OAuth client in Google Cloud. See [Google Sign-In](/docs/guides/admin/google-sign-in).
 
 ### Password Rejected When Setting It
 
@@ -63,13 +63,13 @@ New passwords must be 8–128 characters and at most 72 bytes. Letters outside A
 
 ### Users Logged Out Unexpectedly
 
-Sessions end after `SESSION_IDLE_DAYS` of inactivity (30 by default), and the token is re-issued while the user is active, so an active user should not be logged out mid-use. When it happens anyway:
+Sessions end after the session timeout passes without activity (30 days by default), and the token is re-issued while the user is active, so an active user should not be logged out mid-use. When it happens anyway:
 
 1. **Check Known Proxies.** Behind a reverse proxy that is not listed under **Settings** → **Administration** → **Known Proxies**, every request looks like it came from the proxy, so all users share one rate-limit bucket. Once it is exhausted the API returns `429`. Restart the server after changing the list. See [Known Proxies](/docs/guides/admin/known-proxies).
 2. **Check for `429` in the backend logs.** Rate-limited responses are not authentication failures, but they interrupt the session.
 3. **Check whether someone changed the password or used Logout All.** Both increment `token_version` and end every session for that login. On a shared login this affects everyone using it — giving each person their own [sub-user](/docs/guides/user/sub-users) avoids it.
 4. **Check backend availability.** The frontend retries a failed profile check a few times before giving up, but a backend that stays unreachable ends with the login screen.
-5. **Check `SESSION_IDLE_DAYS`.** A short value expires idle sessions sooner.
+5. **Check the session timeout** under **Settings** → **Administration** → **Session Timeout**. A short value ends idle sessions sooner, and lowering it ends sessions already idle longer than the new value. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
 Query recent session-related events:
 
@@ -101,7 +101,7 @@ LIMIT 50;
 **Solutions:**
 
 1. Login again to get new token
-2. Check `SESSION_IDLE_DAYS` — the token lives for that window and is renewed on activity
+2. Check the session timeout in **Settings** → **Administration**. The token lives for that window and is renewed on activity
 3. Verify system time is correct
 
 ## Permission Issues

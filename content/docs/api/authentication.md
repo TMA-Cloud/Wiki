@@ -218,7 +218,7 @@ Get the current authenticated user's profile, including what this login is allow
 
 ### GET `/api/google/enabled`
 
-Check if Google OAuth is configured and enabled on the server.
+Check whether the first user has saved a Google OAuth client. See [Google Sign-In](/docs/guides/admin/google-sign-in).
 
 **Response:**
 
@@ -230,13 +230,13 @@ Check if Google OAuth is configured and enabled on the server.
 
 ### GET `/api/google/login`
 
-Initiate the Google OAuth login flow. This will redirect the user to Google's authentication page.
+Initiate the Google OAuth login flow. This will redirect the user to Google's authentication page. Returns `503` while Google sign-in is off.
 
 The response sets an HTTP-only `oauth_flow` cookie, valid for 10 minutes, holding a random `state` value and a PKCE code verifier. The redirect to Google carries the `state` and the `S256` code challenge. Scopes are `openid`, `profile`, and `email`, with `prompt=select_account`.
 
 ### GET `/api/google/callback`
 
-The callback endpoint for Google to redirect to after successful authentication.
+The callback endpoint for Google to redirect to after successful authentication. Returns `503` while Google sign-in is off, so a flow started before it was turned off cannot finish.
 
 The callback clears the `oauth_flow` cookie and checks that the `state` query parameter matches it before redeeming the code with the PKCE verifier. Failures redirect to the app with an `error` query parameter, which the login page shows as a message:
 

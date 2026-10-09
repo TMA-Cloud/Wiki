@@ -21,6 +21,7 @@ Rate limits are enforced per IP address and/or user for different endpoint types
   - `POST /api/login`
   - `POST /api/signup`
   - `POST /api/change-password`
+  - `GET /api/google/login`
   - `GET /api/google/callback`
 
 ### Failed Login Limiters
@@ -72,7 +73,7 @@ Because share links are the only routes reachable without a session, this budget
 - **MFA Verification/Disabling:** 5 attempts per minute, keyed on IP + user ID. The limit is this tight because each attempt runs a bcrypt comparison, which is deliberately expensive.
   - `POST /api/mfa/verify`
   - `POST /api/mfa/disable`
-  - `POST /api/google/mfa-verify` (only registered when Google OAuth is configured)
+  - `POST /api/google/mfa-verify`
 - **Backup Code Regeneration:** 3 attempts per 10 minutes, keyed on IP + user ID.
   - `POST /api/mfa/backup-codes/regenerate`
 

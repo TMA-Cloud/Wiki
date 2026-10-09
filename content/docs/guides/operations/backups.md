@@ -7,7 +7,7 @@ Backup and restore procedures for TMA Cloud.
 
 ## What to Backup
 
-- **Database:** PostgreSQL database (all schemas including `pgboss`). It includes the bucket settings and the encrypted bucket secret
+- **Database:** PostgreSQL database (all schemas including `pgboss`). It includes the bucket and Google sign-in settings with their encrypted secrets
 - **Files:** S3 bucket contents
 - **Configuration:** `.env` file
 - **Encryption key:** See [Encryption Key](#encryption-key)

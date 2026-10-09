@@ -8,6 +8,8 @@
     "orphan-review",
     "mfa-management",
     "known-proxies",
+    "google-sign-in",
+    "sessions-and-activity",
     "share-base-url"
   ]
 }

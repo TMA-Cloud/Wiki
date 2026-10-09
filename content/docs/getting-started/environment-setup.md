@@ -41,22 +41,13 @@ Environment variable reference for TMA Cloud.
 | Variable                 | Required | Default | Description                                     |
 | ------------------------ | -------- | ------- | ----------------------------------------------- |
 | `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                       |
-| `SESSION_IDLE_DAYS`      | No       | `30`    | Days of inactivity before a session ends        |
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, the auth cookie has no `Secure` flag |
 
-Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known Proxies**. See [Known Proxies](/docs/guides/admin/known-proxies).
+Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known Proxies**. See [Known Proxies](/docs/guides/admin/known-proxies). The session timeout and last-opened tracking are set there too; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
-## Google OAuth (Optional)
+## Google Sign-In (Optional)
 
-| Variable               | Required | Description                              |
-| ---------------------- | -------- | ---------------------------------------- |
-| `GOOGLE_CLIENT_ID`     | No       | Google OAuth Client ID                   |
-| `GOOGLE_CLIENT_SECRET` | No       | Google OAuth Client Secret               |
-| `GOOGLE_REDIRECT_URI`  | No       | Redirect URI (must match Google Console) |
-
-**Note:** All three must be set to enable Google OAuth.
-
-The sign-in flow uses a `state` value and PKCE, and only links or creates an account when Google reports the email as verified. See [Authentication](/docs/concepts/authentication#google-oauth-optional).
+Google sign-in is not configured through environment variables. After the first login, the first user enters the OAuth client in **Settings** → **Administration** → **Google Sign-In**. See [Google Sign-In](/docs/guides/admin/google-sign-in).
 
 ## File Storage
 
@@ -73,11 +64,10 @@ Generate a key with `openssl rand -base64 32`, or `npm run key:generate` from th
 
 ## Logging Configuration
 
-| Variable                         | Required | Default                          | Description                                        |
-| -------------------------------- | -------- | -------------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`                      | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `METRICS_ALLOWED_IPS`            | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`                   |
-| `QUEUE_METRICS_INTERVAL_SECONDS` | No       | `60`                             | Audit queue gauge refresh interval                 |
+| Variable              | Required | Default                          | Description                                        |
+| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
+| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
+| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`                   |
 
 ## Audit Logging Configuration
 
@@ -85,22 +75,6 @@ Generate a key with `openssl rand -base64 32`, or `npm run key:generate` from th
 | -------------------------- | -------- | ------------- | --------------------------------- |
 | `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Concurrent audit events processed |
 | `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)           |
-
-## OnlyOffice Background Save
-
-| Variable                          | Required | Default  | Description                |
-| --------------------------------- | -------- | -------- | -------------------------- |
-| `ONLYOFFICE_AUTOSAVE_INTERVAL_MS` | No       | `300000` | Worker force-save interval |
-
-Omit this variable to keep the five-minute default. See [Environment Variables](/docs/reference/environment-variables#onlyoffice-background-save) for accepted overrides.
-
-## Last Access Time
-
-| Variable                     | Required | Default | Description                   |
-| ---------------------------- | -------- | ------- | ----------------------------- |
-| `ACCESS_TIME_TRACKING`       | No       | `1`     | Set to `0` or `false` to stop |
-| `ACCESS_TIME_WINDOW_MINUTES` | No       | `60`    | Per-item suppression window   |
-| `ACCESS_TIME_FLUSH_SECONDS`  | No       | `10`    | Buffer flush interval         |
 
 ## Frontend Environment Variables
 

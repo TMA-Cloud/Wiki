@@ -75,7 +75,7 @@ An array of file and folder objects.
 ]
 ```
 
-**`accessedAt`:** When the item was last read. Listing a folder updates that folder's own `accessedAt`, not the entries returned. The value is approximate — it is written at most once per hour per item and may lag by the cache TTL of this response. See [File System](/docs/concepts/file-system#last-access-time).
+**`accessedAt`:** When the item was last read. Listing a folder updates that folder's own `accessedAt`, not the entries returned. The value is approximate — it is written at most once per update window per item (one hour by default) and may lag by the cache TTL of this response. See [File System](/docs/concepts/file-system#last-access-time).
 
 **Share fields:** `sharedAt` is when the item joined a share. `expiresAt` is when access ends, or `null` for a link with no expiration. Both are `null` when `shared` is false. For an item that belongs to more than one share, `expiresAt` is `null` if any link has no expiration; otherwise it is the latest expiration.
 

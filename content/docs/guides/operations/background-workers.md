@@ -85,15 +85,15 @@ Orphan jobs are not scheduled and never delete anything unless the first user se
 
 ### OnlyOffice Force-Save
 
-Opening an editable document creates one durable pg-boss schedule for its document key. The default interval is five minutes. The worker calls the OnlyOffice `/command` service, and the callback streams the returned document through encryption to object storage. Closing the document removes its schedule; an OnlyOffice response that says the document is no longer open also removes it.
+Opening an editable document creates one durable pg-boss schedule for its document key. The interval is five minutes. The worker calls the OnlyOffice `/command` service, and the callback streams the returned document through encryption to object storage. Closing the document removes its schedule; an OnlyOffice response that says the document is no longer open also removes it.
 
-`ONLYOFFICE_AUTOSAVE_INTERVAL_MS` is optional. Omit it to use five minutes. See [OnlyOffice API](/docs/api/onlyoffice#auto-save).
+See [OnlyOffice API](/docs/api/onlyoffice#auto-save).
 
 ## Process-Local Services
 
 These remain in the main application because they own HTTP-process state:
 
-- Access times are buffered from requests and flushed in one statement every `ACCESS_TIME_FLUSH_SECONDS`.
+- Access times are buffered from requests and flushed in one statement per write interval, 10 seconds by default. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 - Audit queue gauges are refreshed for the Prometheus registry exposed by that process.
 - Redis pub/sub, SSE keepalives, and rate-limit timers stay with the web process.
 

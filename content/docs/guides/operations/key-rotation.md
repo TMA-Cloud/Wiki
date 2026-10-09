@@ -41,7 +41,7 @@ What it does:
 3. **db:** Has the app change its own database role's password, then writes the new `DB_PASSWORD` to `.env`
 4. **redis:** Writes the new `REDIS_PASSWORD` to `.env`
 5. Recreates the containers that use the changed files and waits until they are healthy
-6. **key:** Rewraps the stored file keys and the bucket secret under the new version
+6. **key:** Rewraps the stored file keys, the bucket secret and the Google client secret under the new version
 7. Deletes `.rotate-backup/`. A run that stops before it changes anything deletes it too
 
 The containers restart once, so the app is unavailable for a few seconds. Sessions are kept: Redis keeps its data, and sign-in tokens do not depend on these values.
@@ -77,7 +77,7 @@ The script does not change the Redis password, because a Redis server outside Do
 
 ## Master Key
 
-The master key wraps each file's data key and the stored bucket secret. Rotating it rewraps those small values, one database update per file. Objects in the bucket are never read or rewritten.
+The master key wraps each file's data key, the stored bucket secret and the stored Google client secret. Rotating it rewraps those small values, one database update per file. Objects in the bucket are never read or rewritten.
 
 The key file is a keyring with one `version:key` entry per line:
 
@@ -107,6 +107,7 @@ Master key versions: 1, 2
 Newest (encrypts new files): 2
   version 2: 394 file key(s)
 Bucket secret: version 2
+Google client secret: version 2
 All keys are current.
 Not used by current data: version 1. Database backups from before a rotation still need them, so remove a line only once you no longer keep those backups.
 ```

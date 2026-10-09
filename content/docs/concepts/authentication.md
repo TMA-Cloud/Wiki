@@ -19,6 +19,7 @@ TMA Cloud supports multiple authentication methods:
 
 - OAuth 2.0 authorization code flow with a `state` value and PKCE (`S256`). Both are held in a short-lived HTTP-only `oauth_flow` cookie and checked on the callback, so a callback that the browser did not start is refused
 - Requests only `openid`, `profile`, and `email`; no offline access or refresh token
+- Turned on by the first user in **Settings**, with the client secret stored encrypted. See [Google Sign-In](/docs/guides/admin/google-sign-in)
 - Automatic account creation when signup is enabled
 - Linked to an existing email/password account with the same email
 - Account creation and linking by email require Google to report the email as verified (`email_verified`). A Google account already linked by its Google ID signs in without this check
@@ -43,12 +44,12 @@ TMA Cloud supports multiple authentication methods:
 
 Sessions expire after a period of **inactivity**, not a fixed period after login.
 
-- Tokens are issued for the idle window, 30 days by default (`SESSION_IDLE_DAYS`)
+- Tokens are issued for the idle window, 30 days by default
 - While the user is active, the token is re-issued before it runs out, so an active user is not logged out mid-use
 - `sessions.last_activity` is updated on each authenticated request and is what the idle check reads
 - After the idle window passes with no requests, the session ends and the user logs in again
 
-Set `SESSION_IDLE_DAYS` to change the window. See [Environment Variables](/docs/reference/environment-variables).
+The first user sets the window under **Settings** → **Administration** → **Session Timeout**, from 1 to 365 days. A change applies to existing sessions without a restart. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
 ### Active Sessions
 

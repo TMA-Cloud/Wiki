@@ -34,7 +34,7 @@ To check the database from outside the app, use `pg_isready` against the Postgre
 | `audit_processing_duration_seconds` | Histogram | Per-event processing time                                     |
 | `audit_last_processed_timestamp`    | Gauge     | Staleness — alert when the gap from now grows                 |
 
-The two gauges are refreshed every 60 seconds by default from one aggregate query against the pg-boss job table. Scraping `/metrics` returns the latest values without starting another database count. Change the interval with `QUEUE_METRICS_INTERVAL_SECONDS`.
+The two gauges are refreshed every 60 seconds from one aggregate query against the pg-boss job table. Scraping `/metrics` returns the latest values without starting another database count.
 
 ### What is not exposed
 

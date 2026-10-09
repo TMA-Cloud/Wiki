@@ -86,12 +86,12 @@ Searching, viewing Get Info, renaming, moving, starring and sharing do not count
 
 Recording a read on every request would turn each read into a database write. Two rules keep that cost bounded, both taken from how filesystems handle the same problem:
 
-- **One-hour window.** Once an item's timestamp is written, further reads of it are ignored until the window passes. NTFS guarantees its last-access time only to within an hour for the same reason; Linux's `relatime` uses a comparable rule.
-- **Buffered writes.** Updates accumulate in memory and are written in one batched statement every 10 seconds, so no read waits on a write. Linux's `lazytime` works the same way.
+- **Update window, one hour by default.** Once an item's timestamp is written, further reads of it are ignored until the window passes. NTFS guarantees its last-access time only to within an hour for the same reason; Linux's `relatime` uses a comparable rule.
+- **Buffered writes.** Updates accumulate in memory and are written in one batched statement every 10 seconds by default, so no read waits on a write. Linux's `lazytime` works the same way.
 
-The effect is at most one write per item per hour, batched. The number of statements is set by the flush interval rather than by how many users are reading, so it does not grow with traffic. Timestamps may lag by the flush interval plus the window, which is why the value is documented as approximate.
+The effect is at most one write per item per window, batched. The number of statements is set by the flush interval rather than by how many users are reading, so it does not grow with traffic. Timestamps may lag by the flush interval plus the window, which is why the value is documented as approximate.
 
-Set `ACCESS_TIME_TRACKING=0` to switch the feature off. See [Environment Variables](/docs/reference/environment-variables#last-access-time) for the tuning knobs.
+The first user can turn tracking off and change the window and the write interval under **Settings** → **Administration** → **Last Opened Tracking**. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
 ### On the Cloud Drive
 

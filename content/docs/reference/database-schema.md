@@ -100,7 +100,7 @@ Name search is backed by a trigram GIN index from `pg_trgm` on `lower(name)` and
 
 **File timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read. `shared_at` is set when an item joins a share and cleared when it is unshared. Re-sharing an active item does not change it. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
 
-**`accessed_at` precision:** The value is written at most once per hour per item, so it can lag a read by up to that long. This follows NTFS, which guarantees its last-access time only to within an hour, and Linux's `relatime`. Writes are buffered in memory and flushed in batches, so a read never waits on the update. See [File System](/docs/concepts/file-system#last-access-time).
+**`accessed_at` precision:** The value is written at most once per update window per item, one hour by default, so it can lag a read by up to that long. This follows NTFS, which guarantees its last-access time only to within an hour, and Linux's `relatime`. Writes are buffered in memory and flushed in batches, so a read never waits on the update. See [File System](/docs/concepts/file-system#last-access-time).
 
 ### `share_links`
 
@@ -137,32 +137,42 @@ Note the column is `share_id`, not `share_link_id`. Both foreign keys cascade on
 
 Application-wide settings.
 
-| Column                       | Type        | Description                                                        |
-| ---------------------------- | ----------- | ------------------------------------------------------------------ |
-| `id`                         | TEXT        | Primary key (always 'app_settings')                                |
-| `signup_enabled`             | BOOLEAN     | Default true                                                       |
-| `first_user_id`              | TEXT        | FK → users.id (immutable)                                          |
-| `share_base_url`             | TEXT        | Custom share link base URL (null = use request origin)             |
-| `max_upload_size_bytes`      | BIGINT      | Max single-file upload size in bytes (default 10737418240 = 10 GB) |
-| `hide_file_extensions`       | BOOLEAN     | When true, file names are shown without extensions (default false) |
-| `require_electron_client`    | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
-| `allow_password_change`      | BOOLEAN     | When true, users may change their own password (default false)     |
-| `known_proxies`              | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart  |
-| `onlyoffice_url`             | TEXT        | OnlyOffice Document Server URL (null = integration off)            |
-| `onlyoffice_jwt_secret`      | TEXT        | Shared secret for signing OnlyOffice payloads                      |
-| `storage_provider`           | TEXT        | `s3`, `r2`, or `aws` (null = no bucket connected)                  |
-| `storage_endpoint`           | TEXT        | Bucket endpoint origin                                             |
-| `storage_region`             | TEXT        | Signing region (`auto` for R2)                                     |
-| `storage_bucket`             | TEXT        | Bucket name                                                        |
-| `storage_force_path_style`   | BOOLEAN     | Path-style addressing                                              |
-| `storage_access_key_id`      | TEXT        | Access key ID                                                      |
-| `storage_secret_encrypted`   | BYTEA       | Secret access key, AES-256-GCM under a KEK-derived subkey          |
-| `storage_secret_kek_version` | INTEGER     | KEK version that encrypted the secret                              |
-| `storage_updated_at`         | TIMESTAMPTZ | Last bucket settings change                                        |
-| `storage_config_version`     | INTEGER     | Incremented on each save; used to detect concurrent edits          |
-| `updated_at`                 | TIMESTAMPTZ | Default now()                                                      |
+| Column                             | Type        | Description                                                        |
+| ---------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `id`                               | TEXT        | Primary key (always 'app_settings')                                |
+| `signup_enabled`                   | BOOLEAN     | Default true                                                       |
+| `first_user_id`                    | TEXT        | FK → users.id (immutable)                                          |
+| `share_base_url`                   | TEXT        | Custom share link base URL (null = use request origin)             |
+| `max_upload_size_bytes`            | BIGINT      | Max single-file upload size in bytes (default 10737418240 = 10 GB) |
+| `hide_file_extensions`             | BOOLEAN     | When true, file names are shown without extensions (default false) |
+| `require_electron_client`          | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
+| `allow_password_change`            | BOOLEAN     | When true, users may change their own password (default false)     |
+| `known_proxies`                    | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart  |
+| `session_idle_days`                | INTEGER     | Days without activity before a session ends, 1–365 (default 30)    |
+| `access_time_tracking`             | BOOLEAN     | When false, `files.accessed_at` stops updating (default true)      |
+| `access_time_window_minutes`       | INTEGER     | Minutes before a re-read is written again, 0–1440 (default 60)     |
+| `access_time_flush_seconds`        | INTEGER     | Seconds between batched access-time writes, 1–300 (default 10)     |
+| `onlyoffice_url`                   | TEXT        | OnlyOffice Document Server URL (null = integration off)            |
+| `onlyoffice_jwt_secret`            | TEXT        | Shared secret for signing OnlyOffice payloads                      |
+| `storage_provider`                 | TEXT        | `s3`, `r2`, or `aws` (null = no bucket connected)                  |
+| `storage_endpoint`                 | TEXT        | Bucket endpoint origin                                             |
+| `storage_region`                   | TEXT        | Signing region (`auto` for R2)                                     |
+| `storage_bucket`                   | TEXT        | Bucket name                                                        |
+| `storage_force_path_style`         | BOOLEAN     | Path-style addressing                                              |
+| `storage_access_key_id`            | TEXT        | Access key ID                                                      |
+| `storage_secret_encrypted`         | BYTEA       | Secret access key, AES-256-GCM under a KEK-derived subkey          |
+| `storage_secret_kek_version`       | INTEGER     | KEK version that encrypted the secret                              |
+| `storage_updated_at`               | TIMESTAMPTZ | Last bucket settings change                                        |
+| `storage_config_version`           | INTEGER     | Incremented on each save; used to detect concurrent edits          |
+| `google_client_id`                 | TEXT        | Google OAuth client ID                                             |
+| `google_client_secret_encrypted`   | BYTEA       | Client secret, AES-256-GCM under a KEK-derived subkey              |
+| `google_client_secret_kek_version` | INTEGER     | KEK version that encrypted the client secret                       |
+| `google_redirect_uri`              | TEXT        | Callback URL registered with Google                                |
+| `google_updated_at`                | TIMESTAMPTZ | Last Google sign-in settings change                                |
+| `google_config_version`            | INTEGER     | Incremented on each save; used to detect concurrent edits          |
+| `updated_at`                       | TIMESTAMPTZ | Default now()                                                      |
 
-The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `RESTRICT` foreign key, so the first user cannot be deleted while the row references them. The `app_settings_storage_complete` check constraint requires the `storage_*` columns other than `storage_updated_at` and `storage_config_version` to be all set or all null.
+The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `RESTRICT` foreign key, so the first user cannot be deleted while the row references them. The `app_settings_storage_complete` check constraint requires the `storage_*` columns other than `storage_updated_at` and `storage_config_version` to be all set or all null. The `app_settings_google_complete` check constraint requires the four `google_*` client columns to be all set or all null. The `app_settings_activity_ranges` check constraint holds the session and access-time columns to their ranges.
 
 ### `kek_checks`
 
