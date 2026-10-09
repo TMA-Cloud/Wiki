@@ -56,7 +56,7 @@ Validation errors (HTTP status `422`) provide additional detail in a `details` a
 - `413 Payload Too Large`: The upload would exceed the account's storage quota.
 - `499 Client Closed Request`: The client cancelled the upload. Non-standard status, borrowed from nginx.
 - `500 Internal Server Error`: An unexpected condition was encountered on the server.
-- `503 Service Unavailable`: The server is not ready to handle the request.
+- `503 Service Unavailable`: The server is not ready to handle the request. File content requests return `503` with `STORAGE_NOT_CONFIGURED` until a bucket is saved in **Settings** → **Storage**.
 
 ### Desktop-only instances
 

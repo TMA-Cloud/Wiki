@@ -102,7 +102,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 ### Physical Storage
 
 - **S3:** Files stored in S3-compatible object storage. Database stores object key.
-- Bucket configuration is required before starting the backend.
+- The first user connects the bucket in **Settings** → **Storage**; file contents cannot be stored or read until it is saved.
 - Original filenames preserved in database
 
 ### File Encryption

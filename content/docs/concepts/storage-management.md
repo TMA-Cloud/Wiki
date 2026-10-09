@@ -8,7 +8,8 @@ Storage limits and management in TMA Cloud.
 ## Storage Driver
 
 - **S3:** Files stored in S3-compatible object storage. Object keys stored in database.
-- Set the bucket endpoint, name, and credentials (see [Environment Variables](/docs/reference/environment-variables)). Missing or incomplete configuration stops backend startup.
+- The first user connects the bucket in **Settings** → **Storage** (see [Storage Bucket](/docs/guides/admin/storage-bucket)). The backend starts without one; until it is saved, file content requests return `503 STORAGE_NOT_CONFIGURED`.
+- Each API and worker process keeps the decrypted setting in memory only and re-reads it from the database every 15 seconds, so a change applies without a restart. A new setting gets a new S3 client; the previous client is closed after 5 minutes so transfers already running on it can finish.
 - Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage. Bulk deletion uses the S3 multi-object API in batches of up to 1,000 keys.
 - The driver uses operations supported by AWS S3 and Cloudflare R2: `PutObject`, `GetObject`, `HeadObject`, `ListObjectsV2`, `DeleteObject`, `DeleteObjects`, `CopyObject`, and multipart upload and copy operations.
 - A single upload or copy request is limited to 5,000,000,000 bytes. Larger objects use multipart operations, which is the lower portable boundary across AWS S3 and R2.
@@ -123,7 +124,7 @@ See [Orphan Review](/docs/guides/admin/orphan-review) for the admin workflow.
 
 ## S3 Bucket Protection
 
-Backend scripts apply bucket settings using the project S3 config. Run from backend directory.
+Backend scripts apply bucket settings to the bucket saved in **Settings** → **Storage**. They read it from the database, so `.env` must point at the database and hold the same `FILE_ENCRYPTION_KEY` as the app. Run from backend directory.
 
 ### Apply all protections
 

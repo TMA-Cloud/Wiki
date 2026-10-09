@@ -1,6 +1,7 @@
 {
   "title": "Admin Guides",
   "pages": [
+    "storage-bucket",
     "user-management",
     "storage-limits",
     "signup-control",

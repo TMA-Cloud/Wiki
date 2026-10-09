@@ -65,8 +65,9 @@ Same, with a coverage report in `backend/coverage-integration`.
 npm run test:s3
 ```
 
-Exercise the storage driver against the bucket configured in `.env`. Requires
-bucket credentials to be set.
+Exercise the storage driver against the bucket saved in **Settings** → **Storage**.
+The suite reads it from the database named in `.env`, decrypting the secret with the
+`FILE_ENCRYPTION_KEY` from `.env`, so a bucket must be saved first.
 
 ### Everything
 
@@ -142,7 +143,7 @@ override has not taken effect.
 | `DB_NAME=tma_cloud_test` | Its own database. Setup stops unless the name ends in `_test`. |
 | `REDIS_DB=15`            | Its own cache. Setup stops if the value is `0`.                |
 
-Bucket operations use an isolated in-memory double in this suite. Run `npm run test:s3` separately to verify the actual provider.
+Bucket operations use an isolated in-memory double in this suite. Each test also seeds a bucket row in `app_settings`, so code that checks for a saved bucket behaves as on a configured instance. Run `npm run test:s3` separately to verify the actual provider.
 
 Create the database once:
 

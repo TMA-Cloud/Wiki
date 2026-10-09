@@ -24,6 +24,7 @@ Create your first account and get started with TMA Cloud.
 
 The first user to sign up automatically becomes the **administrator** with the following privileges:
 
+- **Storage Bucket** - Connect the S3-compatible bucket that stores files
 - **User Management** - Manage all users
 - **Storage Limits** - Set storage limits for users
 - **Signup Control** - Enable or disable user registration
@@ -32,6 +33,16 @@ The first user to sign up automatically becomes the **administrator** with the f
 - **Share Base URL** - Configure custom domain for share links
 - **Hide File Extensions** - Show file names with or without extensions
 - **System Settings** - Access to all administrative features
+
+## Connect Storage
+
+Files cannot be uploaded or opened until a bucket is connected. After the first sign-in a banner shows **Set up storage**:
+
+1. Click **Set up storage**, or go to **Settings** → **Storage**
+2. Select the provider and enter the endpoint or account ID, bucket name, access key ID, and secret access key
+3. Click **Save**. The connection is tested before it is saved
+
+See [Storage Bucket](/docs/guides/admin/storage-bucket) for each provider's fields and the checks.
 
 ## Signup Control
 

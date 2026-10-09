@@ -222,6 +222,106 @@ Update a user's storage limit (admin only).
 }
 ```
 
+## Storage Bucket Configuration
+
+### GET `/api/user/storage-status`
+
+Whether a bucket is connected, and whether the caller may connect one. Accessible to any authenticated user (used by the frontend for the setup banner).
+
+**Response:**
+
+```json
+{
+  "configured": false,
+  "canConfigure": true
+}
+```
+
+### GET `/api/user/storage-config`
+
+Get the saved bucket settings (admin only). The secret access key is never returned, and the access key ID is masked.
+
+**Response:**
+
+```json
+{
+  "configured": true,
+  "version": 3,
+  "provider": "s3",
+  "endpoint": "https://s3.example.com",
+  "region": "us-east-1",
+  "bucket": "tma-files",
+  "forcePathStyle": true,
+  "accessKeyIdMasked": "AKIA••••MPLE",
+  "updatedAt": "2026-10-09T09:53:35.671Z"
+}
+```
+
+When no bucket is saved, the response is `{ "configured": false, "version": 0 }`.
+
+### PUT `/api/user/storage-config`
+
+Verify the settings against the live endpoint, then save them (admin only). Nothing is saved if a check fails.
+
+**Request Body:**
+
+```json
+{
+  "provider": "s3",
+  "endpoint": "https://s3.example.com",
+  "region": "us-east-1",
+  "bucket": "tma-files",
+  "forcePathStyle": true,
+  "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+  "secretAccessKey": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+  "expectedVersion": 3
+}
+```
+
+**Validation:**
+
+- `provider`: Required. One of `s3`, `r2`, `aws`.
+- `endpoint`: Required for `s3` and `r2`; optional for `aws`, where it defaults to `https://s3.<region>.amazonaws.com`. Must be an origin with no path, query, or credentials. `http://` is accepted only for private network hosts.
+- `region`: Required for `aws`. Ignored for `r2` (always `auto`). Defaults to `us-east-1` for `s3`.
+- `bucket`: Required. 3-63 lowercase letters, numbers, dots, or hyphens.
+- `forcePathStyle`: Optional boolean, used only for `s3` (default `true`).
+- `accessKeyId`, `secretAccessKey`: Required on first setup. Leave both empty to keep the saved keys. A new `accessKeyId` needs its `secretAccessKey`.
+- `expectedVersion`: Optional. The `version` the client last read; a different stored version returns `409`.
+
+**Response:**
+
+The saved settings, in the same shape as `GET /api/user/storage-config`.
+
+**Errors:**
+
+- `400`: A setting is invalid. `message` names the field.
+- `409`: The settings were changed by another session.
+- `422` with `details`: A field has the wrong type, for example a non-boolean `forcePathStyle`.
+- `422`: A connection check failed. The body carries `error: "STORAGE_PROBE_FAILED"` and the failed `step` (`connect`, `list`, `write`, `read`, `delete`, or `existing-files`).
+
+```json
+{
+  "message": "Bucket \"tma-files\" was not found at this endpoint",
+  "error": "STORAGE_PROBE_FAILED",
+  "step": "connect"
+}
+```
+
+### POST `/api/user/storage-config/test`
+
+Run the same checks as the PUT without saving anything (admin only). Takes the same request body.
+
+**Response:**
+
+```json
+{
+  "ok": true,
+  "checks": ["connect", "list", "write", "read", "delete", "existing-files"]
+}
+```
+
+`existing-files` is listed only when files already exist. See [Storage Bucket](/docs/guides/admin/storage-bucket#connection-checks).
+
 ## Signup Status
 
 ### GET `/api/signup-status`

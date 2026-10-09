@@ -75,6 +75,18 @@ Routes validate accepted fields with `express-validator` schemas or controller-s
   vault) before taking the deployment to production.
 </Callout>
 
+### Bucket Credentials
+
+The bucket is configured in **Settings** → **Storage** by the first user. See [Storage Bucket](/docs/guides/admin/storage-bucket).
+
+- **Encryption:** The secret access key is encrypted with AES-256-GCM under a subkey derived from the KEK with HKDF-SHA256 (`tma-cloud/storage-credentials/v1`), using a random 12-byte nonce per save. The access key ID is the associated data, so a ciphertext cannot be moved to another key's row
+- **Never returned:** The API never returns the secret; the access key ID is shown masked
+- **Memory only:** Each process holds the decrypted secret in memory and never writes it to Redis
+- **Redaction:** `secretAccessKey` is redacted from request logs and audit metadata
+- **Verified before saving:** A bucket is saved only after a live connection check passes
+- **Endpoint limits:** Plain `http://` is accepted only for private network addresses, and link-local addresses such as `169.254.169.254` are rejected
+- **Rotation:** `rotate-kek.js` rewraps the secret under the new KEK
+
 ### Database Security
 
 - **Parameterized Queries:** SQL injection prevention

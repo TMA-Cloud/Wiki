@@ -86,7 +86,6 @@ cp ../.env.example ../.env
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` - Database connection
 - `REDIS_HOST`, `REDIS_PORT` - Redis connection (optional)
 - `BPORT` - Backend port (default: 3000)
-- Bucket endpoint, name, and credentials - Required; configure R2, RustFS, or AWS variables (see [Environment Variables](/docs/reference/environment-variables))
 
 **Optional:**
 
@@ -163,6 +162,7 @@ Access at `http://localhost:5173`
 1. Backend shows: "Database connected successfully", "Server running on port 3000"
 2. Open browser: `http://localhost:3000` (production) or `http://localhost:5173` (development)
 3. Create first account (becomes admin)
+4. Connect the bucket in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket)
 
 ## Troubleshooting
 

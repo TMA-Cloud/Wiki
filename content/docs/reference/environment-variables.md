@@ -74,41 +74,11 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 **Key rotation:** To rotate, set a new `FILE_ENCRYPTION_KEY`, increment `FILE_KEK_VERSION`, and keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (e.g. `FILE_ENCRYPTION_KEY_V1`) until `rotate-kek.js` reports `Remaining=0`. See [CLI Commands](/docs/reference/cli-commands).
 
-## S3-compatible
+## Storage Bucket
 
-A bucket is required. The backend stops at startup if its endpoint, bucket name, access key, or secret key is missing.
+The S3-compatible bucket is not configured through environment variables. The first user connects it in **Settings** → **Storage**, and its secret access key is stored encrypted in the database. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
-Supported: **Cloudflare R2** (R2*), **RustFS / other S3** (RUSTFS*), **AWS S3** (AWS\_). Use one set of vars.
-
-### Cloudflare R2
-
-| Setting    | Required | Default | Env var                    |
-| ---------- | -------- | ------- | -------------------------- |
-| Account ID | Yes\*    | -       | `R2_ACCOUNT_ID`            |
-| Bucket     | Yes\*    | -       | `R2_BUCKET`                |
-| Access key | Yes\*    | -       | `R2_ACCESS_KEY_ID`         |
-| Secret key | Yes\*    | -       | `R2_SECRET_ACCESS_KEY`     |
-| Endpoint   | No       | derived | `R2_ENDPOINT` (optional)   |
-| Public URL | No       | -       | `R2_PUBLIC_URL` (optional) |
-
-`R2_ACCESS_KEY` and `R2_SECRET_KEY` are accepted as fallbacks for the two key variables, but `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` take precedence when both are set.
-
-\*Required when using R2. Endpoint is `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com` unless `R2_ENDPOINT` is set. Region is set to `auto` for R2.
-
-### Other S3-compatible (RustFS, AWS, etc.)
-
-| Setting    | Required | Default     | Env var (either name)                              |
-| ---------- | -------- | ----------- | -------------------------------------------------- |
-| Endpoint   | Yes\*    | -           | `RUSTFS_ENDPOINT` or `AWS_S3_ENDPOINT`             |
-| Bucket     | Yes\*    | -           | `RUSTFS_BUCKET` or `AWS_S3_BUCKET`                 |
-| Access key | Yes\*    | -           | `RUSTFS_ACCESS_KEY` or `AWS_ACCESS_KEY_ID`         |
-| Secret key | Yes\*    | -           | `RUSTFS_SECRET_KEY` or `AWS_SECRET_ACCESS_KEY`     |
-| Region     | No       | `us-east-1` | `RUSTFS_REGION` or `AWS_REGION`                    |
-| Path style | No       | `true`      | `RUSTFS_FORCE_PATH_STYLE` (set `false` to disable) |
-
-\*Required when not using R2. Use one set of names consistently.
-
-**Note:** From backend, `npm run s3:protect-all` applies bucket protections (public access block, HTTPS-only policy, versioning, optional encryption, lifecycle). Lifecycle aborts incomplete multipart after 1 day and deletes noncurrent versions after 7 days. Review orphans periodically from **Settings** → **Administration**; see [Orphan Review](/docs/guides/admin/orphan-review).
+**Note:** From backend, `npm run s3:protect-all` applies bucket protections (public access block, HTTPS-only policy, versioning, optional encryption, lifecycle) to the saved bucket. Lifecycle aborts incomplete multipart after 1 day and deletes noncurrent versions after 7 days. Review orphans periodically from **Settings** → **Administration**; see [Orphan Review](/docs/guides/admin/orphan-review).
 
 ## OnlyOffice Background Save
 

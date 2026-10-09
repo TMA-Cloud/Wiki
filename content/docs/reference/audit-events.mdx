@@ -63,6 +63,7 @@ Complete list of audit event types in TMA Cloud.
 
 - `admin.settings.update` - Admin setting changed (metadata: `setting`, e.g. `signup_enabled`, `hide_file_extensions`; `newValue` or `hidden`)
 - `admin.settings.read` - Admin viewed protected settings (failure when unauthorized)
+- `admin.settings.update` with `setting: "storage_config"` - Bucket saved (metadata: `provider`, `endpoint`, `bucket`, `region`, `targetChanged`, `credentialsChanged`, `version`). A failed save is logged with `status: failure`, `action: update_storage_config`, and the failed `step`. Credentials are never logged
 - `admin.user.list` - Admin listed all users
 - `admin.user.update` - Admin updated user (e.g. storage limit)
 - `admin.orphans.scan` - Admin scanned for orphans (metadata: `graceMinutes`, `storageOrphans`, `databaseOrphans`)

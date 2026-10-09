@@ -137,22 +137,32 @@ Note the column is `share_id`, not `share_link_id`. Both foreign keys cascade on
 
 Application-wide settings.
 
-| Column                    | Type        | Description                                                        |
-| ------------------------- | ----------- | ------------------------------------------------------------------ |
-| `id`                      | TEXT        | Primary key (always 'app_settings')                                |
-| `signup_enabled`          | BOOLEAN     | Default true                                                       |
-| `first_user_id`           | TEXT        | FK → users.id (immutable)                                          |
-| `share_base_url`          | TEXT        | Custom share link base URL (null = use request origin)             |
-| `max_upload_size_bytes`   | BIGINT      | Max single-file upload size in bytes (default 10737418240 = 10 GB) |
-| `hide_file_extensions`    | BOOLEAN     | When true, file names are shown without extensions (default false) |
-| `require_electron_client` | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
-| `allow_password_change`   | BOOLEAN     | When true, users may change their own password (default false)     |
-| `known_proxies`           | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart  |
-| `onlyoffice_url`          | TEXT        | OnlyOffice Document Server URL (null = integration off)            |
-| `onlyoffice_jwt_secret`   | TEXT        | Shared secret for signing OnlyOffice payloads                      |
-| `updated_at`              | TIMESTAMPTZ | Default now()                                                      |
+| Column                       | Type        | Description                                                        |
+| ---------------------------- | ----------- | ------------------------------------------------------------------ |
+| `id`                         | TEXT        | Primary key (always 'app_settings')                                |
+| `signup_enabled`             | BOOLEAN     | Default true                                                       |
+| `first_user_id`              | TEXT        | FK → users.id (immutable)                                          |
+| `share_base_url`             | TEXT        | Custom share link base URL (null = use request origin)             |
+| `max_upload_size_bytes`      | BIGINT      | Max single-file upload size in bytes (default 10737418240 = 10 GB) |
+| `hide_file_extensions`       | BOOLEAN     | When true, file names are shown without extensions (default false) |
+| `require_electron_client`    | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
+| `allow_password_change`      | BOOLEAN     | When true, users may change their own password (default false)     |
+| `known_proxies`              | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart  |
+| `onlyoffice_url`             | TEXT        | OnlyOffice Document Server URL (null = integration off)            |
+| `onlyoffice_jwt_secret`      | TEXT        | Shared secret for signing OnlyOffice payloads                      |
+| `storage_provider`           | TEXT        | `s3`, `r2`, or `aws` (null = no bucket connected)                  |
+| `storage_endpoint`           | TEXT        | Bucket endpoint origin                                             |
+| `storage_region`             | TEXT        | Signing region (`auto` for R2)                                     |
+| `storage_bucket`             | TEXT        | Bucket name                                                        |
+| `storage_force_path_style`   | BOOLEAN     | Path-style addressing                                              |
+| `storage_access_key_id`      | TEXT        | Access key ID                                                      |
+| `storage_secret_encrypted`   | BYTEA       | Secret access key, AES-256-GCM under a KEK-derived subkey          |
+| `storage_secret_kek_version` | INTEGER     | KEK version that encrypted the secret                              |
+| `storage_updated_at`         | TIMESTAMPTZ | Last bucket settings change                                        |
+| `storage_config_version`     | INTEGER     | Incremented on each save; used to detect concurrent edits          |
+| `updated_at`                 | TIMESTAMPTZ | Default now()                                                      |
 
-The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `RESTRICT` foreign key, so the first user cannot be deleted while the row references them.
+The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `RESTRICT` foreign key, so the first user cannot be deleted while the row references them. The `app_settings_storage_complete` check constraint requires the `storage_*` columns other than `storage_updated_at` and `storage_config_version` to be all set or all null.
 
 ### `sessions`
 

@@ -76,6 +76,15 @@ Because share links are the only routes reachable without a session, this budget
 - **Backup Code Regeneration:** 3 attempts per 10 minutes, keyed on IP + user ID.
   - `POST /api/mfa/backup-codes/regenerate`
 
+### Storage Connection Limiter
+
+- **Limit:** 20 requests per 15 minutes per user.
+- **Purpose:** Each request makes outbound requests to an admin-supplied storage endpoint, so it has its own budget below the general limit. Applied in addition to the General API Limiter.
+- **Endpoints:**
+  - `PUT /api/user/storage-config`
+  - `POST /api/user/storage-config/test`
+- **Error:** `Too many storage connection attempts, please try again later`
+
 ### SSE Connection Limiter
 
 - **Limit:** 20 concurrent Server-Sent Events connections per user.

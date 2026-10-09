@@ -52,7 +52,7 @@ The file exceeds the max upload size setting.
 **Check:**
 
 1. File size limits
-2. Bucket endpoint and credentials
+2. A bucket is saved in **Settings** → **Storage** (`503 STORAGE_NOT_CONFIGURED` otherwise); use **Test connection** there to check the endpoint and credentials
 3. Bucket access permissions
 4. Network connectivity
 

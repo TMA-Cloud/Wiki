@@ -25,6 +25,8 @@ The list below is the complete set of `error` values the backend emits. Anything
 | `STORAGE_LIMIT_EXCEEDED` | 413    | The upload would push the account past its quota                              |
 | `STORAGE_CHECK_FAILED`   | 500    | The quota could not be read, so the upload is refused rather than let through |
 | `REQUEST_ABORTED`        | 499    | Client cancelled the upload mid-request                                       |
+| `STORAGE_NOT_CONFIGURED` | 503    | No bucket is saved yet; returned by any file requests                         |
+| `STORAGE_PROBE_FAILED`   | 422    | A bucket connection check failed; the body includes the failed `step`         |
 
 ## Files and Documents
 

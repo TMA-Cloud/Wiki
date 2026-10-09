@@ -133,7 +133,7 @@ Backend only. Run knip without tests. This is a manual audit, not a CI check: th
 
 ### S3 bucket
 
-Run from backend directory. Uses project S3 config.
+Run from backend directory. Uses the bucket saved in **Settings** → **Storage**, read from the database; `.env` must hold the database connection and the app's `FILE_ENCRYPTION_KEY`. The scripts stop with `Storage is not configured` when no bucket is saved.
 
 ```bash
 npm run s3:protect-all
@@ -179,7 +179,7 @@ To check current lifecycle config from project root: `node backend/scripts/check
 
 #### Bulk import drive to S3
 
-Use when you have existing data on disk and want it in the app's S3 bucket with encryption and DB records. Copying files directly into the bucket would skip encryption and the `files` table. Requires S3 env vars and `FILE_ENCRYPTION_KEY` in `.env`.
+Use when you have existing data on disk and want it in the app's S3 bucket with encryption and DB records. Copying files directly into the bucket would skip encryption and the `files` table. Requires a bucket saved in **Settings** → **Storage** and the app's `FILE_ENCRYPTION_KEY` (or `FILE_ENCRYPTION_KEY_FILE`) in `.env`.
 
 From the **backend** directory:
 

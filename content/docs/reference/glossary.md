@@ -95,7 +95,7 @@ Moving a file to trash rather than removing it from storage. Trashed files are a
 
 ### Storage driver
 
-Uploaded file contents stream to an S3-compatible bucket. Configure its endpoint, bucket name, and credentials with the R2, RustFS, or AWS environment variables.
+Uploaded file contents stream to an S3-compatible bucket. The first user enters its provider, endpoint, bucket name, and credentials in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
 ### Sub-user
 
