@@ -28,7 +28,7 @@ bash setup.sh
 The script:
 
 1. Checks for Docker, Docker Compose v2, and `openssl` or `/dev/urandom`
-2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `rotate.sh` over HTTPS only
+2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `setup.sh`, `update.sh`, and `rotate.sh` over HTTPS only
 3. Sets `DB_HOST=postgres` and `REDIS_HOST=redis`, and fills `DB_PASSWORD` and `REDIS_PASSWORD` (32 random bytes each, hex) and `JWT_SECRET` (64 random bytes, hex)
 4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` as key version 1, instead of `.env`
 5. Sets permissions: the directory `0700`, `.env` `0600`, `secrets/` `0700`. The key file is `0444`, or owned by uid 1001 with `0400` when run as root (see [Secrets](#secrets))
@@ -36,7 +36,9 @@ The script:
 
 The whole script runs from one function called on its last line, so a download cut off midway runs nothing.
 
-Re-running it is safe. It keeps an existing `compose.yml`, `.env`, and key file, because a new encryption key would make every stored file unreadable. It replaces `rotate.sh` with the current version.
+Re-running it is safe. It keeps an existing `compose.yml`, `.env`, and key file, because a new encryption key would make every stored file unreadable. It records the SHA-256 hash of each file it installs in `.tma-manifest`, which `update.sh` uses to tell your edits from older versions.
+
+To update to a new version, run `./update.sh` in the install directory. See [Updating](/docs/guides/operations/updating).
 
 To rotate the encryption key or the database and Redis passwords later, run `./rotate.sh` in the install directory. See [Key Rotation](/docs/guides/operations/key-rotation).
 
@@ -82,7 +84,7 @@ Access at `http://localhost:3000` (or configured `BPORT`).
 
 ### Image Version
 
-Prebuilt images are on GitHub Container Registry. To pin a version, edit `compose.yml` and set `image: ghcr.io/tma-cloud/tma:X.0.0` for the `app` and `worker` services. To use an image built from source with `make build`, set `image: tma-cloud:latest` there instead.
+Prebuilt images are on GitHub Container Registry. To pin a version, or to use an image built from source with `make build`, set `image:` for the `app` and `worker` services in `compose.override.yml` rather than in `compose.yml`, so `update.sh` can keep replacing `compose.yml`. See [Updating](/docs/guides/operations/updating#files-you-edited).
 
 ## Configuration
 

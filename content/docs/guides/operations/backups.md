@@ -32,6 +32,10 @@ How to keep it:
 2. Store it apart from the database backups, for example in a password manager. A backup that holds both the database and the key gives full access to the files.
 3. To restore, put the key back at the same location with the same value before starting the containers. The server refuses to start with a different key.
 
+## Before Updates
+
+`update.sh` dumps the database to `backups/pre-update-<time>.dump` before each update and keeps the last 3. These dumps are for rolling back an update, not a replacement for regular backups. See [Updating](/docs/guides/operations/updating#roll-back).
+
 ## Backup Script
 
 TMA Cloud includes a backup/restore script at `scripts/db-backup-restore.sh`. It handles full PostgreSQL backups and restores through Docker or host-level `pg_dump`/`pg_restore`.
