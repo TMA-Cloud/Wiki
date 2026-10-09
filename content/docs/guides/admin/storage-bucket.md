@@ -65,7 +65,7 @@ A failed check is shown with its name and a reason, for example `Reach the bucke
 - The secret access key is encrypted with AES-256-GCM before it is stored. The key is derived from `FILE_ENCRYPTION_KEY` with HKDF, and the ciphertext is bound to the access key ID. See [Security Model](/docs/concepts/security-model#bucket-credentials).
 - The secret is never returned by the API. The access key ID is shown masked, for example `AKIA••••MPLE`.
 - When editing, leave both key fields blank to keep the saved keys. A new access key ID needs its secret.
-- `rotate-kek.js` re-encrypts the stored secret under a new `FILE_ENCRYPTION_KEY`. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
+- A master key rotation re-encrypts the stored secret under the new key version. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 ## Concurrent Edits
 

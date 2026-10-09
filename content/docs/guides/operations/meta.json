@@ -6,6 +6,7 @@
     "background-workers",
     "monitoring",
     "backups",
+    "key-rotation",
     "testing"
   ]
 }

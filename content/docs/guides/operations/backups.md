@@ -24,11 +24,11 @@ Where the key is:
 | Key file outside Docker | `FILE_ENCRYPTION_KEY_FILE` | The path set in `.env`                  |
 | Key in `.env`           | `FILE_ENCRYPTION_KEY`      | The value in `.env`                     |
 
-During a key rotation, also back up each `FILE_ENCRYPTION_KEY_V<n>` still in use. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
+After a rotation the key file holds every key version. Back up the whole file: a database backup can only be read with the versions that were in use when it was taken. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 How to keep it:
 
-1. Copy the key once, after setup, and again after each rotation. It does not change otherwise.
+1. Copy the key once, after setup, and again after each key rotation. It does not change otherwise.
 2. Store it apart from the database backups, for example in a password manager. A backup that holds both the database and the key gives full access to the files.
 3. To restore, put the key back at the same location with the same value before starting the containers. The server refuses to start with a different key.
 

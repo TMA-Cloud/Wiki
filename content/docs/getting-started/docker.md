@@ -28,15 +28,17 @@ bash setup.sh
 The script:
 
 1. Checks for Docker, Docker Compose v2, and `openssl` or `/dev/urandom`
-2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml` and `.env.example` as `.env` over HTTPS only
+2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `rotate.sh` over HTTPS only
 3. Sets `DB_HOST=postgres` and `REDIS_HOST=redis`, and fills `DB_PASSWORD` and `REDIS_PASSWORD` (32 random bytes each, hex) and `JWT_SECRET` (64 random bytes, hex)
-4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` instead of `.env`
+4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` as key version 1, instead of `.env`
 5. Sets permissions: the directory `0700`, `.env` `0600`, `secrets/` `0700`. The key file is `0444`, or owned by uid 1001 with `0400` when run as root (see [Secrets](#secrets))
 6. Runs `docker compose up -d`
 
 The whole script runs from one function called on its last line, so a download cut off midway runs nothing.
 
-Re-running it is safe. It keeps an existing `compose.yml`, `.env`, and key file, because a new encryption key would make every stored file unreadable.
+Re-running it is safe. It keeps an existing `compose.yml`, `.env`, and key file, because a new encryption key would make every stored file unreadable. It replaces `rotate.sh` with the current version.
+
+To rotate the encryption key or the database and Redis passwords later, run `./rotate.sh` in the install directory. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 **Options** (environment variables):
 
@@ -96,6 +98,8 @@ Compose mounts a secret file with its host owner and mode; it does not apply `ui
 
 - **Created by root:** `chown 1001:1001` and mode `0400`
 - **Created by another user:** mode `0444` inside the `0700` `secrets/` directory. The container sees only the file; other host users cannot open the directory
+
+`rotate.sh` writes a new key file with the same permissions and recreates the app and worker, because a single-file mount keeps showing the old file until the container is recreated.
 
 Back up `secrets/file_encryption_key` apart from database backups. See [Backups](/docs/guides/operations/backups#encryption-key).
 

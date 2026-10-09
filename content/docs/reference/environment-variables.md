@@ -65,24 +65,22 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 ## File Storage
 
-| Variable                   | Required         | Default             | Description                                              |
-| -------------------------- | ---------------- | ------------------- | -------------------------------------------------------- |
-| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | Key-encryption key (KEK) for files and the bucket secret |
-| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`             |
-| `FILE_KEK_VERSION`         | No               | `1`                 | Version of the current KEK                               |
-| `FILE_ENCRYPTION_KEY_V<n>` | During rotation  | -                   | Previous KEK for version `<n>`                           |
+| Variable                   | Required         | Default             | Description                                               |
+| -------------------------- | ---------------- | ------------------- | --------------------------------------------------------- |
+| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | Key-encryption keys (KEK) for files and the bucket secret |
+| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`              |
 
-**`FILE_ENCRYPTION_KEY`:** In production the value must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key from the `backend` directory with `npm run key:generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
+**`FILE_ENCRYPTION_KEY`:** A single key, or a keyring of `version:key` entries after a rotation: one per line in a key file, comma-separated in `.env`. A key without a version is version 1. The highest version encrypts new data and the others still decrypt. In production the newest key must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key from the `backend` directory with `npm run key:generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
 
 **Docker:** `docker-compose.yml` sets `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key` for the app and worker and mounts `secrets/file_encryption_key` there. Leave `FILE_ENCRYPTION_KEY` empty in `.env`. See [Docker Deployment](/docs/getting-started/docker#secrets).
 
-**`_FILE` variables:** Each key variable can be given as `<NAME>_FILE` instead, holding the path of a file that contains the key, for example `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key`. This keeps the key out of `docker inspect` output and the process environment. Setting both `<NAME>` and `<NAME>_FILE` is an error. Trailing newlines in the file are ignored.
+**`_FILE` variables:** The key can be given as `FILE_ENCRYPTION_KEY_FILE` instead, holding the path of a file that contains it, for example `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key`. This keeps the key out of `docker inspect` output and the process environment. Setting both is an error. Lines starting with `#` in the file are ignored.
 
-**Startup check:** The API and the worker compare each configured key with a check value stored in the `kek_checks` table and refuse to start if it does not match. See [Security Model](/docs/concepts/security-model#key-check).
+**Startup check:** The API and the worker compare each key in the keyring with a check value stored in the `kek_checks` table and refuse to start if one does not match, or if stored data uses a version the keyring lacks. See [Security Model](/docs/concepts/security-model#key-check).
 
 **Note:** File contents use bounded streaming. The multipart uploader buffers at most four parts per active upload. Per-file size is controlled by the max upload size setting in **Settings** → **Storage**.
 
-**Key rotation:** To rotate, set a new `FILE_ENCRYPTION_KEY`, increment `FILE_KEK_VERSION`, and keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (e.g. `FILE_ENCRYPTION_KEY_V1`) until `rotate-kek.js` reports `Remaining=0`. Older keys may be passphrases. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
+**Key rotation:** `./rotate.sh key` on Docker, or `npm run rotate -- key` from the `backend` directory. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 ## Storage Bucket
 

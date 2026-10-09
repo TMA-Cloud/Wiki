@@ -112,7 +112,7 @@ The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Ex
 - Each object has a 40-byte header (a random salt and nonce prefix) followed by 1 MB segments, each sealed with its own authentication tag. The per-file encryption key is derived from the DEK with HKDF-SHA256
 - Segments make stored objects seekable: a download serves an HTTP `Range` request by fetching and decrypting only the overlapping segments, so a large file opens without reading all of it
 - Automatic decryption on download
-- Rotate `FILE_ENCRYPTION_KEY` with `rotate-kek.js`, which only rewraps the stored DEKs and never re-encrypts the objects. See [CLI Commands](/docs/reference/cli-commands)
+- Rotating `FILE_ENCRYPTION_KEY` only rewraps the stored DEKs and never re-encrypts the objects. See [Key Rotation](/docs/guides/operations/key-rotation)
 
 ### Storage Limits
 

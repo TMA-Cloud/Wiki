@@ -41,17 +41,23 @@ Frequently encountered errors and step-by-step diagnosis.
 
 The key is a passphrase. Production accepts only a random 32-byte key in base64 or hex.
 
-1. **Generate a key:** `npm run key:generate` from `backend`, or `openssl rand -base64 32`.
-2. **Rotate to it.** Set the new key as `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the passphrase as `FILE_ENCRYPTION_KEY_V<oldVersion>`, and run `npm run rotate:kek`. Replacing the key without rotating makes every stored file unreadable. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
+1. **Rotate to a random key.** Run `./rotate.sh key` on Docker, or `npm run rotate -- key` from `backend`. Both keep the passphrase as an older version so existing files still open. Replacing the key without rotating makes every stored file unreadable. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 ### Symptom: "FILE_ENCRYPTION_KEY (key version N) does not match the key this deployment's data was encrypted with"
 
 The configured key differs from the one recorded in `kek_checks`.
 
 1. **Compare with your backup** of the key. A copy-paste error or a trailing character is the usual cause.
-2. **Check `FILE_KEK_VERSION`.** It must be the version of the current key.
+2. **Check the version prefixes.** In a keyring each line is `version:key`, and a key without a prefix is version 1.
 3. **Check for both forms.** `FILE_ENCRYPTION_KEY` and `FILE_ENCRYPTION_KEY_FILE` must not both be set.
-4. **The message names `FILE_ENCRYPTION_KEY_V<n>`?** An old key kept for rotation is wrong; restore it or remove it once rotation has reported `Remaining=0`.
+4. **The version is an older one?** A line kept for older data is wrong. Restore it from the key file backup.
+
+### Symptom: "Stored data is encrypted under key version N, which FILE_ENCRYPTION_KEY does not contain"
+
+A key line that file keys or the bucket secret still use was removed, or an older key file was restored.
+
+1. **Restore the key file** from the backup taken after the last rotation.
+2. **Check the version prefix** of each line against the versions in the message.
 
 ## Storage bucket errors
 

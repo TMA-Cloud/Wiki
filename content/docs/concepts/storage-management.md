@@ -77,19 +77,18 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 ### Key Configuration
 
-- Set `FILE_ENCRYPTION_KEY` — the key-encryption key (KEK) that wraps each file's data key and the stored bucket secret
-- Set `FILE_KEK_VERSION` — the version number of the current KEK (default `1`)
+- Set `FILE_ENCRYPTION_KEY` — the key-encryption key (KEK) that wraps each file's data key and the stored bucket secret. After a rotation it is a keyring of `version:key` entries; the highest version is the current KEK
 - Generate a key: `npm run key:generate` from the `backend` directory, or `openssl rand -base64 32`
 - Production requires a random 32-byte key (base64 or hex). A passphrase stops startup, because PBKDF2 with a fixed salt is only as strong as the passphrase
 - Outside production a passphrase is accepted, and a development fallback key is used if none is set
 - The key can be read from a file with `FILE_ENCRYPTION_KEY_FILE` (Docker or Kubernetes secrets)
 - The KEK is never stored in the database. A database backup holds only wrapped keys, which cannot be opened without it
-- At startup the API and worker check the key against the `kek_checks` table and refuse to start on a mismatch
+- At startup the API and worker check every key against the `kek_checks` table and refuse to start on a mismatch, or when stored data uses a version the keyring lacks
 
 ### Key Rotation
 
 - Rotating the KEK only rewraps each file's stored DEK and the stored bucket secret; the encrypted objects are never read or rewritten
-- Set a new `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>`, then run `rotate-kek.js`. Remove the old key once it reports `Remaining=0`
+- `./rotate.sh key` (Docker) or `npm run rotate -- key` adds the next key version and keeps the older ones, which database backups from before the rotation still need. The worker rewraps the stored keys when it starts. See [Key Rotation](/docs/guides/operations/key-rotation)
 - Rotation is also how a deployment moves from a passphrase to a random key
 
 ## Storage Operations

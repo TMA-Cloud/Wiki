@@ -210,33 +210,24 @@ node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR
 npm run key:generate
 ```
 
-Print a new random 32-byte key in base64 for `FILE_ENCRYPTION_KEY`. In production the key must be a random 32-byte key in base64 or hex.
+Print a new random 32-byte key in base64 for `FILE_ENCRYPTION_KEY`. In production the key must be a random 32-byte key in base64 or hex. To replace the key of a running install, use `npm run rotate -- key` instead, which keeps the old key for existing data.
 
-### Rotate FILE_ENCRYPTION_KEY (KEK)
+### Rotate keys and passwords
 
-`FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps each file's data key (DEK) and the stored bucket secret. Rotating it only rewraps those stored keys — a database update per file — and never reads or rewrites the encrypted objects.
+From the **backend** directory:
 
-Use the same steps to replace a passphrase key with a random key, which production requires.
+```bash
+npm run rotate -- status         # Key versions and file keys per version
+npm run rotate -- key            # Add a new master key version
+npm run rotate -- rewrap         # Rewrap stored file keys under the newest version
+npm run rotate -- db-password    # New random database password, saved in .env
+```
 
-Steps:
+- `key` writes to the file named by `FILE_ENCRYPTION_KEY_FILE`, or to `FILE_ENCRYPTION_KEY` in `.env`. Restart the API, then the worker; the worker rewraps the stored file keys when it starts
+- `rewrap` checks every key against the `kek_checks` table first. It changes only the wrapped keys in the database, never the objects in the bucket, and is safe to interrupt and run again
+- Docker installs use `./rotate.sh` in the install directory instead
 
-1. Generate a key with `npm run key:generate`, set it as `FILE_ENCRYPTION_KEY`, and bump `FILE_KEK_VERSION` (for example `1` → `2`).
-2. Keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (for example `FILE_ENCRYPTION_KEY_V1`) so the old DEKs can be unwrapped.
-3. Run it from the **backend** directory:
-
-   ```bash
-   npm run rotate:kek
-   ```
-
-4. Once it reports `Remaining=0`, remove the old `FILE_ENCRYPTION_KEY_V<oldVersion>`.
-
-Notes:
-
-- Before rewrapping, every configured key is checked against the `kek_checks` table. A wrong old or new key stops the script before any row changes
-- The bucket secret access key is rewrapped first, without a confirmation prompt
-- No objects are downloaded or re-uploaded
-- Safe to interrupt and re-run: only files still wrapped under an older KEK are touched
-- Failures are written to a `kek-rotation-failures-*.json` manifest
+See [Key Rotation](/docs/guides/operations/key-rotation).
 
 ## Docker Commands
 

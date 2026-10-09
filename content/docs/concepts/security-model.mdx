@@ -85,7 +85,8 @@ To keep the key out of `docker inspect` output and the process environment, it i
 
 The `kek_checks` table holds one check value per KEK version: an HMAC-SHA256 of a fixed label under a subkey derived from the KEK with HKDF. It confirms that a key is the right one without revealing anything about the key.
 
-- At startup the API, the worker, and `rotate-kek.js` compare every configured key with its stored check value. On a mismatch they stop with a message naming the variable, for example `FILE_ENCRYPTION_KEY (key version 2) does not match the key this deployment's data was encrypted with`.
+- At startup the API, the worker, and `npm run rotate` compare every key in the keyring with its stored check value. On a mismatch they stop with a message naming the version, for example `FILE_ENCRYPTION_KEY (key version 2) does not match the key this deployment's data was encrypted with`.
+- They also stop when a file key or the bucket secret is wrapped under a version the keyring lacks, for example after an old key line was removed too early.
 - The first time a key version is seen, it must open a stored DEK or the bucket secret already sealed under that version before its check value is recorded.
 
 Without this check, a wrong key would let the server start and then fail every download.
@@ -100,7 +101,7 @@ The bucket is configured in **Settings** → **Storage** by the first user. See 
 - **Redaction:** `secretAccessKey` is redacted from request logs and audit metadata
 - **Verified before saving:** A bucket is saved only after a live connection check passes
 - **Endpoint limits:** Plain `http://` is accepted only for private network addresses, and link-local addresses such as `169.254.169.254` are rejected
-- **Rotation:** `rotate-kek.js` rewraps the secret under the new KEK
+- **Rotation:** A master key rotation rewraps the secret under the new key version. See [Key Rotation](/docs/guides/operations/key-rotation)
 
 ### Database Security
 
