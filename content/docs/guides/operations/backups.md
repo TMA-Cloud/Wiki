@@ -38,33 +38,35 @@ How to keep it:
 
 ## Backup Script
 
-TMA Cloud includes a backup/restore script at `scripts/db-backup-restore.sh`. It handles full PostgreSQL backups and restores through Docker or host-level `pg_dump`/`pg_restore`.
+TMA Cloud includes a backup and restore script, `db-backup-restore.sh`. `setup.sh` puts it in the install directory and `update.sh` keeps it current. In a repository checkout it is `scripts/db-backup-restore.sh`. It handles full PostgreSQL backups and restores through Docker or the PostgreSQL client tools on the host.
+
+Run it from the install directory with `./db-backup-restore.sh`; the examples below use that form.
 
 ### How It Works
 
 - Uses `pg_dump` with custom format (compressed binary, supports selective and parallel restore)
 - Takes a `--serializable-deferrable` snapshot (consistent read without blocking writes)
-- Verifies the dump with `pg_restore --list` immediately after creation
+- Verifies the dump with `pg_restore --list` immediately after creation. The dump is written as `<name>.dump.part` and renamed only after this check, so a failed dump leaves no file behind
 - Computes a SHA-256 checksum and writes a `.meta` sidecar file
 - Records per-table row counts at backup time
-- Auto-prunes old backups based on `BACKUP_RETAIN_COUNT` (default 10)
+- Auto-prunes its own old backups based on `BACKUP_RETAIN_COUNT` (default 10). The `pre-update-*.dump` files from `update.sh` are not counted or removed
+- Writes dumps with mode `0600` in a `0700` `backups/` directory
 
 ### Container Detection
 
-The script auto-detects the PostgreSQL Docker container in this order:
+The script finds the PostgreSQL container in this order:
 
-1. `DB_CONTAINER` env var (explicit override)
-2. `tma-cloud-postgres` (project docker-compose container name)
-3. Any running container with a `postgres` image
+1. `DB_CONTAINER` (explicit override)
+2. The `postgres` service of the Docker Compose project in the script's directory
 
-If no container is found, it falls back to host PostgreSQL client tools.
+Otherwise it uses the PostgreSQL client tools on the host and connects to `DB_HOST`:`DB_PORT`. It never picks a container by name or image, because a restore drops the database.
 
 ## Database Backup
 
 ### Create a Backup
 
 ```bash
-./scripts/db-backup-restore.sh backup
+./db-backup-restore.sh backup
 ```
 
 Output is saved to `backups/<DB_NAME>_<TIMESTAMP>.dump` with a `.meta` file alongside it.
@@ -117,23 +119,27 @@ pgboss.job_common=64
 ### Restore from Backup
 
 ```bash
-./scripts/db-backup-restore.sh restore backups/tma_cloud_storage_20260115T020000Z.dump
+./db-backup-restore.sh restore backups/tma_cloud_storage_20260115T020000Z.dump
 ```
 
 The restore process:
 
 1. Validates the backup file (SHA-256 checksum + TOC inspection) before touching the database
 2. Asks for confirmation by typing the database name
-3. Terminates active connections to the database
-4. Drops and recreates the database
+3. Stops the `app` and `worker` services when it runs against the Compose project, so nothing writes during the restore. With a host or `DB_CONTAINER` database, stop the API and the worker yourself first
+4. Drops the database `WITH (FORCE)`, which ends any remaining connections, and creates it again
 5. Restores in `--single-transaction` mode (atomic — rolls back entirely on error)
 6. Runs `ANALYZE` to update query planner statistics
 7. Reports table and row counts for verification
+8. Clears the Redis cache of the Compose project with `FLUSHDB`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 5 minutes for the entries to expire
+9. Starts the services it stopped. After a failed restore they stay stopped, because the database is empty, and the script prints the command that starts them
+
+The restored data opens only with the encryption key file from the time of the backup or a later one, since rotation keeps older key versions.
 
 ## Verify a Backup
 
 ```bash
-./scripts/db-backup-restore.sh verify backups/tma_cloud_storage_20260115T020000Z.dump
+./db-backup-restore.sh verify backups/tma_cloud_storage_20260115T020000Z.dump
 ```
 
 Checks the SHA-256 checksum against the `.meta` file and inspects the dump TOC without restoring.
@@ -141,24 +147,26 @@ Checks the SHA-256 checksum against the `.meta` file and inspects the dump TOC w
 ## List Backups
 
 ```bash
-./scripts/db-backup-restore.sh list
+./db-backup-restore.sh list
 ```
 
 Lists all `.dump` files in the `backups/` directory with file size and date.
 
 ## Configuration
 
-The script reads `.env` from the project root. Relevant variables:
+The script reads these keys from `.env` in its directory (or the repository root for `scripts/db-backup-restore.sh`, or `TMA_DIR`). It reads them as plain values and never runs `.env` as a shell script. Variables already set in the environment take precedence. The password reaches `pg_dump` and `docker exec` through the environment, so it does not appear in the process list.
 
-| Variable              | Default             | Description                              |
-| --------------------- | ------------------- | ---------------------------------------- |
-| `DB_HOST`             | `localhost`         | PostgreSQL host                          |
-| `DB_PORT`             | `5432`              | PostgreSQL port                          |
-| `DB_USER`             | `postgres`          | Database username                        |
-| `DB_PASSWORD`         | -                   | Database password                        |
-| `DB_NAME`             | `tma_cloud_storage` | Database name                            |
-| `DB_CONTAINER`        | auto-detected       | Docker container name override           |
-| `BACKUP_RETAIN_COUNT` | `10`                | Number of backups to keep before pruning |
+| Variable              | Default             | Description                                |
+| --------------------- | ------------------- | ------------------------------------------ |
+| `DB_HOST`             | `localhost`         | PostgreSQL host                            |
+| `DB_PORT`             | `5432`              | PostgreSQL port                            |
+| `DB_USER`             | `postgres`          | Database username                          |
+| `DB_PASSWORD`         | -                   | Database password                          |
+| `DB_NAME`             | `tma_cloud_storage` | Database name                              |
+| `DB_CONTAINER`        | -                   | PostgreSQL container name                  |
+| `REDIS_PASSWORD`      | -                   | Redis password, to clear the cache         |
+| `REDIS_DB`            | `0`                 | Redis database the cache uses              |
+| `BACKUP_RETAIN_COUNT` | `10`                | Backups to keep before pruning (1 or more) |
 
 ## File Backups
 
@@ -176,7 +184,7 @@ Recommended cron schedule for automated backups:
 
 ```bash
 # Daily database backup at 02:00 UTC
-0 2 * * * cd /path/to/cloud_sol && ./scripts/db-backup-restore.sh backup >> /var/log/tma-backup.log 2>&1
+0 2 * * * cd /path/to/tma-cloud && ./db-backup-restore.sh backup >> /var/log/tma-backup.log 2>&1
 ```
 
 ## Related Topics

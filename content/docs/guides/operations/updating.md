@@ -25,7 +25,7 @@ The containers that change are recreated, so the app is unavailable for a short 
 
 ## What It Does
 
-1. **Downloads and checks the new files.** `compose.yml`, `.env.example`, `setup.sh`, `rotate.sh`, and `update.sh` are downloaded over HTTPS only. Each script must start with `#!/usr/bin/env bash` and pass `bash -n`, and the new `compose.yml` must load with your `.env` and `compose.override.yml`. If any check fails, nothing is changed.
+1. **Downloads and checks the new files.** `compose.yml`, `.env.example`, `setup.sh`, `rotate.sh`, `db-backup-restore.sh`, and `update.sh` are downloaded over HTTPS only. Each script must start with `#!/usr/bin/env bash` and pass `bash -n`, and the new `compose.yml` must load with your `.env` and `compose.override.yml`. If any check fails, nothing is changed.
 2. **Updates itself.** When `update.sh` changed, the new copy replaces the old one and runs the rest of the update.
 3. **Backs up the database.** `pg_dump` writes `backups/pre-update-<time>.dump` before the new version runs its migrations. The dump is checked with `pg_restore --list`. If the backup fails, nothing is changed.
 4. **Replaces the files.** The old versions are copied to `.update/backup-<time>/`. See [Files You Edited](#files-you-edited).

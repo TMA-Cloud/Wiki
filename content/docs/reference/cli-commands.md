@@ -332,30 +332,30 @@ Migrations run automatically on application startup.
 ### Backup & Restore
 
 ```bash
-./scripts/db-backup-restore.sh backup
+./db-backup-restore.sh backup
 ```
 
 Full database backup. Outputs a compressed `.dump` file with a `.meta` sidecar (SHA-256 checksum, table row counts, backup metadata).
 
 ```bash
-./scripts/db-backup-restore.sh restore backups/<file>.dump
+./db-backup-restore.sh restore backups/<file>.dump
 ```
 
 Restore database from a backup. Validates integrity before touching the database, restores in single-transaction mode.
 
 ```bash
-./scripts/db-backup-restore.sh verify backups/<file>.dump
+./db-backup-restore.sh verify backups/<file>.dump
 ```
 
 Verify a backup file's SHA-256 checksum and dump TOC without restoring.
 
 ```bash
-./scripts/db-backup-restore.sh list
+./db-backup-restore.sh list
 ```
 
 List available backups with file sizes and dates.
 
-The script auto-detects the PostgreSQL Docker container. Override with `DB_CONTAINER` env var. See [Backups](/docs/guides/operations/backups) for details.
+Run it from the install directory, where `setup.sh` puts it; in a repository checkout it is `scripts/db-backup-restore.sh`. It uses the `postgres` service of the Compose project in that directory, the container named by `DB_CONTAINER`, or the PostgreSQL client tools on the host. See [Backups](/docs/guides/operations/backups) for details.
 
 ## Related Topics
 

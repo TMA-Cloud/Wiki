@@ -28,7 +28,7 @@ bash setup.sh
 The script:
 
 1. Checks for Docker, Docker Compose v2, and `openssl` or `/dev/urandom`
-2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `setup.sh`, `update.sh`, and `rotate.sh` over HTTPS only
+2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `setup.sh`, `update.sh`, `rotate.sh`, and `db-backup-restore.sh` over HTTPS only
 3. Sets `DB_HOST=postgres` and `REDIS_HOST=redis`, and fills `DB_PASSWORD` and `REDIS_PASSWORD` (32 random bytes each, hex) and `JWT_SECRET` (64 random bytes, hex)
 4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` as key version 1, instead of `.env`
 5. Sets permissions: the directory `0700`, `.env` `0600`, `secrets/` `0700`. The key file is `0444`, or owned by uid 1001 with `0400` when run as root (see [Secrets](#secrets))
