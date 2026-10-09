@@ -154,12 +154,12 @@ The Windows desktop app can mount TMA Cloud as a drive (for example `Z:`) so you
 
 ### Save-only mode
 
-**Settings → Storage → Cloud Drive → Save-only mode** (desktop app only).
+The first user sets this for every desktop app in **Settings → Administration → Cloud Drive save-only**. Other users see the current mode in **Settings → Storage → Cloud Drive** and cannot change it.
 
-- **Off (default):** files can be opened and copied from the drive normally.
-- **On:** folders and files stay browsable and **Save As** still works, but opening or copying file content from the drive is blocked (Windows shows "Access denied"). Use this to keep people opening files through the app while still allowing Save As uploads.
+- **On (default):** folders and files stay browsable and **Save As** still works, but opening or copying file content from the drive is blocked (Windows shows "Access denied"). Use this to keep people opening files through the app while still allowing Save As uploads.
+- **Off:** files can be opened and copied from the drive normally.
 
-The toggle applies immediately and is remembered per device.
+The desktop app reads the mode from the server when the drive mounts and every minute after that, and applies a change without remounting. The first user's own drive applies a change at once. Until the server answers, and if it cannot be reached, the drive stays save-only.
 
 ## Clipboard Integration (Windows desktop app)
 

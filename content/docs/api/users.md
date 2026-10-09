@@ -771,6 +771,49 @@ Update the desktop-only access setting (admin only). When enabled, the backend b
 }
 ```
 
+## Cloud Drive Configuration
+
+### GET `/api/user/cloud-drive-config`
+
+Get the Cloud Drive access mode. Accessible to any authenticated user; the desktop app reads it to decide what the mounted drive allows.
+
+**Response:**
+
+```json
+{
+  "saveOnly": true,
+  "canConfigure": false
+}
+```
+
+- `saveOnly`: When true, other apps can browse and save into the drive but cannot read file contents from it. True unless the first user turned it off.
+- `canConfigure`: True for the first user.
+
+### PUT `/api/user/cloud-drive-config`
+
+Update the Cloud Drive access mode (admin only). Mounted drives apply the change within a minute.
+
+**Request Body:**
+
+```json
+{
+  "saveOnly": false
+}
+```
+
+**Validation:**
+
+- `saveOnly`: Required. Must be a boolean.
+
+**Response:**
+
+```json
+{
+  "saveOnly": false,
+  "canConfigure": true
+}
+```
+
 ## Password Change Configuration
 
 ### GET `/api/user/password-change-config`

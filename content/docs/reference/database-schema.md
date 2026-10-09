@@ -147,6 +147,7 @@ Application-wide settings.
 | `hide_file_extensions`             | BOOLEAN     | When true, file names are shown without extensions (default false) |
 | `require_electron_client`          | BOOLEAN     | When true, only desktop app is allowed to use (default false)      |
 | `allow_password_change`            | BOOLEAN     | When true, users may change their own password (default false)     |
+| `cloud_drive_save_only`            | BOOLEAN     | Cloud Drive blocks reading file content (default true)             |
 | `known_proxies`                    | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart  |
 | `session_idle_days`                | INTEGER     | Days without activity before a session ends, 1–365 (default 30)    |
 | `access_time_tracking`             | BOOLEAN     | When false, `files.accessed_at` stops updating (default true)      |

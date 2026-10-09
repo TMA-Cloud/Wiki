@@ -49,6 +49,11 @@ Any account, including yours, can add extra logins that share its files and quot
 - When enabled, file names are shown without extensions (applies to all users)
 - Toggle in **Settings** → **Administration** → **Hide file extensions**
 
+### Cloud Drive Save-only
+
+- When enabled, other apps can browse and save into the desktop app's Cloud Drive but cannot open files from it (applies to all desktop apps, on by default)
+- Toggle in **Settings** → **Administration** → **Cloud Drive save-only**
+
 ## Managing Users
 
 ### Storage Limits
