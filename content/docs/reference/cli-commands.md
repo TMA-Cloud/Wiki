@@ -204,23 +204,6 @@ node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR
 - Finalizes uploaded file metadata in batches of 250, with bounded upload concurrency and one quota lock per batch.
 - Preserves file and folder modification times (mtime). Created rows and storage keys are recorded in `bulk_import_items` in the same database transaction as their metadata. On the first error, rollback reads that manifest in batches and deletes files before folders.
 
-### Migrate to streaming encryption (one-time)
-
-Stored files use Google Tink's AES-GCM-HKDF-STREAMING format (`AES256_GCM_HKDF_1MB`). If you are upgrading from the earlier single-blob format (`[IV][DATA][TAG]`), run this once to convert existing objects to the segmented format.
-
-- Run it with the app **stopped**, before deploying the upgrade
-- Uses the same `FILE_ENCRYPTION_KEY` but it re-wraps the bytes, not the key
-- Uses the configured S3-compatible bucket
-- Covers trashed files as well, since they still own objects and can be restored
-- Resolves each row's actual key material first, so files already converted to a per-file DEK are not mistaken for legacy ciphertext
-- Safe to re-run: objects already in the streaming format are detected and skipped
-
-From the **backend** directory:
-
-```bash
-npm run migrate:streaming
-```
-
 ### Generate an encryption key
 
 ```bash
@@ -254,36 +237,6 @@ Notes:
 - No objects are downloaded or re-uploaded
 - Safe to interrupt and re-run: only files still wrapped under an older KEK are touched
 - Failures are written to a `kek-rotation-failures-*.json` manifest
-
-### Backfill envelope encryption (one-time)
-
-Run once on a deployment created before envelope encryption, to give existing files their own DEK. Reads each object, re-encrypts it under a fresh DEK, and records the wrapped DEK on the row.
-
-- Run with the app **stopped**, after applying migrations and taking a backup
-- Covers trashed files as well, so the upgrade leaves nothing on the legacy master-key path
-- Re-encrypts to a new storage key, flips the database row, then deletes the old object — safe to interrupt and re-run
-- Failures are written to an `envelope-backfill-failures-*.json` manifest
-- `--concurrency N` sets how many objects are re-encrypted at once (default 8). Each is a full download + re-encrypt + re-upload, so raise it for many small files on a fast link (16–32)
-
-```bash
-npm run backfill:envelope
-```
-
-### Reconcile encrypted file sizes (one-time)
-
-Encrypted downloads derive their `Content-Length` from `files.size`, which must hold the exact plaintext byte length. Run this once when upgrading an installation whose rows predate that requirement. It reads each object's real length from storage, checks the streaming-format header, derives the plaintext length, and repairs rows that disagree. Object bytes are not rewritten.
-
-- Run with the app and worker **stopped**, or in maintenance mode
-- Dry run by default — nothing is written without `--apply`
-- Resumable and safe to re-run
-- A row reported as legacy format needs `npm run migrate:streaming` first; run this again afterwards
-- `--concurrency N` sets how many object-store HEAD requests run at once (default 16)
-
-```bash
-npm run migrate:sizes                      # dry run
-npm run migrate:sizes -- --apply           # prompt, then update
-npm run migrate:sizes -- --apply --yes     # non-interactive
-```
 
 ## Docker Commands
 

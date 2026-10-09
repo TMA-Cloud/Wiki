@@ -91,7 +91,6 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 - Rotating the KEK only rewraps each file's stored DEK and the stored bucket secret; the encrypted objects are never read or rewritten
 - Set a new `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>`, then run `rotate-kek.js`. Remove the old key once it reports `Remaining=0`
 - Rotation is also how a deployment moves from a passphrase to a random key
-- A deployment created before envelope encryption runs `backfill-envelope-encryption.js` once to give existing files a DEK. See [CLI Commands](/docs/reference/cli-commands)
 
 ## Storage Operations
 
