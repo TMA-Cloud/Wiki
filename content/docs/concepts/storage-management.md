@@ -77,16 +77,20 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 ### Key Configuration
 
-- Set `FILE_ENCRYPTION_KEY` — the key-encryption key (KEK) that wraps each file's data key
+- Set `FILE_ENCRYPTION_KEY` — the key-encryption key (KEK) that wraps each file's data key and the stored bucket secret
 - Set `FILE_KEK_VERSION` — the version number of the current KEK (default `1`)
-- Generate a key: `openssl rand -base64 32` (a 32-byte base64 or hex key is recommended)
-- Key can be base64, hex, or a passphrase (stretched with PBKDF2)
-- Development fallback key used if not set (not secure for production)
+- Generate a key: `npm run key:generate` from the `backend` directory, or `openssl rand -base64 32`
+- Production requires a random 32-byte key (base64 or hex). A passphrase stops startup, because PBKDF2 with a fixed salt is only as strong as the passphrase
+- Outside production a passphrase is accepted, and a development fallback key is used if none is set
+- The key can be read from a file with `FILE_ENCRYPTION_KEY_FILE` (Docker or Kubernetes secrets)
+- The KEK is never stored in the database. A database backup holds only wrapped keys, which cannot be opened without it
+- At startup the API and worker check the key against the `kek_checks` table and refuse to start on a mismatch
 
 ### Key Rotation
 
-- Rotating the KEK only rewraps each file's stored DEK; the encrypted objects are never read or rewritten
+- Rotating the KEK only rewraps each file's stored DEK and the stored bucket secret; the encrypted objects are never read or rewritten
 - Set a new `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>`, then run `rotate-kek.js`. Remove the old key once it reports `Remaining=0`
+- Rotation is also how a deployment moves from a passphrase to a random key
 - A deployment created before envelope encryption runs `backfill-envelope-encryption.js` once to give existing files a DEK. See [CLI Commands](/docs/reference/cli-commands)
 
 ## Storage Operations

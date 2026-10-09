@@ -65,14 +65,22 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 ## File Storage
 
-| Variable              | Required         | Default             | Description                        |
-| --------------------- | ---------------- | ------------------- | ---------------------------------- |
-| `FILE_ENCRYPTION_KEY` | Yes (production) | Development default | Key-encryption key (KEK) for files |
-| `FILE_KEK_VERSION`    | No               | `1`                 | Version of the current KEK         |
+| Variable                   | Required         | Default             | Description                                              |
+| -------------------------- | ---------------- | ------------------- | -------------------------------------------------------- |
+| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | Key-encryption key (KEK) for files and the bucket secret |
+| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`             |
+| `FILE_KEK_VERSION`         | No               | `1`                 | Version of the current KEK                               |
+| `FILE_ENCRYPTION_KEY_V<n>` | During rotation  | -                   | Previous KEK for version `<n>`                           |
+
+**`FILE_ENCRYPTION_KEY`:** In production the value must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key from the `backend` directory with `npm run key:generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
+
+**`_FILE` variables:** Each key variable can be given as `<NAME>_FILE` instead, holding the path of a file that contains the key, for example `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key`. This keeps the key out of `docker inspect` output and the process environment. Setting both `<NAME>` and `<NAME>_FILE` is an error. Trailing newlines in the file are ignored.
+
+**Startup check:** The API and the worker compare each configured key with a check value stored in the `kek_checks` table and refuse to start if it does not match. See [Security Model](/docs/concepts/security-model#key-check).
 
 **Note:** File contents use bounded streaming. The multipart uploader buffers at most four parts per active upload. Per-file size is controlled by the max upload size setting in **Settings** → **Storage**.
 
-**Key rotation:** To rotate, set a new `FILE_ENCRYPTION_KEY`, increment `FILE_KEK_VERSION`, and keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (e.g. `FILE_ENCRYPTION_KEY_V1`) until `rotate-kek.js` reports `Remaining=0`. See [CLI Commands](/docs/reference/cli-commands).
+**Key rotation:** To rotate, set a new `FILE_ENCRYPTION_KEY`, increment `FILE_KEK_VERSION`, and keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (e.g. `FILE_ENCRYPTION_KEY_V1`) until `rotate-kek.js` reports `Remaining=0`. Older keys may be passphrases. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
 
 ## Storage Bucket
 

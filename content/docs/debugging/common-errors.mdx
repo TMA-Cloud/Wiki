@@ -35,6 +35,39 @@ Frequently encountered errors and step-by-step diagnosis.
 
 4. **Firewall / network.** If Postgres runs on another machine, confirm the port is reachable: `nc -zv $DB_HOST 5432`.
 
+## Encryption key errors
+
+### Symptom: Backend or worker stops with "FILE_ENCRYPTION_KEY must be a random 32-byte key in production"
+
+The key is a passphrase. Production accepts only a random 32-byte key in base64 or hex.
+
+1. **Generate a key:** `npm run key:generate` from `backend`, or `openssl rand -base64 32`.
+2. **Rotate to it.** Set the new key as `FILE_ENCRYPTION_KEY`, bump `FILE_KEK_VERSION`, keep the passphrase as `FILE_ENCRYPTION_KEY_V<oldVersion>`, and run `npm run rotate:kek`. Replacing the key without rotating makes every stored file unreadable. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
+
+### Symptom: "FILE_ENCRYPTION_KEY (key version N) does not match the key this deployment's data was encrypted with"
+
+The configured key differs from the one recorded in `kek_checks`.
+
+1. **Compare with your backup** of the key. A copy-paste error or a trailing character is the usual cause.
+2. **Check `FILE_KEK_VERSION`.** It must be the version of the current key.
+3. **Check for both forms.** `FILE_ENCRYPTION_KEY` and `FILE_ENCRYPTION_KEY_FILE` must not both be set.
+4. **The message names `FILE_ENCRYPTION_KEY_V<n>`?** An old key kept for rotation is wrong; restore it or remove it once rotation has reported `Remaining=0`.
+
+## Storage bucket errors
+
+### Symptom: "Storage is not configured" (503 `STORAGE_NOT_CONFIGURED`)
+
+No bucket is saved. The first user connects one in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
+
+### Symptom: A connection check fails when saving the bucket
+
+The message names the failed check.
+
+1. **"Reach the bucket failed: Access denied"** — Check the access key ID, the secret, and the key's permissions. Some providers, including RustFS, answer a missing bucket with the same `403`.
+2. **"Could not connect to the endpoint" or "did not respond in time"** — The backend container cannot reach the endpoint. Test from inside it, for example `docker compose exec app node -e "fetch('<endpoint>').then(r => console.log(r.status))"`. Any status code means the endpoint is reachable.
+3. **"The bucket is in a different region"** — Set the bucket's region (Amazon S3).
+4. **"Find existing files failed"** — The new bucket does not contain the files already stored. Copy the objects first.
+
 ## Redis connection errors
 
 ### Symptom: "Redis connection failed"

@@ -164,6 +164,18 @@ Application-wide settings.
 
 The table holds exactly one row, keyed `'app_settings'`. `first_user_id` has a `RESTRICT` foreign key, so the first user cannot be deleted while the row references them. The `app_settings_storage_complete` check constraint requires the `storage_*` columns other than `storage_updated_at` and `storage_config_version` to be all set or all null.
 
+### `kek_checks`
+
+One key check value per master key (KEK) version. See [Security Model](/docs/concepts/security-model#key-check).
+
+| Column        | Type        | Description                                              |
+| ------------- | ----------- | -------------------------------------------------------- |
+| `version`     | INTEGER     | Primary key; the `FILE_KEK_VERSION` the value belongs to |
+| `check_value` | BYTEA       | HMAC-SHA256 of a fixed label under a subkey of that KEK  |
+| `created_at`  | TIMESTAMPTZ | Default now()                                            |
+
+A row is written the first time a key version passes the startup check. Deleting a row makes the next startup verify that key against stored data again.
+
 ### `sessions`
 
 Active user sessions.

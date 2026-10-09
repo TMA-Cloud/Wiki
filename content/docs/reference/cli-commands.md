@@ -221,13 +221,23 @@ From the **backend** directory:
 npm run migrate:streaming
 ```
 
+### Generate an encryption key
+
+```bash
+npm run key:generate
+```
+
+Print a new random 32-byte key in base64 for `FILE_ENCRYPTION_KEY`. In production the key must be a random 32-byte key in base64 or hex.
+
 ### Rotate FILE_ENCRYPTION_KEY (KEK)
 
-`FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps each file's data key (DEK). Rotating it only rewraps the stored DEKs — a database update per file — and never reads or rewrites the encrypted objects.
+`FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps each file's data key (DEK) and the stored bucket secret. Rotating it only rewraps those stored keys — a database update per file — and never reads or rewrites the encrypted objects.
+
+Use the same steps to replace a passphrase key with a random key, which production requires.
 
 Steps:
 
-1. Set the new key as `FILE_ENCRYPTION_KEY` and bump `FILE_KEK_VERSION` (for example `1` → `2`).
+1. Generate a key with `npm run key:generate`, set it as `FILE_ENCRYPTION_KEY`, and bump `FILE_KEK_VERSION` (for example `1` → `2`).
 2. Keep the previous key as `FILE_ENCRYPTION_KEY_V<oldVersion>` (for example `FILE_ENCRYPTION_KEY_V1`) so the old DEKs can be unwrapped.
 3. Run it from the **backend** directory:
 
@@ -239,6 +249,8 @@ Steps:
 
 Notes:
 
+- Before rewrapping, every configured key is checked against the `kek_checks` table. A wrong old or new key stops the script before any row changes
+- The bucket secret access key is rewrapped first, without a confirmation prompt
 - No objects are downloaded or re-uploaded
 - Safe to interrupt and re-run: only files still wrapped under an older KEK are touched
 - Failures are written to a `kek-rotation-failures-*.json` manifest

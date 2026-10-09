@@ -82,7 +82,7 @@ cp ../.env.example ../.env
 **Required variables:**
 
 - `JWT_SECRET` - Secret key for JWT tokens
-- `FILE_ENCRYPTION_KEY` - Key used to encrypt stored files
+- `FILE_ENCRYPTION_KEY` - Random 32-byte key used to encrypt stored files (generate with `openssl rand -base64 32`)
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` - Database connection
 - `REDIS_HOST`, `REDIS_PORT` - Redis connection (optional)
 - `BPORT` - Backend port (default: 3000)
@@ -167,6 +167,8 @@ Access at `http://localhost:5173`
 ## Troubleshooting
 
 **Database:** Verify PostgreSQL is running, check credentials in `.env`
+
+**Encryption key:** In production the backend stops if `FILE_ENCRYPTION_KEY` is missing, is a passphrase, or does not match the key the data was encrypted with. The log names the cause
 
 **Redis:** Verify with `redis-cli ping`. App works without Redis but caching is disabled.
 

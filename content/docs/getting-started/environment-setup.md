@@ -60,13 +60,16 @@ The sign-in flow uses a `state` value and PKCE, and only links or creates an acc
 
 ## File Storage
 
-Configure a required S3-compatible bucket using R2, RustFS, or AWS environment variables. See [Environment Variables](/docs/reference/environment-variables#s3-compatible) for all provider settings.
+The S3-compatible bucket is not set in `.env`. After the first account is created, connect it in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
-| Variable              | Required | Default | Description                    |
-| --------------------- | -------- | ------- | ------------------------------ |
-| `FILE_ENCRYPTION_KEY` | No       | -       | Encryption key (see reference) |
+| Variable                   | Required         | Default | Description                            |
+| -------------------------- | ---------------- | ------- | -------------------------------------- |
+| `FILE_ENCRYPTION_KEY`      | Yes (production) | -       | Random 32-byte key in base64 or hex    |
+| `FILE_ENCRYPTION_KEY_FILE` | No               | -       | Path to a file holding the key instead |
 
-**Note:** Storage limits are configured per-user in Settings (admin only). For S3-compatible storage, see [Environment Variables](/docs/reference/environment-variables).
+Generate a key with `openssl rand -base64 32`, or `npm run key:generate` from the `backend` directory. Back it up outside the server: files cannot be decrypted without it.
+
+**Note:** Storage limits are configured per-user in Settings (admin only). See [Environment Variables](/docs/reference/environment-variables#file-storage) for key rotation.
 
 ## Logging Configuration
 

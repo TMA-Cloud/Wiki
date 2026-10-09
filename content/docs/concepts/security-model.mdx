@@ -63,17 +63,32 @@ Routes validate accepted fields with `express-validator` schemas or controller-s
 - **Segmented:** Objects are split into 1 MB segments, each authenticated on its own. This lets downloads serve HTTP `Range` requests without reading the whole file
 - **Envelope keys:** Each newly encrypted object version receives a random data key (DEK); `FILE_ENCRYPTION_KEY` is the key-encryption key (KEK) that wraps it. A server-side logical copy reuses unchanged ciphertext and its wrapped DEK. Rotating the KEK rewraps stored DEKs without re-encrypting objects
 - **Scope:** Stored file contents in the S3-compatible bucket. File names and metadata live in the database
-- **Key Management:** Environment variable configuration
+- **Key Management:** The KEK comes from `FILE_ENCRYPTION_KEY` or a file named by `FILE_ENCRYPTION_KEY_FILE`, never from the database. Production requires a random 32-byte key
 - **Stream Processing:** Files are processed in segments instead of being buffered in full
 - **Automatic:** Encryption on upload, decryption on download
 
 <Callout type="error" title="Key loss means data loss">
-  The KEK is read from an environment variable. If you lose it — or change it
-  without rotating (see [CLI Commands](/docs/reference/cli-commands)) —
-  **previously stored files cannot be decrypted** and are effectively
+  The KEK is read from the environment or a secret file. If you lose it — or
+  change it without rotating (see [CLI Commands](/docs/reference/cli-commands))
+  — **previously stored files cannot be decrypted** and are effectively
   unrecoverable. Back the key up somewhere safe (password manager, secrets
   vault) before taking the deployment to production.
 </Callout>
+
+### Key Placement
+
+The KEK is kept outside the database on purpose. The database holds every wrapped DEK and the encrypted bucket secret, so a KEK stored next to them would let anyone with a database dump or backup decrypt all files. With the KEK held separately, a leaked database alone exposes no file contents and no bucket credentials.
+
+To keep the key out of `docker inspect` output and the process environment, mount it as a Docker or Kubernetes secret and set `FILE_ENCRYPTION_KEY_FILE` to its path.
+
+### Key Check
+
+The `kek_checks` table holds one check value per KEK version: an HMAC-SHA256 of a fixed label under a subkey derived from the KEK with HKDF. It confirms that a key is the right one without revealing anything about the key.
+
+- At startup the API, the worker, and `rotate-kek.js` compare every configured key with its stored check value. On a mismatch they stop with a message naming the variable, for example `FILE_ENCRYPTION_KEY (key version 2) does not match the key this deployment's data was encrypted with`.
+- The first time a key version is seen, it must open a stored DEK or the bucket secret already sealed under that version before its check value is recorded.
+
+Without this check, a wrong key would let the server start and then fail every download.
 
 ### Bucket Credentials
 
