@@ -15,18 +15,19 @@ TMA Cloud uses [Pino](https://getpino.io/) for structured logging with automatic
 
 ```bash
 LOG_LEVEL=info        # fatal, error, warn, info, debug, trace (default: info)
-LOG_FORMAT=json       # json or pretty (default: json in production, pretty otherwise)
 METRICS_ALLOWED_IPS=127.0.0.1,::ffff:127.0.0.1,::1
 ```
 
 **Recommendation:**
 
-- Production: `LOG_LEVEL=info`, `LOG_FORMAT=json`
-- Development: `LOG_LEVEL=debug`, `LOG_FORMAT=pretty`
+- Production: `LOG_LEVEL=info`
+- Development: `LOG_LEVEL=debug`
 
 ## Log Formats
 
-### JSON Format (Production)
+The format is picked automatically. Logs are pretty-printed when the process writes to a terminal and `pino-pretty` is installed, as with `npm run dev` in a development checkout. Everything else gets JSON: Docker containers, output piped to a file or a log shipper, and tests. The Docker image does not include `pino-pretty`.
+
+### JSON Format
 
 Structured JSON logs for log aggregation:
 
@@ -40,7 +41,7 @@ Structured JSON logs for log aggregation:
 }
 ```
 
-### Pretty Format (Development)
+### Pretty Format
 
 Human-readable colored output:
 

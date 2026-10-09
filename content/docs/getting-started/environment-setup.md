@@ -76,7 +76,6 @@ Generate a key with `openssl rand -base64 32`, or `npm run key:generate` from th
 | Variable                         | Required | Default                          | Description                                        |
 | -------------------------------- | -------- | -------------------------------- | -------------------------------------------------- |
 | `LOG_LEVEL`                      | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `LOG_FORMAT`                     | No       | `json` (prod), `pretty` (dev)    | Log format (json, pretty)                          |
 | `METRICS_ALLOWED_IPS`            | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`                   |
 | `QUEUE_METRICS_INTERVAL_SECONDS` | No       | `60`                             | Audit queue gauge refresh interval                 |
 
