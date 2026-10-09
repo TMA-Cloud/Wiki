@@ -79,7 +79,7 @@ Routes validate accepted fields with `express-validator` schemas or controller-s
 
 The KEK is kept outside the database on purpose. The database holds every wrapped DEK and the encrypted bucket secret, so a KEK stored next to them would let anyone with a database dump or backup decrypt all files. With the KEK held separately, a leaked database alone exposes no file contents and no bucket credentials.
 
-To keep the key out of `docker inspect` output and the process environment, mount it as a Docker or Kubernetes secret and set `FILE_ENCRYPTION_KEY_FILE` to its path.
+To keep the key out of `docker inspect` output and the process environment, it is read from a file named by `FILE_ENCRYPTION_KEY_FILE`. `docker-compose.yml` does this with `secrets/file_encryption_key`, which `setup.sh` generates. See [Docker Deployment](/docs/getting-started/docker#secrets).
 
 ### Key Check
 

@@ -11,40 +11,59 @@ Docker deployment guide for TMA Cloud.
 - Docker Compose (v5.0+)
 - Node.js (22, 24, or 26+) - For version extraction during source builds
 
-## Quick Start
-
-See [Option 1: Docker Compose](/docs/getting-started/installation#option-1-docker-compose-recommended).
-
-### Option 1: Use Prebuilt Docker Images (Default)
-
-Prebuilt Docker images are available on GitHub Container Registry.
+## Setup Script
 
 ```bash
-# Pull the latest image (optional; compose will pull if missing)
-docker pull ghcr.io/tma-cloud/tma:latest
-
-# Or pull a specific version
-docker pull ghcr.io/tma-cloud/tma:X.0.0
+curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh | bash
 ```
 
-To pin a version, edit `docker-compose.yml` and set `image: ghcr.io/tma-cloud/tma:X.0.0` for the `app` and `worker` services.
-
-### Option 2: Build Docker Image from Source
-
-If you prefer to build from source:
+To read the script before running it:
 
 ```bash
-make build
+curl -fsSLO https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh
+less setup.sh
+bash setup.sh
 ```
 
-### 2. Configure Environment
+The script:
+
+1. Checks for Docker, Docker Compose v2, and `openssl` or `/dev/urandom`
+2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml` and `.env.example` as `.env` over HTTPS only
+3. Sets `DB_HOST=postgres` and `REDIS_HOST=redis`, and fills `DB_PASSWORD` and `REDIS_PASSWORD` (32 random bytes each, hex) and `JWT_SECRET` (64 random bytes, hex)
+4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` instead of `.env`
+5. Sets permissions: the directory `0700`, `.env` `0600`, `secrets/` `0700`. The key file is `0444`, or owned by uid 1001 with `0400` when run as root (see [Secrets](#secrets))
+6. Runs `docker compose up -d`
+
+The whole script runs from one function called on its last line, so a download cut off midway runs nothing.
+
+Re-running it is safe. It keeps an existing `compose.yml`, `.env`, and key file, because a new encryption key would make every stored file unreadable.
+
+**Options** (environment variables):
+
+| Variable           | Default                   | Description                                                 |
+| ------------------ | ------------------------- | ----------------------------------------------------------- |
+| `TMA_DIR`          | `./tma-cloud`             | Install directory                                           |
+| `TMA_REF`          | `main`                    | Git branch or tag to download the files from                |
+| `TMA_PORT`         | `3000`                    | Host port, written to `BPORT`                               |
+| `TMA_URL`          | `http://localhost:<port>` | Public URL, written to `BACKEND_URL`                        |
+| `TMA_NO_START`     | -                         | Set to `1` to prepare the files without starting containers |
+| `TMA_LOCAL_SOURCE` | -                         | Copy the files from a repository checkout (script testing)  |
+
+Example: `curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh | TMA_PORT=8080 TMA_URL=https://cloud.example.com bash`
+
+## Manual Setup
 
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+mkdir tma-cloud && cd tma-cloud
+curl -fsSL -o compose.yml https://raw.githubusercontent.com/TMA-Cloud/TMA/main/docker-compose.yml
+curl -fsSL -o .env https://raw.githubusercontent.com/TMA-Cloud/TMA/main/.env.example
+chmod 600 .env
+mkdir -m 700 secrets
+openssl rand -base64 32 > secrets/file_encryption_key
+chmod 444 secrets/file_encryption_key
 ```
 
-### 3. Start Services
+Edit `.env`: set `DB_HOST=postgres`, `REDIS_HOST=redis`, and new values for `DB_PASSWORD`, `REDIS_PASSWORD`, and `JWT_SECRET` (for example `openssl rand -hex 32`). Leave `FILE_ENCRYPTION_KEY` empty. Then:
 
 ```bash
 docker compose up -d
@@ -59,13 +78,30 @@ Starts four services:
 
 Access at `http://localhost:3000` (or configured `BPORT`).
 
+### Image Version
+
+Prebuilt images are on GitHub Container Registry. To pin a version, edit `compose.yml` and set `image: ghcr.io/tma-cloud/tma:X.0.0` for the `app` and `worker` services. To use an image built from source with `make build`, set `image: tma-cloud:latest` there instead.
+
 ## Configuration
 
 ### Environment Variables
 
 All variables loaded from `.env` file.
 
-Configure the required S3-compatible bucket endpoint, name, and credentials in `.env`. See [Environment Variables](/docs/reference/environment-variables).
+### Secrets
+
+`compose.yml` mounts `secrets/file_encryption_key` into the app and worker at `/run/secrets/file_encryption_key` and sets `FILE_ENCRYPTION_KEY_FILE` to that path, so the key does not appear in the environment or in `docker inspect`. Keep `FILE_ENCRYPTION_KEY` in `.env` empty; setting both stops startup. See [Environment Variables](/docs/reference/environment-variables#file-storage).
+
+Compose mounts a secret file with its host owner and mode; it does not apply `uid`, `gid`, or `mode` to file secrets. The app runs as uid 1001, so the file must be readable by that user:
+
+- **Created by root:** `chown 1001:1001` and mode `0400`
+- **Created by another user:** mode `0444` inside the `0700` `secrets/` directory. The container sees only the file; other host users cannot open the directory
+
+Back up `secrets/file_encryption_key` apart from database backups. See [Backups](/docs/guides/operations/backups#encryption-key).
+
+The worker has no health check, because it serves no HTTP. A crashed worker exits and the `unless-stopped` restart policy starts it again.
+
+The S3-compatible bucket is not set in `.env`. After the first account is created, connect it in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
 **Redis Configuration:**
 

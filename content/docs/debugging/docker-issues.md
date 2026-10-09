@@ -20,10 +20,22 @@ Troubleshooting Docker deployment problems.
 
 1. Check logs for specific errors
 2. Verify `.env` file exists and is correct
-3. Check bucket configuration, credentials, and network access from the app container
+3. Check that `FILE_ENCRYPTION_KEY` (or `FILE_ENCRYPTION_KEY_FILE`) is set, is a random 32-byte key, and matches the stored data; the log names the cause. See [Common Errors](/docs/debugging/common-errors#encryption-key-errors)
 4. Verify ports are available
 
+### "secret file not found" or "no such file" for file_encryption_key
+
+`compose.yml` needs `secrets/file_encryption_key` next to it. Run `setup.sh`, or create the file as shown in [Manual Setup](/docs/getting-started/docker#manual-setup).
+
+If the app logs `Cannot read FILE_ENCRYPTION_KEY_FILE (/run/secrets/file_encryption_key): EACCES`, the file is not readable by uid 1001. Run `chmod 444 secrets/file_encryption_key`, or as root `chown 1001:1001` it with mode `0400`.
+
+### "Set either FILE_ENCRYPTION_KEY or FILE_ENCRYPTION_KEY_FILE, not both"
+
+`compose.yml` already sets `FILE_ENCRYPTION_KEY_FILE`. Move the key from `.env` into `secrets/file_encryption_key` and leave `FILE_ENCRYPTION_KEY=` empty.
+
 ### Health Check Failing
+
+The worker has no health check, so only `tma-cloud-app` reports a health status.
 
 **Check:**
 

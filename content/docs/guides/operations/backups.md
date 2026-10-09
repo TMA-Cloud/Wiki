@@ -7,9 +7,30 @@ Backup and restore procedures for TMA Cloud.
 
 ## What to Backup
 
-- **Database:** PostgreSQL database (all schemas including `pgboss`)
+- **Database:** PostgreSQL database (all schemas including `pgboss`). It includes the bucket settings and the encrypted bucket secret
 - **Files:** S3 bucket contents
 - **Configuration:** `.env` file
+- **Encryption key:** See [Encryption Key](#encryption-key)
+
+## Encryption Key
+
+Every stored file and the saved bucket secret are encrypted under this key. Without it, a restored database and bucket cannot be decrypted, and the key cannot be recovered.
+
+Where the key is:
+
+| Setup                   | Variable                   | Location                                |
+| ----------------------- | -------------------------- | --------------------------------------- |
+| Docker (`setup.sh`)     | `FILE_ENCRYPTION_KEY_FILE` | `tma-cloud/secrets/file_encryption_key` |
+| Key file outside Docker | `FILE_ENCRYPTION_KEY_FILE` | The path set in `.env`                  |
+| Key in `.env`           | `FILE_ENCRYPTION_KEY`      | The value in `.env`                     |
+
+During a key rotation, also back up each `FILE_ENCRYPTION_KEY_V<n>` still in use. See [CLI Commands](/docs/reference/cli-commands#rotate-file_encryption_key-kek).
+
+How to keep it:
+
+1. Copy the key once, after setup, and again after each rotation. It does not change otherwise.
+2. Store it apart from the database backups, for example in a password manager. A backup that holds both the database and the key gives full access to the files.
+3. To restore, put the key back at the same location with the same value before starting the containers. The server refuses to start with a different key.
 
 ## Backup Script
 

@@ -74,6 +74,8 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 **`FILE_ENCRYPTION_KEY`:** In production the value must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key from the `backend` directory with `npm run key:generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
 
+**Docker:** `docker-compose.yml` sets `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key` for the app and worker and mounts `secrets/file_encryption_key` there. Leave `FILE_ENCRYPTION_KEY` empty in `.env`. See [Docker Deployment](/docs/getting-started/docker#secrets).
+
 **`_FILE` variables:** Each key variable can be given as `<NAME>_FILE` instead, holding the path of a file that contains the key, for example `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key`. This keeps the key out of `docker inspect` output and the process environment. Setting both `<NAME>` and `<NAME>_FILE` is an error. Trailing newlines in the file are ignored.
 
 **Startup check:** The API and the worker compare each configured key with a check value stored in the `kek_checks` table and refuse to start if it does not match. See [Security Model](/docs/concepts/security-model#key-check).

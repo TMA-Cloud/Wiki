@@ -17,24 +17,17 @@ A self-hosted cloud storage platform with file storage and management capabiliti
 
 ## Quick Start
 
-Get TMA Cloud running locally in three commands.
-
-**1. Grab the compose file and example env:**
+Get TMA Cloud running with one command. It needs Docker with Compose v2.
 
 ```bash
-curl -sSL -o docker-compose.yml https://raw.githubusercontent.com/TMA-Cloud/TMA/main/docker-compose.yml
-curl -sSL -o .env https://raw.githubusercontent.com/TMA-Cloud/TMA/main/.env.example
+curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh | bash
 ```
 
-**2. (Optional) Edit `.env`** to set a strong `JWT_SECRET`, `FILE_ENCRYPTION_KEY`, and database password before first boot. See [Environment Variables](/docs/reference/environment-variables) for the full list.
+The script creates `./tma-cloud`, fills every password and key with random values, and starts the stack. See [Docker Deployment](/docs/getting-started/docker#setup-script) for what it does, how to read it before running it, and its options.
 
-**3. Start the stack:**
+Once the containers are healthy, open [http://localhost:3000](http://localhost:3000) and create the first account — that account becomes the admin. Then connect a bucket in **Settings** → **Storage** ([Storage Bucket](/docs/guides/admin/storage-bucket)); files cannot be uploaded until one is saved.
 
-```bash
-docker compose up -d
-```
-
-Once the containers are healthy, open [http://localhost:3000](http://localhost:3000) and create the first account — that account becomes the admin.
+Back up the encryption key; stored files cannot be decrypted without it. See [Backups](/docs/guides/operations/backups#encryption-key).
 
 <Callout type="success" title="Production setup">
   For HTTPS, custom share domain, S3 storage, and OnlyOffice, see the full

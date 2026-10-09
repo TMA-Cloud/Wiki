@@ -16,7 +16,7 @@ For full Docker options (prebuilt images, build from source), see the [Docker Se
 
 ## Option 1: Docker Compose (Recommended)
 
-Download `docker-compose.yml` and `.env.example` with curl—no need to clone the repo.
+No need to clone the repo. The setup script downloads `docker-compose.yml` and `.env.example`, generates the secrets, and starts the stack.
 
 ### Docker-Compose Prerequisites
 
@@ -25,30 +25,21 @@ Download `docker-compose.yml` and `.env.example` with curl—no need to clone th
 
 ### Steps
 
-Create a directory and download the files
-
 ```bash
-mkdir tma-cloud && cd tma-cloud
-curl -sSL -o compose.yml https://raw.githubusercontent.com/TMA-Cloud/TMA/main/docker-compose.yml
-curl -sSL -o .env https://raw.githubusercontent.com/TMA-Cloud/TMA/main/.env.example
+curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh | bash
 ```
 
-Start all services
-
-```bash
-docker compose up -d
-```
-
-This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, audit writes, and OnlyOffice saves). Access it at `http://localhost:3000` or your configured `BPORT`.
+This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, audit writes, and OnlyOffice saves) from `./tma-cloud`. Access it at `http://localhost:3000` or your configured `BPORT`.
 
 Verify
 
 ```bash
+cd tma-cloud
 docker compose ps
 docker compose logs -f
 ```
 
-For more Docker options (prebuilt images, building from source, volumes, etc.), see [Docker Deployment](/docs/getting-started/docker).
+To set up without the script, or to change its options, see [Docker Deployment](/docs/getting-started/docker).
 
 ---
 
