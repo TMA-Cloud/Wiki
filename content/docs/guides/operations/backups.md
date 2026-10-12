@@ -42,6 +42,15 @@ TMA Cloud includes a backup and restore script, `db-backup-restore.sh`. `setup.s
 
 Run it from the install directory with `./db-backup-restore.sh`; the examples below use that form.
 
+Without a local copy, run it in the install directory:
+
+```bash
+cd tma-cloud
+curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/scripts/db-backup-restore.sh | bash -s -- backup
+```
+
+The words after `--` are the command and its arguments, for example `bash -s -- restore backups/<file>.dump`. The script uses the current directory as the install directory; set `TMA_DIR` to use another one. A restore asks for the database name on the terminal, because the script itself arrives on standard input. Without a terminal, the restore is cancelled.
+
 ### How It Works
 
 - Uses `pg_dump` with custom format (compressed binary, supports selective and parallel restore)
