@@ -23,7 +23,7 @@ User accounts and sub-users.
 | `mfa_last_time_step`            | BIGINT      | Last TOTP time step spent                                    |
 | `last_backup_code_regeneration` | TIMESTAMPTZ | Stamped when backup codes are regenerated                    |
 | `token_version`                 | INTEGER     | Token version for revocation, default 1                      |
-| `last_token_invalidation`       | TIMESTAMP   | Last token invalidation time                                 |
+| `last_token_invalidation`       | TIMESTAMPTZ | Last token invalidation time                                 |
 | `storage_limit`                 | BIGINT      | Storage limit (nullable, bytes)                              |
 | `storage_used`                  | BIGINT      | Account usage counter in bytes, default 0                    |
 | `storage_reserved`              | BIGINT      | Bytes reserved by in-progress object operations, default 0   |
@@ -65,32 +65,34 @@ Statement-level insert and delete triggers maintain `users.storage_reserved`. Th
 
 Files and folders.
 
-| Column                   | Type        | Description                                           |
-| ------------------------ | ----------- | ----------------------------------------------------- |
-| `id`                     | TEXT        | Primary key                                           |
-| `name`                   | TEXT        | Not null                                              |
-| `type`                   | TEXT        | 'file' or 'folder'                                    |
-| `size`                   | BIGINT      | File size in bytes (null for folders)                 |
-| `mime_type`              | TEXT        | MIME type                                             |
-| `user_id`                | TEXT        | FK → users.id, the account the row belongs to         |
-| `parent_id`              | TEXT        | FK → files.id (null for root)                         |
-| `path`                   | TEXT        | S3 object key. Null for folders                       |
-| `starred`                | BOOLEAN     | Default false                                         |
-| `shared`                 | BOOLEAN     | Default false; true while the item belongs to a share |
-| `shared_at`              | TIMESTAMPTZ | When the item joined a share; null when not shared    |
-| `deleted_at`             | TIMESTAMPTZ | Soft delete timestamp                                 |
-| `modified`               | TIMESTAMPTZ | Last modification time, not null, default now()       |
-| `created_at`             | TIMESTAMPTZ | Row creation time, not null, default now()            |
-| `accessed_at`            | TIMESTAMPTZ | Last read time, not null, default now()               |
-| `dek_wrapped`            | BYTEA       | Wrapped per-file data key (DEK); null for folders     |
-| `dek_kek_version`        | INTEGER     | Version of the KEK the DEK is wrapped under           |
-| `aggregate_size`         | BIGINT      | Total bytes below a folder; zero for files            |
-| `aggregate_file_count`   | INTEGER     | Descendant file count maintained for folders          |
-| `aggregate_folder_count` | INTEGER     | Descendant folder count maintained for folders        |
+| Column                   | Type        | Description                                              |
+| ------------------------ | ----------- | -------------------------------------------------------- |
+| `id`                     | TEXT        | Primary key                                              |
+| `name`                   | TEXT        | Not null                                                 |
+| `type`                   | TEXT        | 'file' or 'folder' (`files_type_valid` check)            |
+| `size`                   | BIGINT      | File size in bytes (null for folders)                    |
+| `mime_type`              | TEXT        | MIME type                                                |
+| `user_id`                | TEXT        | FK → users.id, not null; the owning account              |
+| `parent_id`              | TEXT        | FK → files.id, a folder of the same account; null = root |
+| `path`                   | TEXT        | S3 object key. Null for folders                          |
+| `starred`                | BOOLEAN     | Default false                                            |
+| `shared`                 | BOOLEAN     | Default false; true while the item belongs to a share    |
+| `shared_at`              | TIMESTAMPTZ | When the item joined a share; null when not shared       |
+| `deleted_at`             | TIMESTAMPTZ | Soft delete timestamp                                    |
+| `modified`               | TIMESTAMPTZ | Last modification time, not null, default now()          |
+| `created_at`             | TIMESTAMPTZ | Row creation time, not null, default now()               |
+| `accessed_at`            | TIMESTAMPTZ | Last read time, not null, default now()                  |
+| `dek_wrapped`            | BYTEA       | Wrapped per-file data key (DEK); null for folders        |
+| `dek_kek_version`        | INTEGER     | Version of the KEK the DEK is wrapped under              |
+| `aggregate_size`         | BIGINT      | Total bytes below a folder; zero for files               |
+| `aggregate_file_count`   | INTEGER     | Descendant file count maintained for folders             |
+| `aggregate_folder_count` | INTEGER     | Descendant folder count maintained for folders           |
 
 **Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, `dek_kek_version` for encrypted files, `(deleted_at, id)` for bounded trash cleanup, covering indexes for active-file statistics and storage-usage reconciliation, and folder-list page indexes for name, modified time, last access, and effective size.
 
 **Hierarchy constraint:** `files_parent_not_self` rejects a row whose `parent_id` equals its own `id`. Move operations also reject indirect descendant cycles, and recursive reads keep a visited-ID path so legacy bad data cannot loop forever.
+
+**Parent must be a folder:** a parent is always a folder of the same account. Upload, bulk upload, folder creation, copy and move check that it is a live folder before writing, and answer `404 Target folder not found` otherwise. The database enforces the type and account part: `files_parent_insert` and `files_parent_update` reject a row whose parent is a file or belongs to another account, and `files_children_update` refuses to change the type or account of a folder that still has children. They are row-level `AFTER` triggers, so a copy that inserts a folder and its children in one statement passes. Their `WHEN` clauses skip updates that leave `parent_id`, `user_id` and `type` alone. Migration `054_enforce_folder_parents` moved rows an earlier paste had stored under a file up to their nearest folder, adding a `(n)` suffix on a name clash as a move does.
 
 **Triggers:** `files_storage_insert`, `files_storage_update`, and `files_storage_delete` update the account owner's `storage_used` counter once per statement from transition tables. `files_aggregate_insert`, `files_aggregate_update`, and `files_aggregate_delete` adjust ancestor folder totals when a row is inserted, moved, resized, changes type, or is removed.
 
@@ -227,14 +229,14 @@ The copy transaction writes its result with the new file rows. If pg-boss retrie
 
 One row per single-use MFA backup code.
 
-| Column       | Type      | Description                                 |
-| ------------ | --------- | ------------------------------------------- |
-| `id`         | TEXT      | Primary key                                 |
-| `user_id`    | TEXT      | FK → users.id, not null, CASCADE            |
-| `code_hash`  | TEXT      | bcrypt hash of the code, not null           |
-| `used`       | BOOLEAN   | Default false                               |
-| `created_at` | TIMESTAMP | Default `CURRENT_TIMESTAMP`                 |
-| `used_at`    | TIMESTAMP | When the code was spent (null while unused) |
+| Column       | Type        | Description                                 |
+| ------------ | ----------- | ------------------------------------------- |
+| `id`         | TEXT        | Primary key                                 |
+| `user_id`    | TEXT        | FK → users.id, not null, CASCADE            |
+| `code_hash`  | TEXT        | bcrypt hash of the code, not null           |
+| `used`       | BOOLEAN     | Default false                               |
+| `created_at` | TIMESTAMPTZ | Default `CURRENT_TIMESTAMP`                 |
+| `used_at`    | TIMESTAMPTZ | When the code was spent (null while unused) |
 
 Codes are stored hashed, never in plain text, so a lost code cannot be recovered — only replaced. Ten rows are written when MFA is enabled and again on each regeneration, which first deletes the old set. Disabling MFA deletes all of a user's rows.
 
@@ -339,7 +341,7 @@ Each migration and its `migrations` row are committed in one transaction, so a c
 
 - User → Sub-users (parent-child, self-referential via `parent_user_id`, CASCADE)
 - User → Files (one-to-many, CASCADE)
-- File → Files (parent-child, self-referential, CASCADE)
+- File → Files (parent-child, self-referential, no cascade: deletes remove the deepest rows first, so a folder goes only after its contents)
 - User → Share Links (one-to-many, CASCADE)
 - Share Link → Files (many-to-many via `share_link_files`)
 - User → Sessions (one-to-many, CASCADE)
