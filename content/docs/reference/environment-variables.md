@@ -7,11 +7,15 @@ Complete reference for all environment variables in TMA Cloud.
 
 ## Application Configuration
 
-| Variable      | Required         | Default       | Description         |
-| ------------- | ---------------- | ------------- | ------------------- |
-| `NODE_ENV`    | No               | `development` | Environment mode    |
-| `BPORT`       | No               | `3000`        | Backend server port |
-| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL  |
+| Variable      | Required         | Default       | Description        |
+| ------------- | ---------------- | ------------- | ------------------ |
+| `NODE_ENV`    | No               | `development` | Environment mode   |
+| `PORT`        | No               | `3000`        | App is served on   |
+| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL |
+
+**`PORT`:** Without Docker, the API listens on this port. With Docker Compose, it is the host port: `compose.yml` publishes `${PORT}:3000` and sets `PORT=3000` inside the container, so the app always listens on 3000, the port the image exposes and its health check uses. With `docker run`, map the port instead: `-p 8080:3000`.
+
+**`BACKEND_URL`:** The URL users and the OnlyOffice document server use to reach the app, including the port if it is not 80 or 443. OnlyOffice downloads files and sends saves to this URL, so set it to the public address behind a reverse proxy. It does not change the port the app listens on.
 
 Reverse proxy trust is configured in **Settings** → **Administration** → **Known Proxies**, not through an environment variable. See [Known Proxies](/docs/guides/admin/known-proxies).
 

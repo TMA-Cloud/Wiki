@@ -7,11 +7,11 @@ Environment variable reference for TMA Cloud.
 
 ## Application Configuration
 
-| Variable      | Required         | Default       | Description         |
-| ------------- | ---------------- | ------------- | ------------------- |
-| `NODE_ENV`    | No               | `development` | Environment mode    |
-| `BPORT`       | No               | `3000`        | Backend server port |
-| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL  |
+| Variable      | Required         | Default       | Description        |
+| ------------- | ---------------- | ------------- | ------------------ |
+| `NODE_ENV`    | No               | `development` | Environment mode   |
+| `PORT`        | No               | `3000`        | App is served on   |
+| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL |
 
 ## Database Configuration
 

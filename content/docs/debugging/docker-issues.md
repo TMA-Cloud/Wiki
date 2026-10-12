@@ -64,7 +64,7 @@ docker inspect --format='{{.State.Health.Status}}' tma-cloud-app
 **Solutions:**
 
 1. Verify port mapping: `docker compose ps`
-2. Check `BPORT` in `.env`
+2. Check `PORT` in `.env`; it sets the host port, and the container listens on 3000
 3. Access via `http://localhost:3000` (or configured port)
 
 ## Related Topics

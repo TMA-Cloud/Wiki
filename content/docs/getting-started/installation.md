@@ -29,7 +29,7 @@ No need to clone the repo. The setup script downloads `docker-compose.yml` and `
 curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh | bash
 ```
 
-This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, audit writes, and OnlyOffice saves) from `./tma-cloud`. Access it at `http://localhost:3000` or your configured `BPORT`.
+This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, audit writes, and OnlyOffice saves) from `./tma-cloud`. Access it at `http://localhost:3000` or the `PORT` in `.env`.
 
 Verify
 
@@ -76,7 +76,7 @@ cp ../.env.example ../.env
 - `FILE_ENCRYPTION_KEY` - Random 32-byte key used to encrypt stored files (generate with `openssl rand -base64 32`)
 - `DATABASE_URL` - Database connection, e.g. `postgresql://postgres:password@localhost:5432/tma_cloud_storage`
 - `REDIS_URL` - Redis connection, e.g. `redis://:password@localhost:6379/0` (the server is optional)
-- `BPORT` - Backend port (default: 3000)
+- `PORT` - Port the app listens on (default: 3000)
 
 **Optional:**
 
@@ -162,7 +162,7 @@ Access at `http://localhost:5173`
 
 **Redis:** Verify with `redis-cli ping`. App works without Redis but caching is disabled.
 
-**Port:** Change `BPORT` in `.env` if port is in use
+**Port:** Change `PORT` in `.env` if port is in use
 
 **OnlyOffice:** Configure via Settings page (admin-only). Requires `BACKEND_URL` environment variable.
 

@@ -48,7 +48,7 @@ To rotate the encryption key or the database and Redis passwords later, run `./r
 | ------------------ | ------------------------- | ----------------------------------------------------------- |
 | `TMA_DIR`          | `./tma-cloud`             | Install directory                                           |
 | `TMA_REF`          | `main`                    | Git branch or tag to download the files from                |
-| `TMA_PORT`         | `3000`                    | Host port, written to `BPORT`                               |
+| `TMA_PORT`         | `3000`                    | Host port, written to `PORT`                                |
 | `TMA_URL`          | `http://localhost:<port>` | Public URL, written to `BACKEND_URL`                        |
 | `TMA_NO_START`     | -                         | Set to `1` to prepare the files without starting containers |
 | `TMA_LOCAL_SOURCE` | -                         | Copy the files from a repository checkout (script testing)  |
@@ -87,7 +87,7 @@ Starts four services:
 - **Redis** (`tma-cloud-redis`) - Caching layer
 - **Worker** (`tma-cloud-worker`) - File operations, maintenance, audit writes, and OnlyOffice saves
 
-Access at `http://localhost:3000` (or configured `BPORT`).
+Access at `http://localhost:3000` (or the `PORT` in `.env`). Inside the container the app always listens on 3000; `PORT` only changes the host side of the mapping.
 
 ### Image Version
 
