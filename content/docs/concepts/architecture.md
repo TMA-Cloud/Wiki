@@ -192,6 +192,8 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 
 **Bridge authentication.** The pipe name is random per session and every request on it carries a per-session token; the main process rejects anything else, so another local process that reaches the pipe cannot issue operations against the signed-in account. The main process passes the token to the host on stdin (`--token-stdin`), not as a command-line argument, because a command line is readable by any process running as the same user for as long as the drive is mounted.
 
+**Names.** The server stores names that Windows cannot hold, such as `Q3: plan?.docx`. The host maps each reserved character `"*:<>?|\`, and a trailing dot or space, to the private-use character `U+F000` plus its code when it lists a folder, and maps it back before it sends a create, rename or save over the pipe. This is the mapping Cygwin, WSL and Syncthing use, so a name survives the round trip unchanged. The mapping lives in `desktop-fs/src/WindowsNames.cs`.
+
 **Drive permissions.** Files and folders on the drive report a security descriptor granting the signed-in Windows user, `SYSTEM` and the local Administrators group but not `Everyone` so other accounts on a shared machine cannot read the mount.
 
 **Listings.** The main process reads every page of a folder listing from `/api/files` and sends the host only the fields it uses (`id`, `name`, `type`, `size`, `modified`, `accessedAt`). The host accepts reply lines up to 64 MB.

@@ -56,6 +56,24 @@ The file exceeds the max upload size setting.
 3. Bucket access permissions
 4. Network connectivity
 
+### "Invalid file name"
+
+The name is empty, is `.` or `..`, is longer than 255 characters, or contains `/`, `\` or a control character. Every other character is accepted, including `: * ? " < > |`. See [File Names](/docs/concepts/file-system#file-names).
+
+**Solutions:**
+
+1. Rename the file on your computer and upload it again
+2. Desktop app: if the name in the error has a `?` that the real name does not, update the desktop app. Older versions read pasted file paths in the console code page, which turns characters such as the narrow no-break space before AM or PM into `?`
+
+### "Target folder not found"
+
+The folder you upload or paste into is not a folder in your account, or it is in the trash. Uploads into a file are refused for the same reason. Nothing is stored.
+
+**Solutions:**
+
+1. Refresh the page; the folder may have been deleted, moved to the trash or moved by another session
+2. Upload into a folder that is open in **My Files**
+
 ### "Upload cancelled by client" (499 REQUEST_ABORTED)
 
 Returned when the user cancels an upload. The request is aborted before completion. The upload middleware aborts incomplete multipart uploads and cleans up uncommitted bucket objects. This is expected behavior, not an error
@@ -66,6 +84,16 @@ Returned when the user cancels an upload. The request is aborted before completi
 - Check that the selected folder actually contains the missing files (some apps create links or placeholders that are not real files)
 - Look in **Audit Logs** for `file.upload.bulk` events to see how many files were processed.
 - If only some files failed, check the `failed` entries returned by `POST /api/files/upload/bulk`
+- Empty subfolders are not created by an upload or a paste, because only files are sent
+
+### Pasted folder missing files (desktop app)
+
+The upload-issues dialog lists every file that was not pasted, with a reason:
+
+- **Links are not uploaded:** The item is a symbolic link or a junction. It is not followed, so a link back to a parent folder cannot repeat the tree forever. Copy the target folder itself instead
+- **Access denied** or **Could not be read:** Windows did not let the app read the file, for example a workbook that Excel has open. Close the file and paste it again
+
+A paste with more than 50,000 files is refused before anything uploads. Paste a smaller folder or use **Upload folder** in parts.
 
 ## File Permissions
 

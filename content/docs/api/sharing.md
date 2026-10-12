@@ -59,7 +59,7 @@ Download an item from a share link. A file `id` downloads the file. A folder `id
 
 ### GET `/s/:token/zip`
 
-Download a folder as ZIP from a share link.
+Download a folder as ZIP from a share link. Entry names follow the same Windows-safe rule as an authenticated [folder download](/docs/api/files#get-apifilesiddownload).
 
 **Validation:**
 

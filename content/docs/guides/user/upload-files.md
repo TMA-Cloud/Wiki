@@ -21,6 +21,8 @@ Learn how to upload and manage files in TMA Cloud.
 - Select a folder from your computer
 - All subfolders and files under that folder are uploaded
 - The folder structure is recreated under the current folder
+- If the current folder already holds a folder with the same name, in any letter case, the files go into that folder instead of a second one. The same applies to every subfolder
+- Empty subfolders are not created, because only files are uploaded
 - In the Upload modal, folder uploads show as **Folders to Upload** with one row per root folder (folder icon, name, item count, total size)
 
 ### Drag and Drop
@@ -31,20 +33,24 @@ Learn how to upload and manage files in TMA Cloud.
 
 ### Paste from Clipboard (Ctrl+V)
 
-- Copy files on your computer (for example, in Explorer with **Ctrl+C**)
+- Copy files on your computer (for example, in Explorer with **Ctrl+C**). The Windows desktop app also accepts copied folders
 - Open **My Files** and go to the folder where you want to upload
 - Press **Ctrl+V** in the file list; if you haven't recently copied something inside TMA Cloud, the OS-clipboard files upload to the current folder
 - Single file uses standard upload; multiple files use bulk upload with progress
 - Same size and quota limits apply as for Upload
 - In the Windows desktop app, **Paste** is unified with the in-app clipboard and uses whichever was written last: files copied in Explorer after an in-app Copy or Cut are uploaded, otherwise the in-app clipboard is pasted
 - Physical clipboard files stream from their existing path. Pathless Outlook/Snipping Tool/OLE items upload from Electron's main-process memory, capped at 500 MB per paste because that content is held in memory. Neither route creates a plaintext upload copy in the host temp directory
-- Pasted files get the same progress cards as any other upload, one per file, each with its own **Cancel**. Canceling stops the transfer rather than only hiding the card
-- A file the server refuses is listed in the upload-issues dialog and the remaining files still upload
+- File names arrive exactly as Windows shows them, including characters such as the narrow no-break space that newer Windows time formats put before AM and PM
+- **Folders (desktop app):** A folder copied in Explorer uploads with all its subfolders and files, in the same way as **Upload folder**. Links and junctions inside it are listed in the upload-issues dialog and not followed. Empty subfolders are not created. One paste can hold up to 50,000 files
+- Up to eight pasted files get a progress card each, with its own **Cancel**. A pasted folder, or more than eight files, gets one card for the whole paste, such as **Trip — 120 files**, whose **Cancel** stops the whole paste. Canceling stops the transfer rather than only hiding the card
+- A file the server refuses, or one that cannot be read (for example a workbook that Excel has open), is listed in the upload-issues dialog and the remaining files still upload
 
 ### Copy to Computer (Windows desktop app)
 
 - The desktop-app **Copy** (right-click → **Copy** or **Ctrl+C**) writes the selection to the Windows clipboard in the background, in addition to the in-app clipboard. You can then paste in Explorer to save them
 - Limit for the Windows-clipboard side: 200 MB total per action and no single file over 200 MB. Larger selections and folders still work for in-app pastes — they just aren't written to the Windows clipboard
+- Names Windows does not accept are changed for the copy: reserved characters become `_`, trailing dots and spaces are dropped, device names such as `CON.txt` get a leading `_`, and a name is shortened, keeping its extension, when its staged path would pass 260 characters. Names that differ only in letter case, such as `Report.pdf` and `report.pdf`, are kept as two files. The names in TMA Cloud do not change
+- If a file cannot be downloaded for the copy, the message names it, and the other files are still on the Windows clipboard
 - Not available in Trash view
 
 ### Duplicate file names
@@ -117,8 +123,8 @@ None of these keys act while you type in a text field such as search, or while a
 - **Cut:** Right-click → Cut (or **Ctrl+X**). In-app only — cut items appear faded until you paste. A cut is used up by its paste
 - **Rename:** Right-click → Rename
 - **Move:** Drag and drop or use Cut + Paste
-- **Paste:** Right-click → Paste (or **Ctrl+V**). Works in **My Files** only. In the desktop app, Paste uses whichever clipboard was written last: files copied in another app after your in-app Copy or Cut are uploaded, otherwise the in-app clipboard is pasted
-- **Name conflicts on paste:** A pasted file or folder with the same name as one already in the folder is kept beside it with a name such as `report (1).pdf`. Names are compared without regard to case
+- **Paste:** Right-click → Paste (or **Ctrl+V**). Works in **My Files** only. Right-clicking a folder pastes into that folder. Right-clicking a file or empty space pastes into the open folder, as in Explorer. In the desktop app, Paste uses whichever clipboard was written last: files copied in another app after your in-app Copy or Cut are uploaded, otherwise the in-app clipboard is pasted
+- **Name conflicts on paste:** A pasted file or folder with the same name as one already in the folder is kept beside it with a name such as `report (1).pdf`. Names are compared without regard to case. A folder pasted from Explorer is the exception: it merges into the existing folder, as in Explorer, and only clashing files get a new name
 - **Missing items:** If a copied or cut item, or the destination folder, was deleted or moved to the trash after the Copy or Cut, Paste fails with a message and nothing is pasted
 - **Trash:** Items in the trash cannot be copied or cut
 - **Delete:** Right-click → Delete (moves to trash)

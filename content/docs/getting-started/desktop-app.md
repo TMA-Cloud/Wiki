@@ -147,6 +147,7 @@ The Windows desktop app can mount TMA Cloud as a drive (for example `Z:`) so you
 - **Mounts automatically.** The drive appears a second or two after you sign in and is removed when you sign out or close the app. It reuses the app's existing session — no separate login.
 - **Save As anywhere.** In any app's Save dialog, choose the TMA Cloud drive as the destination. The file uploads through the same pipeline as a normal upload, so permissions, versioning, and audit all apply. Saving into an existing subfolder reuses that folder instead of creating a duplicate.
 - **Live updates.** Changes made from the web app or another device appear on the drive within a few seconds.
+- **Every name shows up.** A name Windows cannot hold, such as `Q3: plan?.docx`, is listed with a private-use character in place of each reserved one. Most fonts draw these as boxes. Renaming or saving the file on the drive keeps its real name on the server. See [File Names](/docs/concepts/file-system#file-names).
 - **Large folders.** A folder shows every item it contains. The app reads the server's listing 500 items at a time until it reaches the end.
 - **Only your Windows account can read it.** The drive grants access to the Windows user who signed in (plus `SYSTEM` and Administrators). Other accounts on the same computer cannot open the mounted drive.
 - **Temporary cache.** Opening or saving a file stages it under `%TEMP%\tma-cloud-fs\`. Each staged file is deleted when the app closes its handle, anything left over is cleared when the drive unmounts, and stale files from a previous crash are removed on the next mount.
@@ -169,7 +170,7 @@ The Windows desktop app uses a single Copy / Cut / Paste model that bridges the 
 
 - **Copy:** Right-click one or more items → **Copy**. The selection goes to the in-app clipboard immediately so you can paste it into another folder inside TMA Cloud, and it is also written to the Windows clipboard in the background so you can paste in Explorer. Files are downloaded for the Windows clipboard four at a time. Folders and selections over 200 MB are kept on the in-app clipboard only — those still paste between folders in TMA Cloud, but Explorer pastes are skipped. The toast tells you which path applied. If you copy something else before the download finishes, the finished download does not replace the newer copy.
 - **Cut:** Right-click → **Cut**. Moves within TMA Cloud only. Cut items show a Windows-Explorer-style faded look until paste completes.
-- **Paste:** Right-click in a folder → **Paste**. Paste uses whichever clipboard was written last, as Windows does. If another app put files on the Windows clipboard after your last in-app Copy or Cut, those files are uploaded. Otherwise the cloud clipboard is used (server-side copy or move, no re-upload). Physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC.
+- **Paste:** Right-click in a folder → **Paste**. Right-clicking a folder pastes into that folder; right-clicking a file or empty space pastes into the open folder, as in Explorer. Paste uses whichever clipboard was written last, as Windows does. If another app put files or folders on the Windows clipboard after your last in-app Copy or Cut, those are uploaded. Otherwise the cloud clipboard is used (server-side copy or move, no re-upload). Physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC.
 
 Every in-app Copy or Cut also takes the Windows clipboard, including folder copies, copies over 200 MB and cuts. Those write the item names as text, so files copied in Explorer before the in-app Copy are not pasted by mistake.
 
@@ -192,14 +193,31 @@ Copy, Cut and Paste follow the same rules from the context menu and the keyboard
 
 The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference"). Virtual OLE files have no disk path, so Electron extracts them in the main process and uploads them from bounded memory without writing a plaintext upload file to `%TEMP%` or sending file data through renderer IPC. Because that content is held whole in memory, one paste of virtual files is capped at 500 MB in total. The backend still performs the normal streaming encryption before object storage.
 
+The app reads the Windows clipboard through PowerShell with its output set to UTF-8. Windows PowerShell 5.1 otherwise writes in the console code page, which turns characters such as the narrow no-break space that newer Windows time formats put before AM and PM into `?`, so the pasted file would not be found under its real name.
+
 Pasted files use the same size and quota checks as a normal upload — the max upload size setting and the account's remaining space — rather than separate clipboard limits. A file the server would refuse is reported in the upload-issues dialog and the rest of the paste continues.
+
+**Folders copied in Explorer** paste with their whole tree, the same way a dropped folder uploads:
+
+- Each file goes up with its path below the folder, and the server creates the folders on the way. Folder creation is atomic, so files uploading in parallel never create the same folder twice.
+- Pasting into a folder that already holds a folder of that name, in any letter case, merges into it, as Explorer does. Files that clash get a `(n)` suffix.
+- Links and junctions are reported and not followed, so a folder that links back to itself cannot loop. Empty folders are skipped, as they are when dropped.
+- A file that cannot be read, for example a workbook Excel has open, is reported in the upload-issues dialog and the rest continue.
+- One paste is capped at 50,000 files.
+
+**Files copied to Explorer** are written under names Windows accepts:
+
+- Reserved characters become `_`, trailing dots and spaces are dropped, and device names such as `CON.txt` get a leading `_`.
+- Names that differ only in case get a `(n)` suffix, so `Report.pdf` and `report.pdf` stay two files.
+- Long names are shortened, keeping the extension, so the staged path stays within the 260-character limit that Explorer still enforces.
+- If a file cannot be downloaded, the toast names it instead of reporting a full copy.
 
 ### Paste Progress
 
 Clipboard uploads run in the Electron main process and appear in the same floating upload panel as a browser upload.
 
-- One progress card per file, with the file name and size.
-- **Cancel** on a card stops that upload: the read stream and the network request both end.
+- Up to eight loose files get a progress card each, with the file name and size. A pasted folder, or more files than that, gets one card for the whole paste, such as **Trip — 120 files**, as a dropped folder does in the browser.
+- **Cancel** on a card stops that upload: the read stream and the network request both end. On a folder card it stops the whole paste.
 - A completed card clears after a few seconds; a failed one shows its error and stays longer.
 - Bodies stream from disk (or from main-process memory for virtual files) instead of being buffered, so the percentage reflects bytes actually sent.
 

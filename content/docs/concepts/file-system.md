@@ -12,6 +12,7 @@ File system architecture and organization in TMA Cloud.
 - **Root Level:** User's root directory
 - **Folders:** Nested folder structure
 - **Files:** Stored within folders or root
+- **Parents:** An item's parent is always a folder in the same account. An upload, new folder or copy into a file, a folder in the trash or another account's folder is refused with `Target folder not found`. See [Database Schema](/docs/reference/database-schema#files) for the triggers that enforce this.
 
 ### File Metadata
 
@@ -25,6 +26,21 @@ File system architecture and organization in TMA Cloud.
 - **User ID:** The account the item belongs to
 - **Last Access Time:** When the item was last read (`accessed_at`), shown in the UI as "Last opened"
 - **Shared At:** When the item most recently became shared (`shared_at`); null while the item is not shared
+
+### File Names
+
+A name is stored exactly as the user's system wrote it. Uploads, new folders and renames all follow one rule, close to Nextcloud's default, which also refuses only separators and control characters:
+
+- Up to 255 characters, and not empty, `.` or `..`.
+- No `/` or `\`, which are path separators, and no control characters (ASCII 0–31 and 127).
+
+Everything else is allowed, including spaces, accents, emoji, the narrow no-break space that newer Windows time formats put before AM and PM, and the characters Windows reserves (`: * ? " < > |`). Names such as `CON` or ones ending in a dot are also accepted, since macOS, Linux, and Android allow them.
+
+Where a name has to become a Windows file, it is translated rather than refused:
+
+- **Folder ZIP downloads** replace `: * ? " < > |` with `_` and drop trailing dots and spaces in each entry, as browsers do for single downloads.
+- **The desktop app** writes local copies (Open on Desktop, copy to Explorer, Save As) under names that follow Microsoft's naming rules: reserved and control characters become `_`, trailing dots and spaces are dropped, and device names such as `CON`, `NUL.txt` or `COM1.log` get a leading `_`. Copies to Explorer also add a ` (n)` suffix to names that differ only in letter case and shorten long names so the staged path stays within 260 characters.
+- **The Cloud Drive** shows each reserved character, and a trailing dot or space, as the private-use character `U+F000` plus its code, the mapping Cygwin, WSL and Syncthing use. Renames and saves turn it back, so the stored name never changes. WSL and Git Bash show the original characters.
 
 ## File Operations
 

@@ -14,6 +14,8 @@ Organize your files with folders in TMA Cloud.
 3. Enter folder name
 4. Press Enter or click Create
 
+A folder name can be up to 255 characters and cannot contain `/`, `\` or control characters. Characters that Windows does not allow, such as `:` or `?`, are accepted. See [File Names](/docs/concepts/file-system#file-names).
+
 ### Nested Folders
 
 - Create folders inside other folders
@@ -45,7 +47,7 @@ A move or copy fails if the folder or the destination was deleted or moved to th
 
 - **Rename Option:** Right-click → Rename
 - **Inline Edit:** Click folder name to edit
-- **Validation:** Prevents invalid names
+- **Validation:** The same rule as creating a folder: up to 255 characters, with no `/`, `\` or control characters
 
 ### Deleting Folders
 

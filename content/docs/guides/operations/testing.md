@@ -172,6 +172,9 @@ controllers and models, against PostgreSQL and Redis.
 
 - Signup, login, sessions, revocation, CSRF
 - Upload, download, rename, move, copy, trash, restore, permanent delete
+- The parent of every upload, new folder and copy being a live folder in the account, and the database triggers that enforce it
+- The file name rule, and Windows-safe entry names in folder ZIPs
+- Folder trees uploaded in parallel, which must create each folder once
 - Sub-user permissions and the account boundary
 - Share links, expiry, and anonymous access
 - Storage quotas across an account
@@ -203,8 +206,10 @@ The main process end of every desktop feature:
 - Open on desktop — download, watch, throttled re-upload, exported "Save As" files,
   the size-based reuse of an already downloaded copy, and refusing programs and scripts
   before download
-- Clipboard — the file-drop, OLE and text-as-paths sources, size caps, name
-  sanitising, and origin checks on server-side copies
+- Clipboard — the file-drop, OLE and text-as-paths sources, UTF-8 output from
+  PowerShell, folder pastes (the tree walk, links, unreadable files and the single
+  progress card), size caps, Windows names for copies (device names, letter case and
+  path length), and origin checks on server-side copies
 - Cloud Drive — the per-session bridge token and that it reaches the host on stdin,
   the staging-directory confinement on every path the filesystem host sends, save-only mode, mount and unmount, and mounting from the auth cookie without unmounting on a token refresh
 - Updates — the installer URL, `Content-Disposition` filename sanitising, download

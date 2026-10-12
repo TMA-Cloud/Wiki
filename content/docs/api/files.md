@@ -156,7 +156,7 @@ Create a new folder.
 
 **Validation:**
 
-- `name`: Required. Must not be empty after trimming. Max length 100. Any character is allowed except control characters and `/ \ : * ? " < > |`, so spaces, accents, and non-Latin scripts are accepted.
+- `name`: Required. Must not be empty after trimming. Max length 255. Any character is allowed except `/`, `\` and control characters, so spaces, accents, non-Latin scripts and the characters Windows reserves are accepted. See [File Names](/docs/concepts/file-system#file-names).
 - `parentId`: Optional. Must be a string.
 
 **Response:**
@@ -172,6 +172,11 @@ The created folder object.
   "modified": "2024-01-01T00:00:00Z"
 }
 ```
+
+**Errors:**
+
+- `404`: `parentId` is not a folder in the account, or it is in the trash. The message is `Target folder not found` and nothing is created.
+- `422`: The name breaks the rules above.
 
 ## Check Upload Storage
 
@@ -231,8 +236,8 @@ Upload a file.
 
 **Form Data:**
 
-- `file` - File to upload (required)
-- `parentId` - Parent folder ID (optional)
+- `file` - File to upload (required). The part's filename is stored as the name and must follow the [File Names](/docs/concepts/file-system#file-names) rule.
+- `parentId` - Parent folder ID (optional). Must be a folder in the account that is not in the trash.
 - `lastModifiedTimes` - Optional. The client's original modification time for the file. A value that fails validation is ignored and the row keeps the upload time.
 
 **MIME Type Handling:**
@@ -261,6 +266,11 @@ The uploaded file object.
 }
 ```
 
+**Errors:**
+
+- `400`: The file name breaks the [File Names](/docs/concepts/file-system#file-names) rule. The message is `Invalid file name`.
+- `404`: `parentId` is a file, a folder in another account, or a folder in the trash. The message is `Target folder not found`. The uploaded object is queued for deletion and no row is written.
+
 ## Bulk Upload Files
 
 ### POST `/api/files/upload/bulk`
@@ -269,8 +279,8 @@ Upload multiple files at once using `multipart/form-data`.
 
 **Form Data:**
 
-- `files` - Files to upload (required)
-- `parentId` - Parent folder ID (optional)
+- `files` - Files to upload (required). Each filename, and each folder in its relative path, must follow the [File Names](/docs/concepts/file-system#file-names) rule.
+- `parentId` - Parent folder ID (optional). Must be a folder in the account that is not in the trash.
 - `relativePaths` - Optional. One value per file, same order as `files`. When present, the server uses these relative paths (e.g. `"MyFolder/sub/file.txt"`) to recreate folder structure under `parentId`.
 - `clientIds` - Optional. One value per file, same order as `files`. Echoed back in the response for easier client-side matching.
 - `lastModifiedTimes` - Optional. One value per file, same order as `files`. The client's original modification times. Entries that fail validation are ignored individually rather than failing the batch.
@@ -278,6 +288,8 @@ Upload multiple files at once using `multipart/form-data`.
 `relativePaths`, `clientIds` and `lastModifiedTimes` are repeated fields joined to the file parts by ordinal, so all three must carry one entry per file in the same order.
 
 **Duplicate names:** For each file, if a file with the same name already exists in the parent folder, the server assigns a unique display name (e.g. `document (1).pdf`).
+
+**Folders in relative paths:** Each folder named in a relative path is reused when its parent already holds a folder of that name, compared without regard to case. A folder whose name matches exactly is preferred over one that differs only in case. Otherwise the folder is created. The lookup and the insert run in one transaction under a lock on the account, parent and lowercased name, so parallel requests that name the same new folder create it once.
 
 **Response:**
 
@@ -321,6 +333,13 @@ On success, returns a summary object. `files` contains created file records; `fa
   "failedCount": 1
 }
 ```
+
+**Errors:**
+
+- `400`: A filename breaks the [File Names](/docs/concepts/file-system#file-names) rule. The message is `Invalid file name: <name>` and no file in the request is stored.
+- `400`: Every file failed. The message is the first file's error. When `parentId` is a file, a folder in another account or a folder in the trash, every file fails with `Target folder not found`.
+
+A folder in a relative path that breaks the rule fails only the files below it, with `Invalid folder name: <name>`. The other files are still stored.
 
 ## Move Files
 
@@ -393,6 +412,8 @@ Copy always returns `202`. The `account-file-operations` worker copies the tree 
 
 If one or more items are missing or in the trash, or the target folder is missing or in the trash, the endpoint returns `404` and nothing is queued.
 
+The worker checks the target folder again before it copies any object, and once more in the transaction that writes the new rows. If the folder was moved to the trash while the job waited, the job fails with `Target folder not found` and nothing is copied.
+
 ## Rename File
 
 ### POST `/api/files/rename`
@@ -411,7 +432,7 @@ Rename a file or folder.
 **Validation:**
 
 - `id`: Required. Must be a string.
-- `name`: Required. Must not be empty after trimming. Max length 100. Any character is allowed except control characters and `/ \ : * ? " < > |`, so spaces, accents, and non-Latin scripts are accepted.
+- `name`: Required. Must not be empty after trimming. Max length 255. Any character is allowed except `/`, `\` and control characters, so spaces, accents, non-Latin scripts and the characters Windows reserves are accepted. See [File Names](/docs/concepts/file-system#file-names).
 
 **Response:**
 
@@ -833,6 +854,8 @@ The raw file content or a ZIP archive.
 
 Folder ZIPs are built as they stream. If the client disconnects, the server stops the archive and closes the storage and database resources it was using. A folder download does not block uploads or other operations on the account while it runs.
 
+Entry names in a ZIP replace `: * ? " < > |` and control characters with `_` and drop trailing dots and spaces, so the archive extracts on Windows. The stored names do not change. See [File Names](/docs/concepts/file-system#file-names).
+
 Single-file downloads accept an HTTP `Range` header and reply `206 Partial Content` with `Content-Range` for the requested bytes; the response advertises `Accept-Ranges: bytes`. Only the segments overlapping the range are read and decrypted. Folder/bulk downloads are streamed ZIP archives and do not support ranges.
 
 Downloading marks the item as read. For a folder, the folder and every entry in the archive are marked. See [Last Access Time](/docs/concepts/file-system#last-access-time).
@@ -1001,7 +1024,7 @@ Download multiple files and/or folders as a single ZIP archive.
 - `ids`: Required. Must be a non-empty array of strings.
 
 **Response:**
-A ZIP archive containing all selected files and folders.
+A ZIP archive containing all selected files and folders. Entry names follow the same Windows-safe rule as a [folder download](#get-apifilesiddownload).
 
 **Note:** For single file downloads, use the GET endpoint. This endpoint is optimized for downloading multiple items at once.
 
