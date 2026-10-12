@@ -18,22 +18,26 @@ Frequently encountered errors and step-by-step diagnosis.
 1. **Is Postgres actually up?**
 
    ```bash
-   pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}"
+   pg_isready -d "$DATABASE_URL"
    ```
 
    If this fails, start Postgres (Docker users: `docker compose up -d postgres`) before continuing.
 
-2. **Are the credentials in `.env` the ones Postgres actually expects?**
+2. **Does `DATABASE_URL` in `.env` hold the credentials Postgres expects?**
 
    ```bash
-   psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME"
+   psql "$DATABASE_URL"
    ```
 
-   If this prompts for a password and fails, `DB_PASSWORD` is wrong.
+   If this fails with `password authentication failed`, the password in the URL is wrong. A password with `@`, `:`, `/`, or `%` must be percent-encoded in the URL.
 
-3. **Is the backend pointing at the right host?** Inside Docker Compose, the host is the service name (e.g. `postgres`), not `localhost`.
+3. **Is the backend pointing at the right host?** Inside Docker Compose, the host in the URL is the service name (e.g. `postgres`), not `localhost`.
 
-4. **Firewall / network.** If Postgres runs on another machine, confirm the port is reachable: `nc -zv $DB_HOST 5432`.
+4. **Firewall / network.** If Postgres runs on another machine, confirm the port is reachable: `nc -zv <host> 5432`.
+
+### Symptom: "DATABASE_URL is not set" or "DATABASE_URL must name a database"
+
+The backend and worker stop at startup. Set `DATABASE_URL` in `.env` with a database name after the last `/`, for example `postgresql://postgres:password@localhost:5432/tma_cloud_storage`. The same check applies to `REDIS_URL`.
 
 ## Encryption key errors
 
@@ -84,9 +88,9 @@ The message names the failed check.
   unaffected; the limiters keep their counters in the process, not in Redis.
 </Callout>
 
-1. **Is Redis running?** `redis-cli -h "$REDIS_HOST" -p "${REDIS_PORT:-6379}" ping` — should print `PONG`.
-2. **Auth enabled?** If Redis requires a password, set `REDIS_PASSWORD` in `.env`.
-3. **Right host in Docker?** Use the compose service name (`redis`), not `localhost`, from inside containers.
+1. **Is Redis running?** `redis-cli -u "$REDIS_URL" ping` — should print `PONG`.
+2. **Auth enabled?** If Redis requires a password, put it in `REDIS_URL`: `redis://:password@host:6379/0`.
+3. **Right host in Docker?** Use the compose service name (`redis`), not `localhost`, as the host in `REDIS_URL`.
 
 ## Storage limit errors
 

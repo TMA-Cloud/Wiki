@@ -74,8 +74,8 @@ cp ../.env.example ../.env
 
 - `JWT_SECRET` - Secret key for JWT tokens
 - `FILE_ENCRYPTION_KEY` - Random 32-byte key used to encrypt stored files (generate with `openssl rand -base64 32`)
-- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` - Database connection
-- `REDIS_HOST`, `REDIS_PORT` - Redis connection (optional)
+- `DATABASE_URL` - Database connection, e.g. `postgresql://postgres:password@localhost:5432/tma_cloud_storage`
+- `REDIS_URL` - Redis connection, e.g. `redis://:password@localhost:6379/0` (the server is optional)
 - `BPORT` - Backend port (default: 3000)
 
 **Optional:**
@@ -156,7 +156,7 @@ Access at `http://localhost:5173`
 
 ## Troubleshooting
 
-**Database:** Verify PostgreSQL is running, check credentials in `.env`
+**Database:** Verify PostgreSQL is running, and test `DATABASE_URL` from `.env` with `psql "$DATABASE_URL"`
 
 **Encryption key:** In production the backend stops if `FILE_ENCRYPTION_KEY` is missing, is a passphrase, or does not match the key the data was encrypted with. The log names the cause
 

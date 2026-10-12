@@ -15,26 +15,29 @@ Environment variable reference for TMA Cloud.
 
 ## Database Configuration
 
-| Variable        | Required | Default             | Description              |
-| --------------- | -------- | ------------------- | ------------------------ |
-| `DB_HOST`       | No       | `localhost`         | PostgreSQL host          |
-| `DB_PORT`       | No       | `5432`              | PostgreSQL port          |
-| `DB_USER`       | No       | `postgres`          | Database username        |
-| `DB_PASSWORD`   | Yes      | -                   | Database password        |
-| `DB_NAME`       | No       | `tma_cloud_storage` | Database name            |
-| `DB_SSLMODE`    | No       | `disable`           | SSL mode                 |
-| `PGBOSS_SCHEMA` | No       | `pgboss`            | pg-boss job queue schema |
+| Variable       | Required | Default | Description               |
+| -------------- | -------- | ------- | ------------------------- |
+| `DATABASE_URL` | Yes      | -       | PostgreSQL connection URL |
+
+```bash
+DATABASE_URL=postgresql://postgres:password@localhost:5432/tma_cloud_storage
+```
+
+Add libpq parameters as a query string, for example `?sslmode=require` for TLS. Percent-encode `@`, `:`, `/`, and `%` in the password. See [Environment Variables](/docs/reference/environment-variables#database-configuration).
 
 ## Redis Configuration
 
-| Variable         | Required | Default     | Description                  |
-| ---------------- | -------- | ----------- | ---------------------------- |
-| `REDIS_HOST`     | No       | `localhost` | Redis host                   |
-| `REDIS_PORT`     | No       | `6379`      | Redis port                   |
-| `REDIS_PASSWORD` | No       | -           | Redis password (recommended) |
-| `REDIS_DB`       | No       | `0`         | Redis database number        |
+| Variable    | Required | Default | Description          |
+| ----------- | -------- | ------- | -------------------- |
+| `REDIS_URL` | Yes      | -       | Redis connection URL |
 
-**Note:** Redis is optional. App works without it but caching is disabled.
+```bash
+REDIS_URL=redis://:password@localhost:6379/0
+```
+
+Use `rediss://` for TLS. The number after the last `/` is the Redis database.
+
+**Note:** The Redis server is optional. If the app cannot reach it, caching is disabled.
 
 ## Authentication
 

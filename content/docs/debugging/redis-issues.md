@@ -12,16 +12,16 @@ Troubleshooting Redis connection problems.
 **Check:**
 
 1. Redis is running: `redis-cli ping`
-2. Correct host and port in `.env`
+2. Correct host and port in `REDIS_URL` in `.env`
 3. Network connectivity
 4. Firewall rules
 
 **Solutions:**
 
 1. Start Redis: `redis-server` or `docker compose up redis`
-2. Verify `REDIS_HOST` and `REDIS_PORT`
-3. Test connection: `redis-cli -h localhost -p 6379 ping`
-4. Check authentication if password set
+2. Verify the host and port in `REDIS_URL`
+3. Test connection: `redis-cli -u "$REDIS_URL" ping`
+4. If Redis has a password, check that `REDIS_URL` contains it: `redis://:password@host:6379/0`
 
 ## Redis Not Required
 

@@ -59,7 +59,7 @@ The script finds the PostgreSQL container in this order:
 1. `DB_CONTAINER` (explicit override)
 2. The `postgres` service of the Docker Compose project in the script's directory
 
-Otherwise it uses the PostgreSQL client tools on the host and connects to `DB_HOST`:`DB_PORT`. It never picks a container by name or image, because a restore drops the database.
+Otherwise it uses the PostgreSQL client tools on the host and connects to the host and port in `DATABASE_URL`. It never picks a container by name or image, because a restore drops the database.
 
 ## Database Backup
 
@@ -69,7 +69,7 @@ Otherwise it uses the PostgreSQL client tools on the host and connects to `DB_HO
 ./db-backup-restore.sh backup
 ```
 
-Output is saved to `backups/<DB_NAME>_<TIMESTAMP>.dump` with a `.meta` file alongside it.
+Output is saved to `backups/<database>_<TIMESTAMP>.dump`, named after the database in `DATABASE_URL`, with a `.meta` file alongside it.
 
 ### Example Output
 
@@ -131,7 +131,7 @@ The restore process:
 5. Restores in `--single-transaction` mode (atomic — rolls back entirely on error)
 6. Runs `ANALYZE` to update query planner statistics
 7. Reports table and row counts for verification
-8. Clears the Redis cache of the Compose project with `FLUSHDB`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 5 minutes for the entries to expire
+8. Clears the Redis cache of the Compose project with `FLUSHDB` on the database in `REDIS_URL`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 5 minutes for the entries to expire
 9. Starts the services it stopped. After a failed restore they stay stopped, because the database is empty, and the script prints the command that starts them
 
 The restored data opens only with the encryption key file from the time of the backup or a later one, since rotation keeps older key versions.
@@ -156,17 +156,14 @@ Lists all `.dump` files in the `backups/` directory with file size and date.
 
 The script reads these keys from `.env` in its directory (or the repository root for `scripts/db-backup-restore.sh`, or `TMA_DIR`). It reads them as plain values and never runs `.env` as a shell script. Variables already set in the environment take precedence. The password reaches `pg_dump` and `docker exec` through the environment, so it does not appear in the process list.
 
-| Variable              | Default             | Description                                |
-| --------------------- | ------------------- | ------------------------------------------ |
-| `DB_HOST`             | `localhost`         | PostgreSQL host                            |
-| `DB_PORT`             | `5432`              | PostgreSQL port                            |
-| `DB_USER`             | `postgres`          | Database username                          |
-| `DB_PASSWORD`         | -                   | Database password                          |
-| `DB_NAME`             | `tma_cloud_storage` | Database name                              |
-| `DB_CONTAINER`        | -                   | PostgreSQL container name                  |
-| `REDIS_PASSWORD`      | -                   | Redis password, to clear the cache         |
-| `REDIS_DB`            | `0`                 | Redis database the cache uses              |
-| `BACKUP_RETAIN_COUNT` | `10`                | Backups to keep before pruning (1 or more) |
+| Variable              | Default | Description                                     |
+| --------------------- | ------- | ----------------------------------------------- |
+| `DATABASE_URL`        | -       | Database to back up or restore (required)       |
+| `REDIS_URL`           | -       | Redis password and database, to clear the cache |
+| `DB_CONTAINER`        | -       | PostgreSQL container name                       |
+| `BACKUP_RETAIN_COUNT` | `10`    | Backups to keep before pruning (1 or more)      |
+
+The script splits `DATABASE_URL` into user, password, host, port, and database, and percent-decodes them. With the host's client tools, these URL parameters are passed on as libpq environment variables: `sslmode`, `sslrootcert`, `sslcert`, `sslkey`, `sslcrl`, `sslnegotiation`, `connect_timeout`, `application_name`, `options`, and `target_session_attrs`. Inside a container it connects over the local socket as the user in the URL.
 
 ## File Backups
 

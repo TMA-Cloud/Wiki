@@ -29,7 +29,7 @@ The script:
 
 1. Checks for Docker, Docker Compose v2, and `openssl` or `/dev/urandom`
 2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `setup.sh`, `update.sh`, `rotate.sh`, and `db-backup-restore.sh` over HTTPS only
-3. Sets `DB_HOST=postgres` and `REDIS_HOST=redis`, and fills `DB_PASSWORD` and `REDIS_PASSWORD` (32 random bytes each, hex) and `JWT_SECRET` (64 random bytes, hex)
+3. Sets `DATABASE_URL` to `postgresql://postgres:<password>@postgres:5432/tma_cloud_storage` and `REDIS_URL` to `redis://:<password>@redis:6379/0`, each with 32 random bytes as hex for the password, and fills `JWT_SECRET` (64 random bytes, hex)
 4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` as key version 1, instead of `.env`
 5. Sets permissions: the directory `0700`, `.env` `0600`, `secrets/` `0700`. The key file is `0444`, or owned by uid 1001 with `0400` when run as root (see [Secrets](#secrets))
 6. Runs `docker compose up -d`
@@ -67,7 +67,14 @@ openssl rand -base64 32 > secrets/file_encryption_key
 chmod 444 secrets/file_encryption_key
 ```
 
-Edit `.env`: set `DB_HOST=postgres`, `REDIS_HOST=redis`, and new values for `DB_PASSWORD`, `REDIS_PASSWORD`, and `JWT_SECRET` (for example `openssl rand -hex 32`). Leave `FILE_ENCRYPTION_KEY` empty. Then:
+Edit `.env`: set `DATABASE_URL` and `REDIS_URL` to the Compose service names with new passwords, and set a new `JWT_SECRET` (for example `openssl rand -hex 32` for each):
+
+```bash
+DATABASE_URL=postgresql://postgres:<password>@postgres:5432/tma_cloud_storage
+REDIS_URL=redis://:<password>@redis:6379/0
+```
+
+Leave `FILE_ENCRYPTION_KEY` empty. Then:
 
 ```bash
 docker compose up -d
@@ -109,11 +116,15 @@ The worker has no health check, because it serves no HTTP. A crashed worker exit
 
 The S3-compatible bucket is not set in `.env`. After the first account is created, connect it in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
-**Redis Configuration:**
+### Database and Redis Credentials
 
-- `REDIS_HOST=redis` (container name)
-- `REDIS_PORT=6379`
-- `REDIS_PASSWORD` (optional, recommended for production)
+`.env` holds each password once, inside `DATABASE_URL` and `REDIS_URL`. The `postgres` and `redis` services read the same two variables:
+
+- **PostgreSQL:** On the first start with an empty `postgres-data` volume, the container creates the user, password, and database named in `DATABASE_URL`. Later starts do not change them; use `./rotate.sh db` to change the password.
+- **Redis:** The container starts `redis-server` with the password from `REDIS_URL` as `requirepass`, on every start. Without a password in the URL, Redis runs without one.
+- **Health checks:** `pg_isready` and `redis-cli` connect with the same URLs.
+
+These containers read the password as written, without percent-decoding. `setup.sh` and `rotate.sh` write hex passwords, which need no encoding. If you set a password yourself, use only letters, digits, `-`, `.`, `_`, and `~`.
 
 **Database access from host:** To run backend scripts that need the database (e.g. bulk import) from the host, the DB port must be reachable. In `docker-compose.yml`, uncomment the postgres `ports` entry (e.g. `127.0.0.1:5432:5432`).
 

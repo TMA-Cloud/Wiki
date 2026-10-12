@@ -94,7 +94,7 @@ Migrations only move forward, so going back to the previous image also needs the
    docker compose stop app worker
    ```
 
-2. Recreate the database and restore the dump. Use `DB_USER` and `DB_NAME` from `.env`:
+2. Recreate the database and restore the dump. Use the user and database named in `DATABASE_URL` in `.env`:
 
    ```bash
    docker compose exec -T postgres psql -U postgres -d postgres \

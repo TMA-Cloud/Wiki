@@ -11,7 +11,7 @@ System monitoring and health checks in TMA Cloud.
 
 This is a **liveness** check. It returns `200` with `status`, `timestamp` and `uptime` whenever the HTTP server is accepting requests. It does not query PostgreSQL or Redis, so a healthy response does not tell you the database is reachable. The Compose healthcheck uses it to decide whether the container is serving.
 
-To check the database from outside the app, use `pg_isready` against the Postgres container; for Redis, `redis-cli ping`.
+To check the database from outside the app, use `pg_isready -d "$DATABASE_URL"`; for Redis, `redis-cli -u "$REDIS_URL" ping`. The Compose health checks for the `postgres` and `redis` services run these commands.
 
 ## Metrics Endpoint
 

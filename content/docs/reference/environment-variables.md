@@ -17,31 +17,38 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 
 ## Database Configuration
 
-| Variable               | Required | Default             | Description                                                      |
-| ---------------------- | -------- | ------------------- | ---------------------------------------------------------------- |
-| `DB_HOST`              | No       | `localhost`         | PostgreSQL host                                                  |
-| `DB_PORT`              | No       | `5432`              | PostgreSQL port                                                  |
-| `DB_USER`              | No       | `postgres`          | Database username                                                |
-| `DB_PASSWORD`          | Yes      | -                   | Database password                                                |
-| `DB_NAME`              | No       | `tma_cloud_storage` | Database name                                                    |
-| `DB_SSLMODE`           | No       | `disable`           | SSL mode (`require` for TLS)                                     |
-| `PGBOSS_SCHEMA`        | No       | `pgboss`            | pg-boss job queue schema                                         |
-| `DB_CONTAINER`         | No       | auto-detected       | Docker container name for backup/restore script                  |
-| `BACKUP_RETAIN_COUNT`  | No       | `10`                | Number of database backups to keep before pruning                |
-| `DB_HELD_CURSOR_LIMIT` | No       | `3`                 | Folder ZIP downloads that may hold a database connection at once |
+| Variable               | Required | Default       | Description                                                      |
+| ---------------------- | -------- | ------------- | ---------------------------------------------------------------- |
+| `DATABASE_URL`         | Yes      | -             | PostgreSQL connection URL                                        |
+| `DB_CONTAINER`         | No       | auto-detected | Docker container name for backup/restore script                  |
+| `BACKUP_RETAIN_COUNT`  | No       | `10`          | Number of database backups to keep before pruning                |
+| `DB_HELD_CURSOR_LIMIT` | No       | `3`           | Folder ZIP downloads that may hold a database connection at once |
+
+**`DATABASE_URL`:** A libpq connection URI:
+
+```bash
+DATABASE_URL=postgresql://user:password@host:5432/tma_cloud_storage?sslmode=require
+```
+
+- The scheme is `postgresql://` or `postgres://`. The port defaults to `5432`.
+- Query parameters are libpq parameters, for example `sslmode`, `sslrootcert`, `sslcert`, `sslkey`, `application_name`, `connect_timeout`, and `options`.
+- `sslmode` has its libpq meaning, the same as in `psql` and `pg_dump`: `disable`, `require` (encrypt, do not verify the certificate), `verify-ca` (verify against `sslrootcert`), or `verify-full` (also check the host name). Without `sslmode`, the app connects without TLS.
+- Percent-encode characters that have a meaning in a URL when they appear in the user, password, or database name: `@` as `%40`, `:` as `%3A`, `/` as `%2F`, `%` as `%25`.
+- The URL must name a database. The app does not start without `DATABASE_URL`.
+
+The pg-boss job queue uses the `pgboss` schema in the same database.
 
 **`DB_HELD_CURSOR_LIMIT`:** A folder ZIP lists its files through a database cursor. Trees of up to 20,000 entries are read at the start and the connection goes back to the pool within milliseconds. A larger tree keeps its connection for the whole download, and this variable caps how many such downloads can do that at once, per API process. Every folder ZIP takes a slot while it reads its tree, so when all slots are held by large downloads, new folder downloads wait for a free slot before they start. The API process uses the `pg` default pool of 10 connections, so keep this well below 10.
 
 ## Redis Configuration
 
-| Variable         | Required | Default     | Description                  |
-| ---------------- | -------- | ----------- | ---------------------------- |
-| `REDIS_HOST`     | No       | `localhost` | Redis host                   |
-| `REDIS_PORT`     | No       | `6379`      | Redis port                   |
-| `REDIS_PASSWORD` | No       | -           | Redis password (recommended) |
-| `REDIS_DB`       | No       | `0`         | Redis database number        |
+| Variable    | Required | Default | Description          |
+| ----------- | -------- | ------- | -------------------- |
+| `REDIS_URL` | Yes      | -       | Redis connection URL |
 
-**Note:** Redis is optional. App works without it but caching is disabled.
+**`REDIS_URL`:** `redis://[user]:password@host:port/database`, for example `redis://:password@localhost:6379/0`. Use `rediss://` to connect over TLS. The port defaults to `6379` and the database to `0`. Leave out the user to use the `default` user, and leave out `:password@` when Redis has no password. Percent-encode reserved characters in the password, as for `DATABASE_URL`.
+
+**Note:** `REDIS_URL` must be set, but the Redis server is optional. If the app cannot reach it, it keeps running without caching.
 
 ## Authentication
 

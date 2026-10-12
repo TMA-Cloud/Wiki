@@ -220,7 +220,7 @@ From the **backend** directory:
 npm run rotate -- status         # Key versions and file keys per version
 npm run rotate -- key            # Add a new master key version
 npm run rotate -- rewrap         # Rewrap stored file keys under the newest version
-npm run rotate -- db-password    # New random database password, saved in .env
+npm run rotate -- db-password    # New random database password, saved in DATABASE_URL in .env
 ```
 
 - `key` writes to the file named by `FILE_ENCRYPTION_KEY_FILE`, or to `FILE_ENCRYPTION_KEY` in `.env`. Restart the API, then the worker; the worker rewraps the stored file keys when it starts
@@ -317,10 +317,10 @@ View logs from app service only.
 ### PostgreSQL
 
 ```bash
-psql -h localhost -U postgres -d tma_cloud_storage
+psql "$DATABASE_URL"
 ```
 
-Connect to PostgreSQL database. Substitute your `DB_NAME` if you changed it.
+Connect to the PostgreSQL database with the URL from `.env`. `psql` reads the same URL, including `sslmode` and other parameters, as the app. On Docker, run it in the container: `docker compose exec postgres sh -c 'psql "$DATABASE_URL"'`.
 
 ### Migrations
 

@@ -138,10 +138,12 @@ The integration suite reads connection details from the project `.env`, then ove
 database and cache settings and replaces bucket storage with an in-memory double so it never touches working data. Setup fails with an error if an
 override has not taken effect.
 
-| Override                 | Reason                                                         |
-| ------------------------ | -------------------------------------------------------------- |
-| `DB_NAME=tma_cloud_test` | Its own database. Setup stops unless the name ends in `_test`. |
-| `REDIS_DB=15`            | Its own cache. Setup stops if the value is `0`.                |
+| Override                                      | Reason                                                         |
+| --------------------------------------------- | -------------------------------------------------------------- |
+| Database in `DATABASE_URL` → `tma_cloud_test` | Its own database. Setup stops unless the name ends in `_test`. |
+| Database in `REDIS_URL` → `15`                | Its own cache. Setup stops if the index is `0`.                |
+
+Only the database part of each URL changes; the host, credentials, and parameters come from `.env`, or from the environment when `.env` does not set them, as in CI.
 
 Bucket operations use an isolated in-memory double in this suite. Each test also seeds a bucket row in `app_settings`, so code that checks for a saved bucket behaves as on a configured instance. Run `npm run test:s3` separately to verify the actual provider.
 

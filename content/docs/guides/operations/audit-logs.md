@@ -185,7 +185,7 @@ npm run worker
 
 ### Check Queue Status
 
-The queue is named `audit-events`. If you set `PGBOSS_SCHEMA`, substitute it for `pgboss` below.
+The queue is named `audit-events`, in the `pgboss` schema.
 
 ```sql
 -- View pending jobs

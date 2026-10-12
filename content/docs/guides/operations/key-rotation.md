@@ -10,8 +10,8 @@ Rotate the master encryption key and the database and Redis passwords.
 | What                                   | Docker install       | Manual install                   |
 | -------------------------------------- | -------------------- | -------------------------------- |
 | Master key (`FILE_ENCRYPTION_KEY`)     | `./rotate.sh key`    | `npm run rotate -- key`, restart |
-| Database password (`DB_PASSWORD`)      | `./rotate.sh db`     | `npm run rotate -- db-password`  |
-| Redis password (`REDIS_PASSWORD`)      | `./rotate.sh redis`  | Change it in Redis and `.env`    |
+| Database password (in `DATABASE_URL`)  | `./rotate.sh db`     | `npm run rotate -- db-password`  |
+| Redis password (in `REDIS_URL`)        | `./rotate.sh redis`  | Change it in Redis and `.env`    |
 | All three, with one restart            | `./rotate.sh all`    | -                                |
 | Key versions and file keys per version | `./rotate.sh status` | `npm run rotate -- status`       |
 
@@ -38,8 +38,8 @@ What it does:
 
 1. Copies `.env` and `secrets/file_encryption_key` to `.rotate-backup/`
 2. **key:** Adds the next key version to `secrets/file_encryption_key` and keeps the older lines. The new version is above every version in the file and every version in the `kek_checks` table, so a number left by an earlier failed attempt is never reused
-3. **db:** Has the app change its own database role's password, then writes the new `DB_PASSWORD` to `.env`
-4. **redis:** Writes the new `REDIS_PASSWORD` to `.env`
+3. **db:** Has the app change its own database role's password, then writes it into `DATABASE_URL` in `.env`. The user, host, database, and parameters in the URL stay as they are
+4. **redis:** Writes the new password into `REDIS_URL` in `.env`. The `redis` container reads it from there when it is recreated
 5. Recreates the containers that use the changed files and waits until they are healthy
 6. **key:** Rewraps the stored file keys, the bucket secret and the Google client secret under the new version
 7. Deletes `.rotate-backup/`. A run that stops before it changes anything deletes it too
@@ -66,12 +66,12 @@ npm run rotate -- rewrap
 npm run rotate -- db-password
 ```
 
-This changes the password of the database role in `DB_USER` and saves it as `DB_PASSWORD` in `.env`. Restart the API and the worker right after: connections opened with the old password keep working, new ones need the new password.
+This changes the password of the database role in `DATABASE_URL` and saves the URL with the new password in `.env`. Restart the API and the worker right after: connections opened with the old password keep working, new ones need the new password.
 
 The script does not change the Redis password, because a Redis server outside Docker keeps it in its own configuration file. Redis accepts several passwords per user, so it can be changed without failed connections:
 
 1. Add the new password: `ACL SETUSER default >new-password`
-2. Set `REDIS_PASSWORD` in `.env` and restart the API and the worker
+2. Put the new password in `REDIS_URL` in `.env` and restart the API and the worker
 3. Remove the old password: `ACL SETUSER default <old-password`
 4. Set the new password as `requirepass` in the Redis configuration file, so a Redis restart keeps it
 
