@@ -17,7 +17,6 @@ cd tma-cloud
 Without a local copy, for example on an install made before `update.sh` existed:
 
 ```bash
-cd tma-cloud
 curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/update.sh | bash
 ```
 

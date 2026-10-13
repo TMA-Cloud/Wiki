@@ -45,7 +45,6 @@ Run it from the install directory with `./db-backup-restore.sh`; the examples be
 Without a local copy, run it in the install directory:
 
 ```bash
-cd tma-cloud
 curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/scripts/db-backup-restore.sh | bash -s -- backup
 ```
 
