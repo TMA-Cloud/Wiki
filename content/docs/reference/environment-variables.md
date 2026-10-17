@@ -7,11 +7,16 @@ Complete reference for all environment variables in TMA Cloud.
 
 ## Application Configuration
 
-| Variable      | Required         | Default       | Description        |
-| ------------- | ---------------- | ------------- | ------------------ |
-| `NODE_ENV`    | No               | `development` | Environment mode   |
-| `PORT`        | No               | `3000`        | App is served on   |
-| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL |
+| Variable       | Required         | Default       | Description                   |
+| -------------- | ---------------- | ------------- | ----------------------------- |
+| `APP_ENV`      | No               | `development` | `production` or `development` |
+| `PORT`         | No               | `3000`        | App is served on              |
+| `BACKEND_URL`  | Yes (OnlyOffice) | -             | Public backend URL            |
+| `WEB_DIST_DIR` | No               | auto-detected | Folder with the built web app |
+
+**`APP_ENV`:** `production` turns on secure cookies and refuses development-only keys. `NODE_ENV` is still read when `APP_ENV` is not set, so an existing `.env` keeps working.
+
+**`WEB_DIST_DIR`:** The Docker image sets it to `/app/web`. A source checkout finds `apps/tma-cloud-web/dist` without it.
 
 **`PORT`:** Without Docker, the API listens on this port. With Docker Compose, it is the host port: `compose.yml` publishes `${PORT}:3000` and sets `PORT=3000` inside the container, so the app always listens on 3000, the port the image exposes and its health check uses. With `docker run`, map the port instead: `-p 8080:3000`.
 
@@ -27,6 +32,7 @@ Reverse proxy trust is configured in **Settings** → **Administration** → **K
 | `DB_CONTAINER`         | No       | auto-detected | Docker container name for backup/restore script                  |
 | `BACKUP_RETAIN_COUNT`  | No       | `10`          | Number of database backups to keep before pruning                |
 | `DB_HELD_CURSOR_LIMIT` | No       | `3`           | Folder ZIP downloads that may hold a database connection at once |
+| `DB_POOL_MAX`          | No       | `20`          | Database connections each process keeps open                     |
 
 **`DATABASE_URL`:** A libpq connection URI:
 
@@ -40,9 +46,11 @@ DATABASE_URL=postgresql://user:password@host:5432/tma_cloud_storage?sslmode=requ
 - Percent-encode characters that have a meaning in a URL when they appear in the user, password, or database name: `@` as `%40`, `:` as `%3A`, `/` as `%2F`, `%` as `%25`.
 - The URL must name a database. The app does not start without `DATABASE_URL`.
 
-The pg-boss job queue uses the `pgboss` schema in the same database.
+Background jobs are stored in the `job_queue` and `job_schedules` tables of the same database.
 
-**`DB_HELD_CURSOR_LIMIT`:** A folder ZIP lists its files through a database cursor. Trees of up to 20,000 entries are read at the start and the connection goes back to the pool within milliseconds. A larger tree keeps its connection for the whole download, and this variable caps how many such downloads can do that at once, per API process. Every folder ZIP takes a slot while it reads its tree, so when all slots are held by large downloads, new folder downloads wait for a free slot before they start. The API process uses the `pg` default pool of 10 connections, so keep this well below 10.
+**`DB_POOL_MAX`:** The API and the worker each keep their own pool, so the database needs room for twice this many connections, plus any backup or admin sessions.
+
+**`DB_HELD_CURSOR_LIMIT`:** A folder ZIP lists its files through a database cursor. Trees of up to 20,000 entries are read at the start and the connection goes back to the pool within milliseconds. A larger tree keeps its connection for the whole download, and this variable caps how many such downloads can do that at once, per API process. Every folder ZIP takes a slot while it reads its tree, so when all slots are held by large downloads, new folder downloads wait for a free slot before they start. Keep it well below `DB_POOL_MAX`.
 
 ## Redis Configuration
 
@@ -60,6 +68,7 @@ The pg-boss job queue uses the `pgboss` schema in the same database.
 | ------------------------ | -------- | ------- | --------------------------------------------------------- |
 | `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                                 |
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, auth cookie has no `Secure` flag in production |
+| `JWT_SECRET_FILE`        | No       | -       | Path to a file holding `JWT_SECRET`                       |
 
 The session timeout is not an environment variable. The first user sets it in **Settings** → **Administration**; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
@@ -74,7 +83,7 @@ Google sign-in is not configured through environment variables. The first user e
 | `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | KEKs for files, the bucket secret and the Google secret |
 | `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`            |
 
-**`FILE_ENCRYPTION_KEY`:** A single key, or a keyring of `version:key` entries after a rotation: one per line in a key file, comma-separated in `.env`. A key without a version is version 1. The highest version encrypts new data and the others still decrypt. In production the newest key must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key from the `backend` directory with `npm run key:generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
+**`FILE_ENCRYPTION_KEY`:** A single key, or a keyring of `version:key` entries after a rotation: one per line in a key file, comma-separated in `.env`. A key without a version is version 1. The highest version encrypts new data and the others still decrypt. In production the newest key must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key with `tma-server key generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
 
 **Docker:** `docker-compose.yml` sets `FILE_ENCRYPTION_KEY_FILE=/run/secrets/file_encryption_key` for the app and worker and mounts `secrets/file_encryption_key` there. Leave `FILE_ENCRYPTION_KEY` empty in `.env`. See [Docker Deployment](/docs/getting-started/docker#secrets).
 
@@ -84,13 +93,13 @@ Google sign-in is not configured through environment variables. The first user e
 
 **Note:** File contents use bounded streaming. The multipart uploader buffers at most four parts per active upload. Per-file size is controlled by the max upload size setting in **Settings** → **Storage**.
 
-**Key rotation:** `./rotate.sh key` on Docker, or `npm run rotate -- key` from the `backend` directory. See [Key Rotation](/docs/guides/operations/key-rotation).
+**Key rotation:** `./rotate.sh key` on Docker, or `tma-server rotate key`. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 ## Storage Bucket
 
 The S3-compatible bucket is not configured through environment variables. The first user connects it in **Settings** → **Storage**, and its secret access key is stored encrypted in the database. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
-**Note:** From backend, `npm run s3:protect-all` applies bucket protections (public access block, HTTPS-only policy, versioning, optional encryption, lifecycle) to the saved bucket. Lifecycle aborts incomplete multipart after 1 day and deletes noncurrent versions after 7 days. Review orphans periodically from **Settings** → **Administration**; see [Orphan Review](/docs/guides/admin/orphan-review).
+**Note:** `tma-server s3 protect-all` applies bucket protections (public access block, HTTPS-only policy, versioning, optional encryption, lifecycle) to the saved bucket. Lifecycle aborts incomplete multipart after 1 day and deletes noncurrent versions after 7 days. Review orphans periodically from **Settings** → **Administration**; see [Orphan Review](/docs/guides/admin/orphan-review).
 
 ## OnlyOffice Background Save
 
@@ -100,30 +109,34 @@ The S3-compatible bucket is not configured through environment variables. The fi
 
 Force-save runs every five minutes. The standalone worker must be running for scheduled force-save commands.
 
-Keep `ONLYOFFICE_REJECT_UNAUTHORIZED` enabled unless the document server uses a self-signed certificate on a trusted network.
-
-## Desktop Development
-
-| Variable                    | Required | Default           | Description                                     |
-| --------------------------- | -------- | ----------------- | ----------------------------------------------- |
-| `TMA_CLOUDFS_EXE`           | No       | Build output path | Cloud Drive host executable override            |
-| `TMA_CLOUD_CLIPBOARD_DEBUG` | No       | `0`               | Set to `1` to log desktop clipboard diagnostics |
-
-These variables affect the Electron client and are not server settings. Clipboard diagnostics can contain local file paths; disable them outside development.
+`ONLYOFFICE_REJECT_UNAUTHORIZED` applies when the app downloads a saved document from the document server. Keep it enabled unless the document server uses a self-signed certificate on a trusted network.
 
 ## Logging Configuration
 
-| Variable              | Required | Default                          | Description                                        |
-| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`   |
+| Variable              | Required | Default                          | Description                                      |
+| --------------------- | -------- | -------------------------------- | ------------------------------------------------ |
+| `LOG_LEVEL`           | No       | `info`                           | Log level (error, warn, info, debug, trace)      |
+| `LOG_FORMAT`          | No       | text                             | `json` for one JSON object per line              |
+| `RUST_LOG`            | No       | -                                | Per-module filter; overrides `LOG_LEVEL`         |
+| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics` |
 
-## Audit Logging Configuration
+See [Logging](/docs/guides/operations/logging).
 
-| Variable                   | Required | Default       | Description                                 |
-| -------------------------- | -------- | ------------- | ------------------------------------------- |
-| `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Audit batch size and worker concurrency cap |
-| `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)                     |
+## Update Feed
+
+| Variable       | Required | Default                                             | Description                                                |
+| -------------- | -------- | --------------------------------------------------- | ---------------------------------------------------------- |
+| `VERSIONS_URL` | No       | `https://tma-cloud.github.io/updates/versions.json` | The release feed behind `/api/version/latest` (https only) |
+
+The feed is published from the [TMA-Cloud/updates](https://github.com/TMA-Cloud/updates) repository. Point `VERSIONS_URL` at another copy (for example a branch's raw `versions.json`) to try a release before it is published to everyone; desktop apps signed in to this server then update to the version it names.
+
+## Background Worker
+
+| Variable                   | Required | Default | Description                                     |
+| -------------------------- | -------- | ------- | ----------------------------------------------- |
+| `AUDIT_WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
+
+The name is kept from earlier versions. Audit events no longer go through the worker; see [Audit Logs](/docs/guides/operations/audit-logs).
 
 ## Related Topics
 

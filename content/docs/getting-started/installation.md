@@ -47,10 +47,15 @@ To set up without the script, or to change its options, see [Docker Deployment](
 
 ### Manual-Installation Prerequisites
 
-- Node.js (22, 24, or 26+)
+- Rust (stable, from [rustup](https://rustup.rs)) with the `wasm32-unknown-unknown` target
+- [trunk](https://trunkrs.dev), to build the web app
 - PostgreSQL (v17+)
 - Redis (v6+) - Optional but recommended
-- npm or yarn
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo install trunk --locked
+```
 
 ### Installation Steps
 
@@ -61,13 +66,11 @@ git clone https://github.com/TMA-Cloud/TMA.git
 cd TMA
 ```
 
-#### 2. Backend Setup
+#### 2. Configure
 
 ```bash
-cd backend
-npm install
-cp ../.env.example ../.env
-# Edit ../.env with your configuration
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 **Required variables:**
@@ -88,7 +91,7 @@ cp ../.env.example ../.env
 CREATE DATABASE tma_cloud_storage;
 ```
 
-Migrations run automatically on startup.
+Migrations run automatically on startup, or by hand with `tma-server migrate`.
 
 #### 4. Setup Redis (Optional)
 
@@ -109,26 +112,30 @@ redis-server
 
 **Verify:** `redis-cli ping` (should return PONG)
 
-#### 5. Frontend Setup
+#### 5. Build
 
 ```bash
-cd ../frontend
-npm install
-npm run build
+# The web app, into apps/tma-cloud-web/dist
+cd apps/tma-cloud-web
+trunk build --release
+cd ../..
+
+# The server
+cargo build --release -p tma-server
 ```
+
+The server binary is `target/release/tma-server` (`tma-server.exe` on Windows). It finds the web app in `apps/tma-cloud-web/dist`; to keep the web app somewhere else, set `WEB_DIST_DIR`.
 
 #### 6. Start Application
 
 **Production:**
 
 ```bash
-# Terminal 1 - Backend
-cd backend
-npm start
+# Terminal 1 - API and web app
+./target/release/tma-server serve
 
-# Terminal 2 - Background Worker (required)
-cd backend
-npm run worker
+# Terminal 2 - Background worker (required)
+./target/release/tma-server worker
 ```
 
 Access at `http://localhost:3000`
@@ -136,21 +143,15 @@ Access at `http://localhost:3000`
 **Development:**
 
 ```bash
-# Terminal 1 - Backend
-cd backend
-npm run dev
-
-# Terminal 2 - Frontend
-cd frontend
-npm run dev
+cargo run -p tma-server -- serve --with-worker
 ```
 
-Access at `http://localhost:5173`
+This runs the API, the web app and the worker in one process. After changing the interface, run `trunk build` again in `apps/tma-cloud-web`; the server picks up the new build without a restart.
 
 ## Verification
 
-1. Backend shows: "Database connected successfully", "Server running on port 3000"
-2. Open browser: `http://localhost:3000` (production) or `http://localhost:5173` (development)
+1. The server logs `Server listening` with the port
+2. Open browser: `http://localhost:3000`
 3. Create first account (becomes admin)
 4. Connect the bucket in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket)
 
@@ -158,15 +159,17 @@ Access at `http://localhost:5173`
 
 **Database:** Verify PostgreSQL is running, and test `DATABASE_URL` from `.env` with `psql "$DATABASE_URL"`
 
-**Encryption key:** In production the backend stops if `FILE_ENCRYPTION_KEY` is missing, is a passphrase, or does not match the key the data was encrypted with. The log names the cause
+**Encryption key:** In production the server stops if `FILE_ENCRYPTION_KEY` is missing, is a passphrase, or does not match the key the data was encrypted with. The log names the cause
 
 **Redis:** Verify with `redis-cli ping`. App works without Redis but caching is disabled.
 
 **Port:** Change `PORT` in `.env` if port is in use
 
+**Web app missing:** A `FRONTEND_NOT_BUILT` error means the server did not find the web app. Run `trunk build --release` in `apps/tma-cloud-web`, or set `WEB_DIST_DIR`.
+
 **OnlyOffice:** Configure via Settings page (admin-only). Requires `BACKEND_URL` environment variable.
 
-**Background Worker:** Must run `npm run worker` in production. See [Background Workers](/docs/guides/operations/background-workers).
+**Background Worker:** Must run `tma-server worker` in production. See [Background Workers](/docs/guides/operations/background-workers).
 
 ## Next Steps
 

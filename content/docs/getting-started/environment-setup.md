@@ -7,11 +7,11 @@ Environment variable reference for TMA Cloud.
 
 ## Application Configuration
 
-| Variable      | Required         | Default       | Description        |
-| ------------- | ---------------- | ------------- | ------------------ |
-| `NODE_ENV`    | No               | `development` | Environment mode   |
-| `PORT`        | No               | `3000`        | App is served on   |
-| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL |
+| Variable      | Required         | Default       | Description                   |
+| ------------- | ---------------- | ------------- | ----------------------------- |
+| `APP_ENV`     | No               | `development` | `production` or `development` |
+| `PORT`        | No               | `3000`        | App is served on              |
+| `BACKEND_URL` | Yes (OnlyOffice) | -             | Public backend URL            |
 
 ## Database Configuration
 
@@ -67,23 +67,21 @@ Generate a key with `openssl rand -base64 32`, or `npm run key:generate` from th
 
 ## Logging Configuration
 
-| Variable              | Required | Default                          | Description                                        |
-| --------------------- | -------- | -------------------------------- | -------------------------------------------------- |
-| `LOG_LEVEL`           | No       | `info`                           | Log level (fatal, error, warn, info, debug, trace) |
-| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`                   |
+| Variable              | Required | Default                          | Description                                 |
+| --------------------- | -------- | -------------------------------- | ------------------------------------------- |
+| `LOG_LEVEL`           | No       | `info`                           | Log level (error, warn, info, debug, trace) |
+| `LOG_FORMAT`          | No       | text                             | `json` for one JSON object per line         |
+| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | IPs allowed to access `/metrics`            |
 
-## Audit Logging Configuration
+## Background Worker
 
-| Variable                   | Required | Default       | Description                       |
-| -------------------------- | -------- | ------------- | --------------------------------- |
-| `AUDIT_WORKER_CONCURRENCY` | No       | `5`           | Concurrent audit events processed |
-| `AUDIT_JOB_TTL_SECONDS`    | No       | `82800` (23h) | Job TTL (must be < 24h)           |
+| Variable                   | Required | Default | Description                                     |
+| -------------------------- | -------- | ------- | ----------------------------------------------- |
+| `AUDIT_WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
 
-## Frontend Environment Variables
+## Web App
 
-**No frontend environment variables required!**
-
-Single-Origin Architecture means frontend uses relative URLs and is served from the same origin as the backend.
+The web app needs no environment variables. The server serves it from the same origin as the API, so it uses relative URLs.
 
 ## Next Steps
 

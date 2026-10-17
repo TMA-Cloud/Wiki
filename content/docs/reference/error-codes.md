@@ -60,10 +60,10 @@ Login failures, missing MFA codes and permission denials return a `message` only
 
 ## System
 
-| Code                 | Status | When                                                         |
-| -------------------- | ------ | ------------------------------------------------------------ |
-| `INTERNAL_ERROR`     | 500    | Anything that reaches the error handler unmatched            |
-| `FRONTEND_NOT_BUILT` | 404    | A non-API route was requested but `frontend/dist` is missing |
+| Code                 | Status | When                                                           |
+| -------------------- | ------ | -------------------------------------------------------------- |
+| `INTERNAL_ERROR`     | 500    | Anything that reaches the error handler unmatched              |
+| `FRONTEND_NOT_BUILT` | 404    | A non-API route was requested but the web app build is missing |
 
 An error raised with its own status keeps that status and still carries `INTERNAL_ERROR`. For example, an upload or a new folder whose `parentId` is not a folder in the account returns `404` with `{ "message": "Target folder not found", "error": "INTERNAL_ERROR" }`. Branch on the status, not on this code.
 

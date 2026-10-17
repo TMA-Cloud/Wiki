@@ -7,24 +7,26 @@ System architecture and design patterns for TMA Cloud.
 
 ## System Architecture
 
-TMA Cloud uses **Single-Origin Architecture**:
+TMA Cloud is written in Rust and uses a **single-origin architecture**: one server
+program, `tma-server`, serves the web app and all APIs from the same origin.
 
-- **Production:** The Express backend serves both the built frontend and all APIs from the same origin.
-- **Development:** The browser loads the app from the Vite dev server at `http://localhost:5173`, which proxies `/api/*` and `/s/*` to the backend on `http://localhost:3000`.
+- **Production:** the Docker image runs `tma-server serve` for the API and web app and
+  `tma-server worker` for background work. Both are the same binary.
+- **Development:** build the web app once with `trunk build` and run
+  `tma-server serve --with-worker`; the server finds the build in
+  `apps/tma-cloud-web/dist`.
 
 ### Production Architecture
 
 ```bash
-┌─────────┐
-│ Browser │
-└────┬────┘
-     │
-     │ HTTP Requests
-     │
-┌────▼─────────────────────────────────────────────┐
-│         Express Backend (:3000)                  │
+┌─────────┐        ┌──────────────┐
+│ Browser │        │ Desktop app  │
+└────┬────┘        └──────┬───────┘
+     │ HTTP               │ HTTP (desktop header)
+┌────▼────────────────────▼────────────────────────┐
+│         tma-server serve (:3000)                 │
 │  ┌──────────────────────────────────────────┐    │
-│  │ /          → Static Frontend Files       │    │
+│  │ /          → Web app (WebAssembly)       │    │
 │  │ /api/*     → API Endpoints               │    │
 │  │ /s/*       → Share Links                 │    │
 │  │ /health    → Health Check                │    │
@@ -32,175 +34,122 @@ TMA Cloud uses **Single-Origin Architecture**:
 │  └──────────────────────────────────────────┘    │
 └────┬───────────────────┬─────────────────────────┘
      │                   │
-     │                   │
-┌────▼─────┐      ┌──────▼──────┐
-│PostgreSQL│      │    Redis    │
-│ Database │      │   (Cache)   │
-└──────────┘      └─────────────┘
+┌────▼─────┐      ┌──────▼──────┐     ┌─────────────────────┐
+│PostgreSQL│      │    Redis    │     │ tma-server worker   │
+│ Database │      │   (Cache)   │     │ (jobs, maintenance) │
+└──────────┘      └─────────────┘     └─────────────────────┘
 ```
 
-### Development Architecture
+**Benefits:** No CORS issues, simplified deployment, cookie-based auth, no frontend
+environment variables.
 
-```bash
-┌─────────┐
-│ Browser │
-└────┬────┘
-     │
-     │ HTTP Requests
-     │
-┌────▼──────────────────────────────────────┐
-│     Vite Dev Server (:5173)               │
-│  ┌────────────────────────────────────┐   │
-│  │ Frontend Development Server        │   │
-│  │ Proxies /api/* → Backend (:3000)   │   │
-│  │ Proxies /s/*   → Backend (:3000)   │   │
-│  └────────────────────────────────────┘   │
-└────┬──────────────────────────────────────┘
-     │
-     │ Proxy Requests
-     │
-┌────▼─────────────────────────────────────┐
-│      Express Backend (:3000)             │
-│  ┌────────────────────────────────────┐  │
-│  │ API Endpoints                      │  │
-│  │ Share Links                        │  │
-│  └────────────────────────────────────┘  │
-└────┬───────────────────┬─────────────────┘
-     │                   │
-     │                   │
-┌────▼─────┐      ┌──────▼──────┐
-│PostgreSQL│      │    Redis    │
-│ Database │      │   (Cache)   │
-└──────────┘      └─────────────┘
-```
+### One interface, two apps
 
-**Benefits:** No CORS issues, simplified deployment, cookie-based auth, no frontend env vars needed.
+The interface is written once with [egui](https://www.egui.rs). It runs in the browser
+as WebAssembly (the web app the server serves) and natively as the desktop app for
+Windows, macOS and Linux. Both talk to the same `/api/*` endpoints.
 
 ### Custom Share Domain (Optional)
 
-Configure custom share base URL in Settings → Share Base URL (admin only). When configured, share links use the custom domain. Share domain middleware blocks all routes except `/s/*`, `/health`, and `/metrics`.
+Configure custom share base URL in Settings → Administration → Share link address (admin only). When
+configured, share links use the custom domain. The share domain blocks all routes
+except `/s/*`, `/health`, and `/metrics`.
 
-## Backend Structure
+## Code Structure
 
 ```bash
-backend/
-├── config/          # Configuration (database, redis, logger)
-├── controllers/     # Request handlers
-├── middleware/      # Express middleware (auth, error handling)
-├── migrations/      # Database migrations
-├── models/          # Data models
-├── routes/          # API routes
-├── services/        # Background services
-└── utils/           # Utilities
+crates/
+├── tma-core/     # Shared types, file kinds, names and formatting (also built to WebAssembly)
+├── tma-server/   # The server: routes, models, services, jobs, storage, crypto, CLI
+├── tma-client/   # API client used by both apps
+├── tma-ui/       # The egui interface
+└── tma-drive/    # Cloud Drive
+apps/
+├── tma-cloud/      # Desktop app
+└── tma-cloud-web/  # Web app (built with trunk)
 ```
 
-**Key Components:**
+**Server components:**
 
-- **Controllers:** Handle HTTP requests and business logic
-- **Middleware:** Auth, error handling, rate limiting, share domain blocking
-- **Models:** Database abstraction layer
-- **Services:** pg-boss producers, worker tasks, access-time buffering, metrics, and storage operations
-- **Caching:** Redis-based caching with short-lived prefix registries for invalidation; request handlers never scan the Redis keyspace
-- **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting; a burst for one user is published as one batch envelope and causes one list refresh. Each API process holds one Redis subscriber connection shared by all of its SSE streams, so open tabs do not add Redis connections
+- **Routes:** Parse requests and shape responses; one file per area
+- **Middleware:** Request context and access log, share domain blocking, desktop-only
+  mode, security headers, CSRF, authentication and rate limits
+- **Models:** All SQL, with Redis caching for hot lookups
+- **Services:** Audit batching, live events, access-time buffering, metrics, OnlyOffice
+- **Jobs:** A durable job queue in PostgreSQL (see [Background Workers](/docs/guides/operations/background-workers))
+- **Real-Time Events:** Redis pub/sub + SSE for file event broadcasting; a burst for one
+  user is published as one batch envelope and causes one list refresh. Each API process
+  holds one Redis subscriber connection shared by all of its SSE streams, so open tabs do
+  not add Redis connections
 
-## Frontend Structure
+**Interface:** views draw the screen; background requests run off the frame and their
+results are applied on the next frame. The light and dark palettes follow the system
+setting until you switch with the sun or moon button in the header. Text is set in Inter,
+bundled with the app.
 
-```bash
-frontend/src/
-├── components/   # React components
-├── contexts/     # State management
-├── hooks/        # Custom hooks
-└── utils/        # Utilities
-```
+## Desktop App
 
-**Key Features:**
+A native app for Windows, macOS and Linux. It signs in to a server you choose, keeps the
+session in the system's credential store (Windows Credential Manager, macOS Keychain,
+Secret Service on Linux), and reports itself as a desktop client, so it works when the
+server is set to allow only the desktop app.
 
-- **Responsive Design:** Separate mobile (≤1024px) and desktop (>1024px) UIs
-- **Contexts:** AuthContext, AppContext, ThemeContext
-- **Viewers:** Image and document viewers with device-specific implementations
+Extras over the web app:
 
-## Electron Desktop App
+- **Open in desktop apps:** opening any file opens it from the Cloud Drive folder with
+  the computer's app for its type, and the drive uploads every save. A "Save As" PDF or
+  copy saved next to it uploads beside the original
+- **System clipboard:** Copy also puts the files' Cloud Drive paths on the Windows
+  clipboard, to paste into Explorer, mail or chat; files copied in Explorer paste in
+  (Windows)
+- **Updates:** a newer release downloads and installs itself (Windows)
+- **One copy at a time:** opening the app again brings the running window forward
+- **Cloud Drive:** see below
 
-Optional Windows client. Loads the same frontend from the TMA Cloud server URL; no separate frontend build.
+## Cloud Drive
 
-### Electron Architecture
+The desktop app shows TMA Cloud as a `TMA Cloud` folder so files can be opened and saved
+from any application's file dialogs, with no extra driver on any system:
 
-```bash
-┌─────────────────────────────────────────────────────────────────┐
-│  Main Process (Node)                                            │
-│  src/main: createWindow, getServerUrl(), IPC                    │
-│  Server URL: embedded at build, or userData/config.json,        │
-│  or electron/src/config/build-config.json (dev)                 │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │ loadURL(serverUrl)
-                               │ IPC
-┌──────────────────────────────▼──────────────────────────────────┐
-│  Renderer (BrowserWindow)                                       │
-│  Same React frontend as web; origin = server URL                │
-│  Preload (src/preload) exposes window.electronAPI to renderer   │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │ fetch /api/* (same origin, cookies)
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  TMA Cloud Backend                                              │
-└─────────────────────────────────────────────────────────────────┘
-```
+- **Windows:** the Cloud Files API (what OneDrive uses). Files are placeholders that
+  download when opened; a watcher uploads local changes, and server events refresh the
+  folders you have opened. Cloud Files is built into Windows 10 version 1709 and later.
+- **Linux:** FUSE.
+- **macOS:** a local NFS server inside the app, reachable only from `127.0.0.1`, mounted
+  with the system's own NFS client.
 
-### Electron Folder Structure
-
-```bash
-electron/
-├── src/
-│   ├── main/         # Main process: window, server URL, IPC
-│   ├── preload/       # contextBridge, exposes electronAPI
-│   ├── config/       # build-config.json (serverUrl when run from source)
-│   └── build/        # electron-builder configs + icon
-├── scripts/          # prepare-client-build.js
-└── dist-electron/    # Staging for packaging (generated)
-```
-
-**Main process:** Creates a single BrowserWindow; loads a loading page, then the server URL. Resolves server URL from embedded constant (at build time) or `src/config/build-config.json` (when run from source).
-
-**Preload:** contextIsolation: true, nodeIntegration: false, sandbox: true. Exposes a small API (e.g. `electronAPI.clipboard`) via contextBridge and ipcRenderer.invoke.
-
-**Main process checks:**
-
-- Navigation is allowed only to the exact origin of the server URL. A host that only starts with the server's origin, such as `https://cloud.example.com.evil.example`, is blocked
-- `window.open` is denied, and permission requests (camera, microphone, and so on) are refused
-- Every IPC handler checks the frame that sent the call and runs only when that frame is on the server URL's origin. A page from any other origin that ends up in the window cannot use the clipboard, file, update, or Cloud Drive handlers
-
-**Renderer:** Same React app as web. Detects Electron via `window.electronAPI` and uses it where needed; all API calls go to the same backend via fetch.
-
-Some deployments enable an optional mode where the desktop app is only allowed. In that mode, normal browsers are blocked from the main app while share links continue to work.
-
-### Cloud Drive (WinFsp)
-
-The desktop app can mount TMA Cloud as a Windows drive so files can be opened and saved from any application's file dialogs. It has two parts:
-
-- **`desktop-fs`** — a small .NET host (`TmaCloudFs.exe`) built on [WinFsp](https://winfsp.dev). It presents the drive to Windows and translates filesystem operations into requests, but holds no credentials.
-- **`electron/src/main/clouddrive.cjs`** — the trusted half. The host forwards each operation over a local named pipe (newline-delimited JSON); the main process runs the matching authenticated call to `/api/*` using the app's session cookies, so the drive reuses the same auth, permissions, and audit as the rest of the app.
+The drive runs inside the desktop app. Every operation becomes a call to `/api/*` with
+the app's own session, so the drive uses the same auth, permissions, and audit as the
+rest of the app. There is no separate helper process and no local pipe.
 
 ```bash
-Any app's Save As → Z:\ TMA Cloud (WinFsp)
-        │  named pipe (JSON)
-   TmaCloudFs.exe (desktop-fs, no credentials)
+Any app's Save As → %USERPROFILE%\TMA Cloud (Cloud Files) or ~/TMA Cloud (FUSE, NFS)
         │
-   Electron main (clouddrive.cjs, session cookies) → /api/* → backend
+   Desktop app (Cloud Drive core, signed-in session) → /api/* → server
 ```
 
-The main process mounts the drive when the auth cookie appears (sign-in) and unmounts on sign-out or app close. Directory listings are cached briefly and refreshed by the backend event stream. See [Desktop App — Cloud Drive](/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive).
+The app connects the drive after sign-in and disconnects it on sign-out or when it closes.
+Directory listings are cached for five seconds and dropped when the server's event
+stream reports a change. See [Desktop App — Cloud Drive](/docs/getting-started/desktop-app#cloud-drive).
 
-**Bridge authentication.** The pipe name is random per session and every request on it carries a per-session token; the main process rejects anything else, so another local process that reaches the pipe cannot issue operations against the signed-in account. The main process passes the token to the host on stdin (`--token-stdin`), not as a command-line argument, because a command line is readable by any process running as the same user for as long as the drive is mounted.
+**Names.** The server stores names that Windows cannot hold, such as `Q3: plan?.docx`. On
+Windows, each reserved character `"*:<>?|\`, and a trailing dot or space, maps to the
+private-use character `U+F000` plus its code when a folder is listed, and maps back
+before a create, rename or save. This is the mapping Cygwin, WSL and Syncthing use, so a
+name survives the round trip unchanged.
 
-**Names.** The server stores names that Windows cannot hold, such as `Q3: plan?.docx`. The host maps each reserved character `"*:<>?|\`, and a trailing dot or space, to the private-use character `U+F000` plus its code when it lists a folder, and maps it back before it sends a create, rename or save over the pipe. This is the mapping Cygwin, WSL and Syncthing use, so a name survives the round trip unchanged. The mapping lives in `desktop-fs/src/WindowsNames.cs`.
+**Drive permissions.** On Windows, files and folders on the drive report a security
+descriptor granting the signed-in Windows user, `SYSTEM` and the local Administrators
+group but not `Everyone`, so other accounts on a shared machine cannot read the mount.
 
-**Drive permissions.** Files and folders on the drive report a security descriptor granting the signed-in Windows user, `SYSTEM` and the local Administrators group but not `Everyone` so other accounts on a shared machine cannot read the mount.
+**Concurrent saves.** Creating a file or folder is serialized per path, so an app's
+0-byte placeholder and the real content resolve to one file on the server. Saves to
+different paths do not wait for each other.
 
-**Listings.** The main process reads every page of a folder listing from `/api/files` and sends the host only the fields it uses (`id`, `name`, `type`, `size`, `modified`, `accessedAt`). The host accepts reply lines up to 64 MB.
-
-**Concurrent saves.** Creating a file or folder is serialized per path, so an app's 0-byte placeholder and the real content resolve to one backend file. Saves to different paths do not wait for each other.
-
-**Local staging.** File bytes never travel on the pipe. Reads and writes stage through temp files under `%TEMP%\tma-cloud-fs\` whose paths are exchanged over the pipe. Staging files are deleted when their handle closes, and any survivors are removed when the drive unmounts.
+**Local staging.** On Linux and macOS, reads and writes stage through files in
+`TMA Cloud/drive` in the user's cache folder. Staging files are deleted when their handle
+closes, and any survivors are removed when the drive unmounts. Cloud Files on Windows
+streams downloads straight into the placeholder and stages nothing.
 
 ## Data Flow
 
@@ -208,7 +157,7 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
 
 ```bash
 ┌─────────┐     POST /api/login       ┌──────────┐
-│ Browser │ ────────────────────────> │ Backend  │
+│  App    │ ────────────────────────> │  Server  │
 └─────────┘                           └────┬─────┘
      │                                     │
      │                                     │ Validate credentials
@@ -217,38 +166,35 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
      │                                     │
      │<────────────────────────────────────┘
      │ Set httpOnly cookie
-     │
-┌────▼─────────┐
-│ AuthContext  │
-│   Updated    │
-└──────────────┘
 ```
 
 ### File Upload Flow
 
 ```bash
 ┌──────────┐     POST /api/files/upload     ┌──────────┐
-│ Browser  │ ─────────────────────────────> │ Backend  │
-│(FormData)│                                └────┬─────┘
+│   App    │ ─────────────────────────────> │  Server  │
+│(multipart)                                └────┬─────┘
 └──────────┘                                     │
                                                  │ Enforce size while streaming
                                                  │ Encrypt and write to bucket
                                                  │ Validate request metadata
                                                  │ Create database record
-                                                 │ Update cache
                                                  │
 ┌─────────┐     Response with file info          │
-│ Browser │<─────────────────────────────────────┘
+│   App   │<─────────────────────────────────────┘
 └─────────┘
 ```
 
-**Storage:** S3-compatible object storage is required. File contents stream through encryption to the bucket. Large files use multipart upload with a part size calculated to stay within the S3 and R2 10,000-part limit. If later validation rejects the request, the uploaded object is queued for deletion.
+**Storage:** S3-compatible object storage is required. File contents stream through
+encryption to the bucket. Large files use multipart upload with a part size calculated
+to stay within the S3 and R2 10,000-part limit. If later validation rejects the request,
+the uploaded object is queued for deletion.
 
 ### Share Link Flow
 
 ```bash
 ┌─────────┐     POST /api/files/share      ┌──────────┐
-│ Browser │ ─────────────────────────────> │ Backend  │
+│   App   │ ─────────────────────────────> │  Server  │
 └─────────┘                                └────┬─────┘
                                                 │
                                                 │ Check items belong to account
@@ -257,13 +203,15 @@ The main process mounts the drive when the auth cookie appears (sign-in) and unm
                                                 │ Link files
                                                 │
 ┌─────────┐     Response with share URL         │
-│ Browser │<────────────────────────────────────┘
+│   App   │<────────────────────────────────────┘
 └─────────┘
 ```
 
 ## Database Schema
 
-Key tables: `users`, `files`, `share_links`, `share_link_files`, `sessions`, `mfa_backup_codes`, `client_heartbeats`, `storage_reservations`, `file_operation_results`, `app_settings`, `audit_log`
+Key tables: `users`, `files`, `share_links`, `share_link_files`, `sessions`,
+`mfa_backup_codes`, `client_heartbeats`, `storage_reservations`,
+`file_operation_results`, `job_queue`, `job_schedules`, `app_settings`, `audit_log`
 
 See [Database Schema](/docs/reference/database-schema) for details.
 
@@ -272,23 +220,29 @@ See [Database Schema](/docs/reference/database-schema) for details.
 - JWT tokens in httpOnly cookies
 - Input validation and sanitization
 - SQL injection protection (parameterized queries)
-- XSS protection (HTML escaping)
+- XSS protection (HTML escaping on server-rendered pages)
 - Path traversal protection
 - Rate limiting
 - Security headers (CSP with per-request nonces, X-Frame-Options, etc.). See [Security Model](/docs/concepts/security-model#security-headers)
 
 ## Logging & Audit
 
-- **Structured Logging:** Pino with automatic secret masking
-- **Background Work:** One pg-boss worker handles batched audit writes, account-ordered file operations, object cleanup, durable maintenance schedules, admin-requested orphan work, share auto-linking, and OnlyOffice force-save commands. It is also the only supervising pg-boss instance, so job maintenance and cron evaluation stay off the API process
+- **Structured Logging:** one line per request with its request id; plain text, or JSON
+  with `LOG_FORMAT=json`
+- **Background Work:** the worker runs account-ordered file operations, object cleanup,
+  maintenance schedules, admin-requested orphan work, share auto-linking, and OnlyOffice
+  force-save commands from a job queue in PostgreSQL. Audit events are written in batches
+  by each process
 - **Request Logging:** All requests logged with context
 
 See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/operations/audit-logs) for details.
 
 ## Technology Stack
 
-**Backend:** Express.js, PostgreSQL, Redis, JWT, Pino, pg-boss
+**Server:** Rust, axum, PostgreSQL (sqlx), Redis, AWS SDK for S3
 
-**Frontend:** React 19, TypeScript, Vite, Tailwind CSS
+**Interface:** egui (native and WebAssembly), built with trunk for the web
+
+**Cloud Drive:** Cloud Files (Windows), FUSE (Linux), NFS (macOS)
 
 **Integration:** OnlyOffice, Google OAuth

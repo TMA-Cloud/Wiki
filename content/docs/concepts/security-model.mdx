@@ -40,7 +40,7 @@ Overall security architecture and practices in TMA Cloud.
 
 ### Input Validation
 
-Routes validate accepted fields with `express-validator` schemas or controller-specific checks.
+Request bodies are read into typed Rust structs, so a field with the wrong type is refused before the route runs. Fields the route does not use are ignored. Routes then check names, IDs and limits themselves.
 
 - **Type and format checks:** Request fields have type, length, and format limits where required
 - **Database queries:** Values are passed through parameterized queries
@@ -161,16 +161,16 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 
 ### Content Security Policy
 
-`script-src` does not include `'unsafe-inline'` or `'unsafe-eval'`, so an injected script does not run. Scripts are allowed when they come from:
+`script-src` does not include `'unsafe-inline'` or `'unsafe-eval'`, so an injected script does not run. It includes `'wasm-unsafe-eval'`, which lets the browser compile the web app's WebAssembly and does not allow `eval()`. Scripts are allowed when they come from:
 
 - The app's own origin
 - The configured OnlyOffice Document Server origin, when OnlyOffice is set up
 - A per-request nonce. Server-rendered pages (share folder listings, the OnlyOffice viewer) add the nonce to their inline scripts
-- A SHA-256 hash of each inline script in the built `frontend/dist/index.html`, computed when the backend starts
+- A SHA-256 hash of each inline script in the built web app's `index.html`
 
-The hashes are read once at startup. If a frontend build changes an inline script in `index.html`, restart the backend so the new hash is allowed. The Docker image ships both together, so a container restart covers this.
+The server computes the hashes at startup and again whenever `index.html` changes, so a new web build is allowed without a restart.
 
-The policy also sets `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, and `form-action 'self'`. `style-src` keeps `'unsafe-inline'` because the frontend sets inline styles.
+The policy also sets `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, and `form-action 'self'`. `style-src` keeps `'unsafe-inline'` for the inline styles of server-rendered pages.
 
 Values placed into server-rendered HTML are HTML-escaped. JSON embedded in an inline script has `<`, `>`, `&`, U+2028, and U+2029 escaped, so a value such as a display name containing `</script>` cannot close the script element.
 

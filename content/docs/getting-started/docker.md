@@ -9,7 +9,6 @@ Docker deployment guide for TMA Cloud.
 
 - Docker (v29.0+)
 - Docker Compose (v5.0+)
-- Node.js (22, 24, or 26+) - For version extraction during source builds
 
 ## Setup Script
 
@@ -126,7 +125,7 @@ The S3-compatible bucket is not set in `.env`. After the first account is create
 
 These containers read the password as written, without percent-decoding. `setup.sh` and `rotate.sh` write hex passwords, which need no encoding. If you set a password yourself, use only letters, digits, `-`, `.`, `_`, and `~`.
 
-**Database access from host:** To run backend scripts that need the database (e.g. bulk import) from the host, the DB port must be reachable. In `docker-compose.yml`, uncomment the postgres `ports` entry (e.g. `127.0.0.1:5432:5432`).
+**Database access from host:** To run `tma-server` commands that need the database (e.g. bulk import) from the host, the DB port must be reachable. In `docker-compose.yml`, uncomment the postgres `ports` entry (e.g. `127.0.0.1:5432:5432`).
 
 ### Persistent Data
 
@@ -139,7 +138,7 @@ PostgreSQL and Redis use the `postgres-data` and `redis-data` volumes. File cont
 make build
 
 # Build with custom tag
-make build IMAGE_TAG=3.0.0
+make build IMAGE_TAG=4.0.0
 
 # Build without cache
 make build-no-cache

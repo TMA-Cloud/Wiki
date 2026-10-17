@@ -10,7 +10,7 @@ Choose a deployment method and install TMA Cloud.
 TMA Cloud is a self-hosted cloud storage platform that provides:
 
 - AES-256-GCM-encrypted file storage in an S3-compatible bucket
-- A Windows cloud drive and desktop client
+- A desktop app for Windows, macOS and Linux, with Cloud Drive
 - Read-only share links with expiry controls
 - Document editing through OnlyOffice or desktop applications
 - Sub-users with separate file permissions
@@ -19,10 +19,10 @@ TMA Cloud is a self-hosted cloud storage platform that provides:
 
 Before you begin, ensure you have:
 
-- **Node.js** (22, 24, or 26+)
+- **Docker** with Docker Compose, for the standard install
+- Or, to build from source: **Rust** (stable) and **trunk** for the web app
 - **PostgreSQL** (v17+)
 - **Redis** (v6+) - Optional but recommended
-- **npm** or **yarn**
 
 ## Quick Installation
 
