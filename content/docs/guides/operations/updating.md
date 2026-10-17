@@ -29,7 +29,7 @@ The containers that change are recreated, so the app is unavailable for a short 
 3. **Backs up the database.** `pg_dump` writes `backups/pre-update-<time>.dump` before the new version runs its migrations. The dump is checked with `pg_restore --list`. If the backup fails, nothing is changed.
 4. **Replaces the files.** The old versions are copied to `.update/backup-<time>/`. See [Files You Edited](#files-you-edited).
 5. **Adds new settings to `.env`.** See [New Settings](#new-settings).
-6. **Pulls the new images and restarts.** The running app image is first tagged `tma-cloud/tma:pre-update-<time>`, then `docker compose pull` and `docker compose up -d --wait` run. The script ends when the containers are healthy.
+6. **Pulls the new images and restarts.** The running app image is first tagged `tma-cloud/tma:pre-update-<time>`, then `docker compose pull` and `docker compose up -d --wait` run. The script ends when the containers are healthy and prints the version that is now running.
 
 Each file is written to a temporary name in the same directory and renamed into place, so an interrupted update leaves the old file or the new one, never half of one. Scripts are saved with mode `0700`, `.env`, `compose.yml`, and `.env.example` with `0600`.
 
@@ -93,15 +93,13 @@ Migrations only move forward, so going back to the previous image also needs the
    docker compose stop app worker
    ```
 
-2. Recreate the database and restore the dump. Use the user and database named in `DATABASE_URL` in `.env`:
+2. Restore the dump with the backup script. It asks you to type the database name. Because the app and the worker are already stopped, it leaves them stopped:
 
    ```bash
-   docker compose exec -T postgres psql -U postgres -d postgres \
-     -c 'DROP DATABASE tma_cloud_storage' \
-     -c "CREATE DATABASE tma_cloud_storage ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'C' TEMPLATE template0"
-   docker compose exec -T postgres pg_restore -U postgres -d tma_cloud_storage --single-transaction --no-owner \
-     < backups/pre-update-<time>.dump
+   ./db-backup-restore.sh restore backups/pre-update-<time>.dump
    ```
+
+   The dump goes into a scratch database first, so a failed restore leaves the current database as it was. See [Database Restore](/docs/guides/operations/backups#database-restore).
 
 3. Set the previous image for `app` and `worker` in `compose.override.yml`:
 

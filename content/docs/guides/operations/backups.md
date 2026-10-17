@@ -67,7 +67,7 @@ The script finds the PostgreSQL container in this order:
 1. `DB_CONTAINER` (explicit override)
 2. The `postgres` service of the Docker Compose project in the script's directory
 
-Otherwise it uses the PostgreSQL client tools on the host and connects to the host and port in `DATABASE_URL`. It never picks a container by name or image, because a restore drops the database.
+Otherwise it uses the PostgreSQL client tools on the host and connects to the host and port in `DATABASE_URL`. It never picks a container by name or image, because a restore replaces the database.
 
 ## Database Backup
 
@@ -132,15 +132,17 @@ public.job_queue=64
 
 The restore process:
 
-1. Validates the backup file (SHA-256 checksum + TOC inspection) before touching the database
-2. Asks for confirmation by typing the database name
-3. Stops the `app` and `worker` services when it runs against the Compose project, so nothing writes during the restore. With a host or `DB_CONTAINER` database, stop the API and the worker yourself first
-4. Drops the database `WITH (FORCE)`, which ends any remaining connections, and creates it again
-5. Restores in `--single-transaction` mode (atomic — rolls back entirely on error)
-6. Runs `ANALYZE` to update query planner statistics
-7. Reports table and row counts for verification
-8. Clears the Redis cache of the Compose project with `FLUSHDB` on the database in `REDIS_URL`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 5 minutes for the entries to expire
-9. Starts the services it stopped. After a failed restore they stay stopped, because the database is empty, and the script prints the command that starts them
+1. Checks the backup file before touching the database: its SHA-256 checksum, and that `pg_restore` can read it. A file it cannot read is refused with a message.
+2. Asks you to confirm by typing the database name.
+3. Stops the `app` and `worker` services when it runs against the Compose project, so nothing writes during the restore. With a host or `DB_CONTAINER` database, stop the API and the worker yourself first.
+4. Restores into a new scratch database (`tma_restore_<TIMESTAMP>`) in `--single-transaction` mode. Your current database is not touched yet.
+5. Only when that worked, renames your current database aside and renames the restored one into its place. It then drops the old one. If the rename fails, the old database is put back.
+6. Runs `ANALYZE` to update query planner statistics.
+7. Reports table and row counts so you can check the result.
+8. Clears the Redis cache of the Compose project with `FLUSHDB` on the database in `REDIS_URL`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 5 minutes for the entries to expire.
+9. Starts the services it stopped. It does this even when the restore fails.
+
+If the restore fails at any step, the script says so and your database keeps its data. It also drops the scratch database. While it runs, the server needs enough free disk space for two copies of the database.
 
 The restored data opens only with the encryption key file from the time of the backup or a later one, since rotation keeps older key versions.
 
