@@ -85,17 +85,22 @@ a flash.
 ## Version and updates
 
 - **Settings → Updates** shows the server version and this app's version.
-- **Updates install themselves on Windows.** After sign-in the app checks the published
-  release list (`/api/version/latest`). When a newer release exists, its installer
-  downloads in the background (shown in the transfers panel), then installs silently
-  once no upload or download is running, and the app starts again. On macOS and Linux
-  a notice points to the releases page.
+- **When it checks.** After sign-in, and then every 6 hours while the app stays signed
+  in, the app reads the published release list (`/api/version/latest`). **Check now** in
+  **Settings** → **Updates** checks at once.
+- **Windows installs updates by itself.** When a newer release exists, its installer
+  downloads in the background (shown in the transfers panel). Once no upload or download
+  is running, the installer starts, the app closes, and the new version opens a few
+  seconds later. A download that fails is tried again at the next check.
+- **macOS and Linux update by hand.** A notice says once that a new version exists, and
+  **Settings** → **Updates** shows **Open releases**, which opens the releases page to
+  download the new `.dmg`, `.deb` or `.AppImage`.
 - **Where updates come from.** The version is the `desktop` entry of the server's
   update feed (see [`VERSIONS_URL`](/docs/reference/environment-variables#update-feed)).
   The installer is the release asset `tma-cloud_<version>_x64-setup.exe` on GitHub,
   from [TMA-Cloud/TMA](https://github.com/TMA-Cloud/TMA/releases) unless the app was built
   with another `TMA_UPDATE_REPO`. Publish the release before raising the feed's version.
-- **Check now** in **Settings** → **Updates** compares the installed and latest versions by hand.
+  Until the feed has a `desktop` entry, the app reports no update.
 
 ## Active desktop clients (admin view)
 
