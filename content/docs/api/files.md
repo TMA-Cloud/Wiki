@@ -15,7 +15,7 @@ Listing, searching, and reading file details are available to every member of an
 
 | Permission       | Endpoints                                                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `files.download` | `GET /:id/download`, `POST /download/bulk`                                                                   |
+| `files.download` | `GET /:id/download`, `POST /download/bulk`, `POST /download/bulk/ticket`, `POST /download/bulk/form`         |
 | `files.upload`   | `POST /folder`, `POST /upload`, `POST /upload/bulk`, `POST /upload/check`, `POST /copy`, `POST /:id/derived` |
 | `files.edit`     | `POST /move`, `POST /rename`, `POST /star`, `POST /:id/replace`                                              |
 | `files.share`    | `POST /share`, `POST /share/links`, `POST /link-parent-share`                                                |
@@ -1021,12 +1021,44 @@ Download multiple files and/or folders as a single ZIP archive.
 
 **Validation:**
 
-- `ids`: Required. Must be a non-empty array of strings.
+- `ids`: Required. An array of 1 to 500 IDs.
 
 **Response:**
 A ZIP archive containing all selected files and folders. Entry names follow the same Windows-safe rule as a [folder download](#get-apifilesiddownload).
 
 **Note:** For single file downloads, use the GET endpoint. This endpoint is optimized for downloading multiple items at once.
+
+### POST `/api/files/download/bulk/ticket`
+
+Get a one-minute ticket for [`POST /api/files/download/bulk/form`](#post-apifilesdownloadbulkform). The web app uses the pair so that the browser's own download manager saves a large ZIP straight to disk, instead of the page holding it in memory.
+
+**Request Body:** the same as `POST /api/files/download/bulk`.
+
+**Response:**
+
+```json
+{
+  "ticket": "eyJhbGciOiJIUzI1NiJ9...",
+  "expiresIn": 60
+}
+```
+
+The ticket names the selected IDs and is bound to the user and session that asked for it. `404` if none of the IDs exist in the account.
+
+### POST `/api/files/download/bulk/form`
+
+Download the selection named by a ticket, as a ZIP archive. The browser sends this as a plain HTML form post, which cannot carry the `X-Requested-With` header, so this route is outside the CSRF header check. The ticket stands in for it: it can only be obtained by a request that passed the check.
+
+**Request Body** (`application/x-www-form-urlencoded`):
+
+- `ticket`: Required. A ticket from `POST /api/files/download/bulk/ticket`.
+
+**Response:** the same ZIP archive as `POST /api/files/download/bulk`, with the same audit event.
+
+**Errors:**
+
+- `401` - Not signed in, or the ticket is expired, altered, or belongs to another session
+- `403` - The caller lacks `files.download`
 
 ## File Events
 

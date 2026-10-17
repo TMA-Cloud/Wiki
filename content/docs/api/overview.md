@@ -27,9 +27,9 @@ Requests without it are rejected with `403`:
 { "message": "Forbidden: missing CSRF header" }
 ```
 
-Safe methods (`GET`, `HEAD`, `OPTIONS`) are exempt. Because the auth token is a cookie, a cross-origin page could otherwise trigger writes on a signed-in user's behalf; a browser will not attach a custom header cross-origin without a preflight the server refuses, so the header is what blocks that. The Electron desktop client sends `X-TMA-Desktop-Client` instead, which is accepted in its place.
+Safe methods (`GET`, `HEAD`, `OPTIONS`) are exempt. Because the auth token is a cookie, a cross-origin page could otherwise trigger writes on a signed-in user's behalf; a browser will not attach a custom header cross-origin without a preflight the server refuses, so the header is what blocks that. The desktop app sends `X-TMA-Desktop-Client` instead, which is accepted in its place.
 
-The check is not applied to the public routes (`GET /api/signup-status`), the OnlyOffice routes under `/api/onlyoffice`, the version routes under `/api/version`, or the share routes under `/s`.
+The check is not applied to the public routes (`GET /api/signup-status`), the OnlyOffice routes under `/api/onlyoffice`, the version routes under `/api/version`, the share routes under `/s`, or `POST /api/files/download/bulk/form`, which checks a ticket from a guarded request instead (see [Files](/docs/api/files#post-apifilesdownloadbulkform)).
 
 ## Authorization
 
