@@ -75,9 +75,9 @@ Generate a key with `openssl rand -base64 32`, or `tma-server key generate`. Bac
 
 ## Background Worker
 
-| Variable                   | Required | Default | Description                                     |
-| -------------------------- | -------- | ------- | ----------------------------------------------- |
-| `AUDIT_WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
+| Variable             | Required | Default | Description                                     |
+| -------------------- | -------- | ------- | ----------------------------------------------- |
+| `WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
 
 ## Web App
 

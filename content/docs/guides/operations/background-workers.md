@@ -25,7 +25,7 @@ For development, `tma-server serve --with-worker` runs the API and the worker in
 
 **Configuration:**
 
-- `AUDIT_WORKER_CONCURRENCY` - The most jobs one worker runs at once per queue (default 5). Each queue also has its own cap: maintenance and orphan work run one at a time, the others up to four.
+- `WORKER_CONCURRENCY` - The most jobs one worker runs at once per queue (default 5). Each queue also has its own cap: maintenance and orphan work run one at a time, the others up to four.
 
 The worker must run in production. Without it, file operations, object cleanup and maintenance do not run, and open OnlyOffice documents do not receive periodic force-save commands.
 

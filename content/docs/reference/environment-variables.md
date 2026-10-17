@@ -14,7 +14,7 @@ Complete reference for all environment variables in TMA Cloud.
 | `BACKEND_URL`  | Yes (OnlyOffice) | -             | Public backend URL            |
 | `WEB_DIST_DIR` | No               | auto-detected | Folder with the built web app |
 
-**`APP_ENV`:** `production` turns on secure cookies and refuses development-only keys. `NODE_ENV` is still read when `APP_ENV` is not set, so an existing `.env` keeps working.
+**`APP_ENV`:** `production` turns on secure cookies and refuses development-only keys. `update.sh` renames an older `NODE_ENV` line in `.env` to `APP_ENV`.
 
 **`WEB_DIST_DIR`:** The Docker image sets it to `/app/web`. A source checkout finds `apps/tma-cloud-web/dist` without it.
 
@@ -132,11 +132,11 @@ The feed is published from the [TMA-Cloud/updates](https://github.com/TMA-Cloud/
 
 ## Background Worker
 
-| Variable                   | Required | Default | Description                                     |
-| -------------------------- | -------- | ------- | ----------------------------------------------- |
-| `AUDIT_WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
+| Variable             | Required | Default | Description                                     |
+| -------------------- | -------- | ------- | ----------------------------------------------- |
+| `WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
 
-The name is kept from earlier versions. Audit events no longer go through the worker; see [Audit Logs](/docs/guides/operations/audit-logs).
+`update.sh` renames an older `AUDIT_WORKER_CONCURRENCY` line in `.env` to `WORKER_CONCURRENCY`. Audit events do not go through the worker; see [Audit Logs](/docs/guides/operations/audit-logs).
 
 ## Related Topics
 

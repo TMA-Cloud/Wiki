@@ -28,7 +28,7 @@ The containers that change are recreated, so the app is unavailable for a short 
 2. **Updates itself.** When `update.sh` changed, the new copy replaces the old one and runs the rest of the update.
 3. **Backs up the database.** `pg_dump` writes `backups/pre-update-<time>.dump` before the new version runs its migrations. The dump is checked with `pg_restore --list`. If the backup fails, nothing is changed.
 4. **Replaces the files.** The old versions are copied to `.update/backup-<time>/`. See [Files You Edited](#files-you-edited).
-5. **Adds new settings to `.env`.** See [New Settings](#new-settings).
+5. **Updates `.env`.** Renamed settings get their new name, and new settings are added. See [New Settings](#new-settings).
 6. **Pulls the new images and restarts.** The running app image is first tagged `tma-cloud/tma:pre-update-<time>`, then `docker compose pull` and `docker compose up -d --wait` run. The script ends when the containers are healthy and prints the version that is now running.
 
 Each file is written to a temporary name in the same directory and renamed into place, so an interrupted update leaves the old file or the new one, never half of one. Scripts are saved with mode `0700`, `.env`, `compose.yml`, and `.env.example` with `0600`.
@@ -58,7 +58,9 @@ services:
 
 ## New Settings
 
-Settings that the new `.env.example` has and `.env` lacks are added at the end of `.env` under `# Added by update.sh on <time>`, with the comment lines above each one. Existing lines are never changed, so passwords and keys stay as they are. The script lists the added settings; review their values.
+Settings that were renamed keep their values under the new name: `NODE_ENV` becomes `APP_ENV`, and `AUDIT_WORKER_CONCURRENCY` becomes `WORKER_CONCURRENCY`. If `.env` already sets the new name, the old line is left alone and listed as unused. A copy of `.env` from before the change is saved in `.update/backup-<time>/`.
+
+Settings that the new `.env.example` has and `.env` lacks are added at the end of `.env` under `# Added by update.sh on <time>`, with the comment lines above each one. No other line is changed, so passwords and keys stay as they are. The script lists the renamed and added settings; review their values.
 
 Settings in `.env` that the new version no longer reads are listed as safe to remove. They are not removed.
 
