@@ -222,11 +222,11 @@ List the account's most recently read files, ordered by `accessed_at` descending
 
 **Query Parameters:**
 
-- `limit` - Optional. Defaults to 10, clamped to the recent-files cache size.
+- `limit` - Optional, from 1 to 50. Defaults to 10, which is also used for a value outside that range.
 
 **Response:**
 
-An array of file objects, same shape as [List Files](#list-files). The result is served from the Redis cache when available.
+An array of file objects, same shape as [List Files](#list-files).
 
 ## Upload File
 
@@ -1064,7 +1064,7 @@ Download the selection named by a ticket, as a ZIP archive. The browser sends th
 
 ### GET `/api/files/events`
 
-Establish a real-time event stream (Server-Sent Events) for file system changes. Requires Redis to be configured.
+Establish a real-time event stream (Server-Sent Events) for file system changes. Redis carries events between the server and worker processes; without it, the stream gets only the events of the process it is connected to.
 
 **Response:**
 A Server-Sent Events stream.

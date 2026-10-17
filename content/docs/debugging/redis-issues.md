@@ -25,12 +25,11 @@ Troubleshooting Redis connection problems.
 
 ## Redis Not Required
 
-**Note:** TMA Cloud works without Redis!
+TMA Cloud keeps working while Redis is unreachable:
 
-- Caching will be disabled
-- Real-time events won't work
-- Performance may be slower
-- App will function normally
+- Caching is off, so every lookup goes to PostgreSQL and requests are slower
+- Live file updates reach only the apps connected to the server process that made the change; changes made by a separate worker process show up on the next refresh
+- When Redis is back, the server reconnects by itself and live updates from every process resume
 
 ## Docker Redis
 

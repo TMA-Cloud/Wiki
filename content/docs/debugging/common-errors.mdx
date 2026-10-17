@@ -83,9 +83,10 @@ The message names the failed check.
 ### Symptom: "Redis connection failed"
 
 <Callout type="info">
-  The app runs without Redis — caching and the SSE event stream degrade, but
-  uploads, downloads and every other operation still work. Rate limiting is
-  unaffected; the limiters keep their counters in the process, not in Redis.
+  The app runs without Redis: caching stops and live updates reach only the apps
+  connected to the same server process, but uploads, downloads and every other
+  operation still work. Rate limiting is unaffected; the limiters keep their
+  counters in the process, not in Redis.
 </Callout>
 
 1. **Is Redis running?** `redis-cli -u "$REDIS_URL" ping` — should print `PONG`.
