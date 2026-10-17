@@ -24,6 +24,10 @@ Create shareable links for files and folders in TMA Cloud.
 Anything you add to the folder later by upload, new folder, copy, or move is
 included in the share automatically, including items in subfolders.
 
+If something inside a shared folder is not part of its share (for example it was
+unshared on its own), right-click it → **Link to folder share** to add it back to
+the folder's link. No new link is made.
+
 ### Bulk Share
 
 1. Select multiple files/folders
@@ -62,9 +66,11 @@ Open **Get Info** on a shared file or folder to see when it was shared, how much
 
 ### Copying Links
 
-- Click **"Copy Link"** button
-- Link copied to clipboard
+- Right-click a shared item → **Copy link** (with several selected, every shared item's link is copied, one per line)
+- Or open **Share** on it and use **Copy** beside its link
 - Share via email, messaging, etc.
+
+A shared item shows a link icon beside its name, in the list and on grid tiles. Hover the icon to see when it was shared and how long the link lasts. Once a link expires the icon goes away.
 
 ### Revoking Shares
 

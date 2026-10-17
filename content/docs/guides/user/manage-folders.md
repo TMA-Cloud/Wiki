@@ -68,7 +68,7 @@ A move or copy fails if the folder or the destination was deleted or moved to th
 
 - **Breadcrumbs:** Navigate up folder hierarchy
 - **Keyboard:** **Enter** opens the selected folder, **Backspace** goes back to the previous folder, and **Alt+Up** goes to the parent folder. Typing the first letters of a name or using the arrow keys selects an item. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation).
-- **Back/Forward:** Back and Forward buttons in the file manager header move through folder history. Mouse back/forward (side buttons) do the same when on file manager. See [Desktop App — Folder navigation](/docs/getting-started/desktop-app#folder-navigation-backforward).
+- **Back/Forward:** The arrows left of the folder path move through folder history. The mouse's back and forward side buttons do the same over the file list.
 - **Search:** Find folders by name
 
 ## Folder Sharing

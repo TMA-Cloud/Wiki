@@ -93,7 +93,7 @@ The upload-issues dialog lists every file that was not pasted, with a reason:
 - **Links are not uploaded:** The item is a symbolic link or a junction. It is not followed, so a link back to a parent folder cannot repeat the tree forever. Copy the target folder itself instead
 - **Access denied** or **Could not be read:** Windows did not let the app read the file, for example a workbook that Excel has open. Close the file and paste it again
 
-A paste with more than 50,000 files is refused before anything uploads. Paste a smaller folder or use **Upload folder** in parts.
+A paste with more than 50,000 files is refused before anything uploads. Paste a smaller folder or upload it in parts with **Upload** → **Folder**.
 
 ## File Permissions
 
