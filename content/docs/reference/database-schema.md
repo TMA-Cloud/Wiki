@@ -147,7 +147,7 @@ Application-wide settings.
 | `share_base_url`                   | TEXT        | Custom share link base URL (null = use request origin)               |
 | `max_upload_size_bytes`            | BIGINT      | Max single-file upload size in bytes (default 10737418240 = 10 GB)   |
 | `hide_file_extensions`             | BOOLEAN     | When true, file names are shown without extensions (default false)   |
-| `require_electron_client`          | BOOLEAN     | When true, only the desktop app may use the main app (default false) |
+| `desktop_only`                     | BOOLEAN     | When true, only the desktop app may use the main app (default false) |
 | `allow_password_change`            | BOOLEAN     | When true, users may change their own password (default false)       |
 | `cloud_drive_save_only`            | BOOLEAN     | Cloud Drive blocks reading file content (default true)               |
 | `known_proxies`                    | TEXT[]      | Proxy IPs, CIDR ranges, or hostnames trusted after server restart    |

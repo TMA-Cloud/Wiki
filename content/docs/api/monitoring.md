@@ -91,14 +91,12 @@ The response format depends on the external update feed. Example:
 {
   "frontend": "4.0.0",
   "backend": "4.0.0",
-  "electron": "unknown",
   "desktop": "4.0.0"
 }
 ```
 
 - `frontend`, `backend`: Latest web app and server versions from the update feed
-- `desktop`: Latest desktop app version from the update feed; the Windows desktop app installs it automatically
-- `electron`: Kept for older desktop clients; `unknown` when the feed does not list it
+- `desktop`: Latest desktop app version from the update feed; the desktop app installs it where it can update itself (see [Desktop App](/docs/getting-started/desktop-app#version-and-updates))
 
 A key missing from the feed is returned as `unknown`.
 

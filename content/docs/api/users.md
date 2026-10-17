@@ -348,8 +348,8 @@ Requires authentication. Returns signup status, hide file extensions setting, an
   "canToggle": false,
   "hideFileExtensions": false,
   "canToggleHideFileExtensions": false,
-  "electronOnlyAccess": false,
-  "canToggleElectronOnlyAccess": false,
+  "desktopOnly": false,
+  "canToggleDesktopOnly": false,
   "allowPasswordChange": false,
   "canToggleAllowPasswordChange": false
 }
@@ -365,8 +365,8 @@ Requires authentication. Returns signup status, hide file extensions setting, an
   "additionalUsers": 2,
   "hideFileExtensions": false,
   "canToggleHideFileExtensions": true,
-  "electronOnlyAccess": false,
-  "canToggleElectronOnlyAccess": true,
+  "desktopOnly": false,
+  "canToggleDesktopOnly": true,
   "allowPasswordChange": true,
   "canToggleAllowPasswordChange": true
 }
@@ -735,9 +735,7 @@ Update the hide file extensions setting (admin only). When true, file names are 
 
 ## Desktop App Only Access Configuration
 
-### GET `/api/user/electron-only-access-config`
-
-The path and field names keep the word `electron` from earlier versions, so older clients keep working.
+### GET `/api/user/desktop-only-config`
 
 Get the desktop-only access setting. Accessible to any authenticated user.
 
@@ -745,11 +743,11 @@ Get the desktop-only access setting. Accessible to any authenticated user.
 
 ```json
 {
-  "electronOnlyAccess": false
+  "desktopOnly": false
 }
 ```
 
-### PUT `/api/user/electron-only-access-config`
+### PUT `/api/user/desktop-only-config`
 
 Update the desktop-only access setting (admin only). When enabled, the backend blocks browser access to the main app. Share links, `/health`, `/metrics`, and the OnlyOffice file and callback endpoints (called by the Document Server) remain available.
 
@@ -769,7 +767,7 @@ Update the desktop-only access setting (admin only). When enabled, the backend b
 
 ```json
 {
-  "electronOnlyAccess": true
+  "desktopOnly": true
 }
 ```
 
