@@ -60,7 +60,7 @@ TMA Cloud is self-hosted. The project does not operate a hosted service and does
 The only network requests the software makes on its own are:
 
 - **Update check.** The backend fetches the latest version numbers from the TMA Cloud update feed (see [`GET /api/version/latest`](/docs/api/monitoring)). The request comes from your server, so the feed host sees your server's IP address and standard HTTP headers. No user, file, or account data is included.
-- **Desktop app.** The desktop app connects to the server address entered at sign-in. Its update check and heartbeat go to that server, not to the project. When the server reports a newer release, the Windows app downloads its installer from the project's GitHub releases (github.com), so GitHub sees your computer's IP address and standard HTTP headers; no user, file, or account data is included. On macOS and Linux, new versions are downloaded by hand from the releases page.
+- **Desktop app.** The desktop app connects to the server address entered at sign-in. Its update check and heartbeat go to that server, not to the project. When the server reports a newer release, the app downloads it from the project's GitHub releases (github.com): the installer on Windows, the AppImage on Linux, and the disk image on macOS. GitHub sees your computer's IP address and standard HTTP headers; no user, file, or account data is included. A Linux .deb install is updated by hand from the releases page.
 - **Services you configure.** S3-compatible storage, OnlyOffice, Redis, PostgreSQL, and any reverse proxy are chosen and operated by you.
 
 ## Self-hosted instances

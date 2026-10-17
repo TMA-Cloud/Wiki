@@ -88,19 +88,30 @@ a flash.
 - **When it checks.** After sign-in, and then every 6 hours while the app stays signed
   in, the app reads the published release list (`/api/version/latest`). **Check now** in
   **Settings** → **Updates** checks at once.
-- **Windows installs updates by itself.** When a newer release exists, its installer
-  downloads in the background (shown in the transfers panel). Once no upload or download
-  is running, the installer starts, the app closes, and the new version opens a few
-  seconds later. A download that fails is tried again at the next check.
-- **macOS and Linux update by hand.** A notice says once that a new version exists, and
-  **Settings** → **Updates** shows **Open releases**, which opens the releases page to
-  download the new `.dmg`, `.deb` or `.AppImage`.
+- **Updates install themselves.** When a newer release exists, it downloads in the
+  background (shown in the transfers panel). Once no upload or download is running, the
+  app closes and the new version opens a few seconds later. A download that fails is
+  tried again at the next check.
+
+  | Install                                       | How the update is applied                                                                                     |
+  | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+  | Windows installer                             | The new installer runs silently over the installed app                                                        |
+  | Linux AppImage (x86_64)                       | The new AppImage replaces the file the app was started from                                                   |
+  | macOS app (Apple Silicon)                     | The new app from the disk image replaces `TMA Cloud.app` in its folder                                        |
+  | Linux `.deb`, or a folder you cannot write to | By hand: a notice says once that a new version exists, and **Settings** → **Updates** shows **Open releases** |
+
+  A `.deb` install is left to you because replacing it needs administrator rights.
+  Intel Macs and ARM Linux also update by hand, because releases are built for Apple
+  Silicon and x86_64 Linux only.
+
 - **Where updates come from.** The version is the `desktop` entry of the server's
   update feed (see [`VERSIONS_URL`](/docs/reference/environment-variables#update-feed)).
-  The installer is the release asset `tma-cloud_<version>_x64-setup.exe` on GitHub,
+  The files are the release assets `tma-cloud_<version>_x64-setup.exe`,
+  `tma-cloud_<version>_x86_64.AppImage` and `tma-cloud_<version>_aarch64.dmg` on GitHub,
   from [TMA-Cloud/TMA](https://github.com/TMA-Cloud/TMA/releases) unless the app was built
-  with another `TMA_UPDATE_REPO`. Publish the release before raising the feed's version.
-  Until the feed has a `desktop` entry, the app reports no update.
+  with another `TMA_UPDATE_REPO`. `cargo xtask package` gives them these names. Publish
+  the release before raising the feed's version. Until the feed has a `desktop` entry,
+  the app reports no update.
 
 ## Active desktop clients (admin view)
 
