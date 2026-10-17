@@ -68,6 +68,14 @@ Troubleshooting OnlyOffice integration problems.
 2. Check firewall rules
 3. Test callback endpoint manually
 
+### Edits Not Saved
+
+When the Document Server reports a saved document, the server downloads it from the URL in the callback. It refuses some URLs and logs why:
+
+- `[ONLYOFFICE] Blocked save URL outside the document server`: the URL points to a private or internal IP address that is not the Document Server's own host. Set **Document Server URL** in **Settings** → **Administration** → **Integrations** → **OnlyOffice** to the address the Document Server uses in its download links.
+- `[ONLYOFFICE] Callback error` with `resolves only to internal addresses`: the URL's hostname resolves to a private or internal address. Only the configured Document Server host may do that, so use that host name in **Document Server URL**.
+- `[ONLYOFFICE] Callback error` with a timeout: the Document Server stopped sending the file for a minute. Check the network between the two servers.
+
 ## Auto-Save Issues
 
 ### Changes Not Saving Until Close

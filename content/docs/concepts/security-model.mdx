@@ -55,7 +55,7 @@ Request bodies are read into typed Rust structs, so a field with the wrong type 
 - **Path Validation:** Prevents directory traversal
 - **Access Control:** Database-level checks
 - **MIME Type Detection:** Stored type is detected from content (magic bytes), not the filename; a content/extension mismatch is never used to reject an upload
-- **Safe Serving:** Downloads use `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`, so a disguised file downloads instead of running in the browser
+- **Safe Serving:** Downloads use `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`, so a disguised file downloads instead of running in the browser. Stored files also get their own `sandbox` Content Security Policy, so an uploaded HTML or SVG file cannot run script on the site even if it is opened directly
 
 ### File Encryption
 
@@ -128,10 +128,10 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 
 ### Desktop app only access (optional)
 
-- Admins can place an instance into a mode where the backend requires a custom HTTP header that only the Electron desktop app sends
+- Admins can place an instance into a mode where the backend requires a custom HTTP header that only the desktop app sends
 - The middleware checks this header for all main app routes and blocks requests that do not include it
 - Share links (`/s/*`), `/health`, and `/metrics` remain reachable without the header
-- The OnlyOffice file and callback endpoints (`/api/onlyoffice/file/*`, `/api/onlyoffice/callback`) also skip the header check. The Document Server calls them itself and does not send the header; both are authenticated by the OnlyOffice JWT
+- The OnlyOffice file and callback endpoints (`/api/onlyoffice/file/*`, `/api/onlyoffice/callback`) also skip the header check. The Document Server calls them itself and does not send the header; both are authenticated by the OnlyOffice JWT. When the Document Server reports a saved document, the server fetches it only from the Document Server's own host or from a public address. It refuses hostnames that resolve to private or internal addresses, and gives up on a download that stalls for a minute
 - This setting is an access policy, not client attestation. A client that reproduces the header can pass the check, so authentication and authorization remain required
 
 ## Audit & Logging
