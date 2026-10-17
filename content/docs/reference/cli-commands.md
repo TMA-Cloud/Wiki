@@ -5,226 +5,179 @@ description: 'Command-line interface commands for TMA Cloud.'
 
 Command-line interface commands for TMA Cloud.
 
-## Backend Commands
+## Server Commands
+
+The server is one program, `tma-server`. It serves the API and web app, runs the background worker, and has the admin commands below. In a Docker install, run them in the app container: `docker compose exec app tma-server <command>`. From a source checkout, use `cargo run -p tma-server -- <command>`.
 
 ### Start Application
 
 ```bash
-npm start
+tma-server serve
 ```
 
-Start the main application server.
-
-### Development Mode
+Serve the API and the web app. `serve` is the default when no command is given.
 
 ```bash
-npm run dev
+tma-server serve --with-worker
 ```
 
-Start application in development mode with hot reload.
+Also run the background worker in the same process. Useful for a single-process install or development.
 
 ### Background Worker
 
 ```bash
-npm run worker
+tma-server worker
 ```
 
-Worker for background jobs and costly tasks.
+Run the background worker only: queued file operations, maintenance, orphan scans and OnlyOffice saves. See [Background Workers](/docs/guides/operations/background-workers).
 
-### Development Worker
+### Migrations
 
 ```bash
-npm run dev:worker
+tma-server migrate
 ```
 
-Start the background worker in development mode with hot reload.
+Apply database migrations and exit. `serve` and `worker` also apply them at startup.
 
-### Tests
+### Health Check
 
 ```bash
-npm test
+tma-server healthcheck
 ```
 
-Run the unit and route-level test suites. Needs no database or cache.
+Exit with status 0 when the server in this container answers `/health` on `PORT`. The Docker image uses it for its health check.
+
+## Development Commands
+
+From the repository root:
 
 ```bash
-npm run test:watch
+cargo xtask ci
 ```
 
-Re-run affected tests as files change.
+Run the checks CI runs: formatting (rustfmt and Prettier), the house rules (file size, copied code, theme colours), Clippy with warnings as errors, all unit tests, and the WebAssembly build of the web app.
 
 ```bash
-npm run test:coverage
+cargo xtask fmt
 ```
 
-Run the unit suites and write a coverage report to `backend/coverage`.
+Format Rust with rustfmt and Markdown, YAML, JSON, HTML and CSS with Prettier. `--check` only reports.
 
 ```bash
-npm run test:ui
+cargo xtask house
 ```
 
-Open the Vitest UI for interactive runs.
+Check the house rules on their own: no file over 400 lines of code, no copied blocks of 10 or more lines, and theme colours only. `--sizes` lists the largest files; `--near` also reports copies that differ only in literals.
 
 ```bash
-npm run test:integration
+cargo test -p tma-server --test api
 ```
 
-Run the suite that uses PostgreSQL and Redis. Requires a `tma_cloud_test` database; see [Testing](/docs/guides/operations/testing).
+Run the end-to-end server suite against PostgreSQL, Redis and an S3-compatible bucket; see [Testing](/docs/guides/operations/testing).
 
 ```bash
-npm run test:integration:coverage
+cd apps/tma-cloud-web && trunk build --release
 ```
 
-Same, with a coverage report in `backend/coverage-integration`.
+Build the web app into `apps/tma-cloud-web/dist`, where a source checkout's server finds it.
 
 ```bash
-npm run test:s3
+cargo run -p tma-cloud
 ```
 
-Run the storage driver suite against the configured S3-compatible bucket. It covers multipart upload, ranged reads, multipart copy, and multi-object deletion. Run it separately with each provider configuration, including R2. Requires bucket credentials.
-
-```bash
-npm run test:all
-```
-
-Run the unit suite, then the integration suite.
-
-### Linting
-
-```bash
-npm run lint
-```
-
-Run ESLint to check code quality.
-
-```bash
-npm run lint:fix
-```
-
-Run ESLint and automatically fix issues.
-
-### Formatting
-
-```bash
-npm run format
-```
-
-Format code with Prettier.
-
-```bash
-npm run format:check
-```
-
-Check code formatting without making changes.
-
-### Unused Code
-
-```bash
-npm run knip
-```
-
-Run [knip](https://knip.dev) to find unused files, exports and dependencies. Exits non-zero when it finds any. The frontend and desktop app define the same script and run knip twice, once with tests and once without, so code that only its own tests use is also reported.
-
-```bash
-npm run knip:production
-```
-
-Backend only. Run knip without tests. This is a manual audit, not a CI check: the remaining findings should be exports that a module uses itself and that tests reach.
+Run the desktop app.
 
 ### S3 bucket
 
-Run from backend directory. Uses the bucket saved in **Settings** → **Storage**, read from the database; `.env` must hold the database connection and the app's `FILE_ENCRYPTION_KEY`. The scripts stop with `Storage is not configured` when no bucket is saved.
+Uses the bucket saved in **Settings** → **Storage**, read from the database; `.env` must hold the database connection and the app's `FILE_ENCRYPTION_KEY`. The commands stop with `Connect a storage bucket in Settings > Storage first` when no bucket is saved.
 
 ```bash
-npm run s3:protect-all
+tma-server s3 protect-all
 ```
 
 Apply all bucket protections: block public access; bucket policy (HTTPS only); versioning; default SSE if supported; lifecycle (abort incomplete multipart + delete old versions and delete markers).
 
 ```bash
-npm run s3:lifecycle
+tma-server s3 lifecycle
 ```
 
 Apply lifecycle rules only: abort incomplete multipart uploads after 1 day; delete noncurrent versions after 7 days; remove expired delete markers.
 
 ```bash
-npm run s3:policy-https
+tma-server s3 policy-https
 ```
 
 Apply bucket policy that denies HTTP (HTTPS only).
 
 ```bash
-npm run s3:public-block
+tma-server s3 public-block
 ```
 
 Block public access (private bucket).
 
 ```bash
-npm run s3:versioning
+tma-server s3 versioning
 ```
 
 Enable versioning on the bucket.
 
 ```bash
-npm run s3:encryption
+tma-server s3 encryption
 ```
 
-Enable default server-side encryption (AES256). Not supported by all S3-compatible stores; script exits with error if unsupported.
+Enable default server-side encryption (AES256). Not supported by all S3-compatible stores; the command exits with an error if unsupported.
 
-To check current lifecycle config from project root: `node backend/scripts/check-s3-lifecycle.js`.
+```bash
+tma-server s3 check-lifecycle
+```
+
+Print the bucket's current lifecycle rules.
 
 ### Bulk import (drive to storage)
 
-**Requirement:** the database must be reachable from the host. If the app runs in Docker, uncomment the postgres `ports` in `docker-compose.yml` (e.g. `127.0.0.1:5432:5432`) so the host can connect.
+Use when you have existing data on disk and want it in the app's S3 bucket with encryption and DB records. Copying files directly into the bucket would skip encryption and the `files` table. Requires a bucket saved in **Settings** → **Storage** and the app's `FILE_ENCRYPTION_KEY` (or `FILE_ENCRYPTION_KEY_FILE`).
 
-#### Bulk import drive to S3
-
-Use when you have existing data on disk and want it in the app's S3 bucket with encryption and DB records. Copying files directly into the bucket would skip encryption and the `files` table. Requires a bucket saved in **Settings** → **Storage** and the app's `FILE_ENCRYPTION_KEY` (or `FILE_ENCRYPTION_KEY_FILE`) in `.env`.
-
-From the **backend** directory:
+**Requirement:** the source folder must be readable by the command. In Docker, mount it into the app container, or run `tma-server` on the host with the database reachable (uncomment the postgres `ports` in `docker-compose.yml`, e.g. `127.0.0.1:5432:5432`).
 
 ```bash
-# Dry run: list folders/files and total size only
-node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --dry-run
+# Dry run: count folders, files and total size only
+tma-server import --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --dry-run
 
-# Import (creates folder hierarchy in DB, encrypts and uploads each file)
-node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR_USER_ID
+# Import (creates the folder tree, encrypts and uploads each file)
+tma-server import --source-dir "D:\MyDrive" --user-id YOUR_USER_ID
 
 # Use email instead of user ID
-node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-email "you@example.com"
+tma-server import --source-dir "D:\MyDrive" --user-email "you@example.com"
 
 # Optional: more concurrent uploads (default 2)
-node scripts/bulk-import-drive-to-s3.js --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --concurrency 4
-
+tma-server import --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --concurrency 4
 ```
 
-- Preserves folder structure; invalid file names are sanitized with a warning.
-- Enforces per-user storage limit and max file size (checked before any upload).
-- Scans the source twice: the first pass checks sizes and quota, and the second creates folders and uploads files. It does not keep the full file tree in memory.
-- Finalizes uploaded file metadata in batches of 250, with bounded upload concurrency and one quota lock per batch.
-- Preserves file and folder modification times (mtime). Created rows and storage keys are recorded in `bulk_import_items` in the same database transaction as their metadata. On the first error, rollback reads that manifest in batches and deletes files before folders.
+- Preserves folder structure; invalid file names are sanitized.
+- Enforces the per-user storage limit and the max file size before anything is written.
+- Finalizes uploaded file metadata in batches of 250, with bounded upload concurrency.
+- Preserves file and folder modification times. Created rows and storage keys are recorded in `bulk_import_items`. On the first error, the run is rolled back: files and their objects first, then folders.
 
 ### Generate an encryption key
 
 ```bash
-npm run key:generate
+tma-server key generate
 ```
 
-Print a new random 32-byte key in base64 for `FILE_ENCRYPTION_KEY`. In production the key must be a random 32-byte key in base64 or hex. To replace the key of a running install, use `npm run rotate -- key` instead, which keeps the old key for existing data.
+Print a new random 32-byte key in base64 for `FILE_ENCRYPTION_KEY`. In production the key must be a random 32-byte key in base64 or hex. To replace the key of a running install, use `tma-server rotate key` instead, which keeps the old key for existing data.
 
 ### Rotate keys and passwords
 
-From the **backend** directory:
-
 ```bash
-npm run rotate -- status         # Key versions and file keys per version
-npm run rotate -- key            # Add a new master key version
-npm run rotate -- rewrap         # Rewrap stored file keys under the newest version
-npm run rotate -- db-password    # New random database password, saved in DATABASE_URL in .env
+tma-server rotate status         # Key versions and file keys per version
+tma-server rotate key            # Add a new master key version
+tma-server rotate rewrap         # Rewrap stored file keys under the newest version
+tma-server rotate db-password    # New random database password, saved in DATABASE_URL in .env
 ```
 
-- `key` writes to the file named by `FILE_ENCRYPTION_KEY_FILE`, or to `FILE_ENCRYPTION_KEY` in `.env`. Restart the API, then the worker; the worker rewraps the stored file keys when it starts
+- `key` writes to the file named by `FILE_ENCRYPTION_KEY_FILE`, or to `FILE_ENCRYPTION_KEY` in `.env`. Restart the server, then the worker; the worker rewraps the stored file keys when it starts
 - `rewrap` checks every key against the `kek_checks` table first. It changes only the wrapped keys in the database, never the objects in the bucket, and is safe to interrupt and run again
+- `db-password --stdin` reads the new password from standard input and saves nothing; `rotate.sh` uses it
 - Docker installs use `./rotate.sh` in the install directory instead
 
 See [Key Rotation](/docs/guides/operations/key-rotation).
@@ -252,7 +205,7 @@ Build Docker image with default tag.
 make build IMAGE_TAG=3.0.0
 ```
 
-Build Docker image with custom tag. The `version` image label is read from `backend/package.json` regardless of the tag you pass.
+Build Docker image with custom tag. The `version` image label is read from the workspace `Cargo.toml` regardless of the tag you pass.
 
 ```bash
 make build-no-cache
@@ -324,7 +277,7 @@ Connect to the PostgreSQL database with the URL from `.env`. `psql` reads the sa
 
 ### Migrations
 
-Migrations run automatically on application startup.
+Migrations run automatically on application startup (or with `tma-server migrate`).
 
 - Each migration file runs in one transaction together with its row in the `migrations` table. A migration that fails is rolled back completely, the app does not start, and the same migration runs again on the next start.
 - A PostgreSQL advisory lock is held while migrations run, so when several app instances start at once, only one applies migrations and the others wait for it.

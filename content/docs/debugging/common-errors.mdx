@@ -45,7 +45,7 @@ The backend and worker stop at startup. Set `DATABASE_URL` in `.env` with a data
 
 The key is a passphrase. Production accepts only a random 32-byte key in base64 or hex.
 
-1. **Rotate to a random key.** Run `./rotate.sh key` on Docker, or `npm run rotate -- key` from `backend`. Both keep the passphrase as an older version so existing files still open. Replacing the key without rotating makes every stored file unreadable. See [Key Rotation](/docs/guides/operations/key-rotation).
+1. **Rotate to a random key.** Run `./rotate.sh key` on Docker, or `tma-server rotate key`. Both keep the passphrase as an older version so existing files still open. Replacing the key without rotating makes every stored file unreadable. See [Key Rotation](/docs/guides/operations/key-rotation).
 
 ### Symptom: "FILE_ENCRYPTION_KEY (key version N) does not match the key this deployment's data was encrypted with"
 
@@ -74,7 +74,7 @@ No bucket is saved. The first user connects one in **Settings** → **Storage**.
 The message names the failed check.
 
 1. **"Reach the bucket failed: Access denied"** — Check the access key ID, the secret, and the key's permissions. Some providers, including RustFS, answer a missing bucket with the same `403`.
-2. **"Could not connect to the endpoint" or "did not respond in time"** — The backend container cannot reach the endpoint. Test from inside it, for example `docker compose exec app node -e "fetch('<endpoint>').then(r => console.log(r.status))"`. Any status code means the endpoint is reachable.
+2. **"Could not connect to the endpoint" or "did not respond in time"** — The backend container cannot reach the endpoint. The app image has no shell, so test from a throwaway container on the same network, for example `docker run --rm --network tma-cloud_default curlimages/curl -sS -o /dev/null -w "%{http_code}\n" <endpoint>` (the network is named after the install folder; `docker network ls` lists it). Any status code means the endpoint is reachable.
 3. **"The bucket is in a different region"** — Set the bucket's region (Amazon S3).
 4. **"Find existing files failed"** — The new bucket does not contain the files already stored. Copy the objects first.
 

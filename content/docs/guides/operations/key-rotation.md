@@ -9,11 +9,11 @@ Rotate the master encryption key and the database and Redis passwords.
 
 | What                                   | Docker install       | Manual install                   |
 | -------------------------------------- | -------------------- | -------------------------------- |
-| Master key (`FILE_ENCRYPTION_KEY`)     | `./rotate.sh key`    | `npm run rotate -- key`, restart |
-| Database password (in `DATABASE_URL`)  | `./rotate.sh db`     | `npm run rotate -- db-password`  |
+| Master key (`FILE_ENCRYPTION_KEY`)     | `./rotate.sh key`    | `tma-server rotate key`, restart |
+| Database password (in `DATABASE_URL`)  | `./rotate.sh db`     | `tma-server rotate db-password`  |
 | Redis password (in `REDIS_URL`)        | `./rotate.sh redis`  | Change it in Redis and `.env`    |
 | All three, with one restart            | `./rotate.sh all`    | -                                |
-| Key versions and file keys per version | `./rotate.sh status` | `npm run rotate -- status`       |
+| Key versions and file keys per version | `./rotate.sh status` | `tma-server rotate status`       |
 
 Every new value is random: a 32-byte key in base64 for the master key, and 32 bytes in hex for the passwords.
 
@@ -50,25 +50,25 @@ After a key rotation, back up `secrets/file_encryption_key` again. See [Backups]
 
 ## Manual Install
 
-From the **backend** directory:
+In the directory with `.env`:
 
 ```bash
-npm run rotate -- key
+tma-server rotate key
 ```
 
 This adds the next key version to the file named by `FILE_ENCRYPTION_KEY_FILE`, or to `FILE_ENCRYPTION_KEY` in `.env`. Restart the API, then the worker. The worker rewraps the stored file keys when it starts. To rewrap at once and see the result:
 
 ```bash
-npm run rotate -- rewrap
+tma-server rotate rewrap
 ```
 
 ```bash
-npm run rotate -- db-password
+tma-server rotate db-password
 ```
 
-This changes the password of the database role in `DATABASE_URL` and saves the URL with the new password in `.env`. Restart the API and the worker right after: connections opened with the old password keep working, new ones need the new password.
+This generates a random password, or reads one from standard input with `--stdin`. It changes the password of the database role in `DATABASE_URL` and saves the URL with the new password in `.env`. Restart the API and the worker right after: connections opened with the old password keep working, new ones need the new password.
 
-The script does not change the Redis password, because a Redis server outside Docker keeps it in its own configuration file. Redis accepts several passwords per user, so it can be changed without failed connections:
+The command does not change the Redis password, because a Redis server outside Docker keeps it in its own configuration file. Redis accepts several passwords per user, so it can be changed without failed connections:
 
 1. Add the new password: `ACL SETUSER default >new-password`
 2. Put the new password in `REDIS_URL` in `.env` and restart the API and the worker
@@ -90,7 +90,7 @@ The key file is a keyring with one `version:key` entry per line:
 ```
 
 - The highest version encrypts new files. Lower versions only decrypt.
-- A key without a version prefix is version 1, so a single key from `npm run key:generate` works as is.
+- A key without a version prefix is version 1, so a single key from `tma-server key generate` works as is.
 - In `.env`, entries are separated by commas: `FILE_ENCRYPTION_KEY=1:<key>,2:<key>`.
 - Older versions may be passphrases, so a passphrase key can be replaced by a random one with the same rotation. The newest key must be a random 32-byte key in production.
 
@@ -122,7 +122,7 @@ If the old key leaked, rotate, check that `status` reports `All keys are current
 - **The app does not become healthy after a key rotation:** The key file keeps the new version. Do not remove it: it still holds every older key, and the worker may already have wrapped file keys under the new version. The previous key file stays in `.rotate-backup/`. Check `docker compose logs app`, fix the cause, and run `docker compose up -d`.
 - **The containers do not become healthy after a db or redis rotation:** The previous `.env` stays in `.rotate-backup/`. Check `docker compose logs app`.
 - **`.rotate-backup/` is left:** `rotate.sh` does not run again until that folder is removed, so the files in it are not overwritten. Remove it once the stack works.
-- **Some file keys are not rewrapped:** They still open with their old version, and the worker tries again when it starts. Run `./rotate.sh status` and fix the cause shown in the output. To rewrap at once: `docker compose exec app node backend/scripts/rotate.js rewrap`.
+- **Some file keys are not rewrapped:** They still open with their old version, and the worker tries again when it starts. Run `./rotate.sh status` and fix the cause shown in the output. To rewrap at once: `docker compose exec app tma-server rotate rewrap`.
 
 ## Related Topics
 

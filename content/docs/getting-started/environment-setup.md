@@ -61,7 +61,7 @@ The S3-compatible bucket is not set in `.env`. After the first account is create
 | `FILE_ENCRYPTION_KEY`      | Yes (production) | -       | Random 32-byte key in base64 or hex    |
 | `FILE_ENCRYPTION_KEY_FILE` | No               | -       | Path to a file holding the key instead |
 
-Generate a key with `openssl rand -base64 32`, or `npm run key:generate` from the `backend` directory. Back it up outside the server: files cannot be decrypted without it.
+Generate a key with `openssl rand -base64 32`, or `tma-server key generate`. Back it up outside the server: files cannot be decrypted without it.
 
 **Note:** Storage limits are configured per-user in Settings (admin only). See [Environment Variables](/docs/reference/environment-variables#file-storage) for key rotation.
 

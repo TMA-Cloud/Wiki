@@ -78,7 +78,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 ### Key Configuration
 
 - Set `FILE_ENCRYPTION_KEY` — the key-encryption key (KEK) that wraps each file's data key and the stored bucket secret. After a rotation it is a keyring of `version:key` entries; the highest version is the current KEK
-- Generate a key: `npm run key:generate` from the `backend` directory, or `openssl rand -base64 32`
+- Generate a key: `tma-server key generate`, or `openssl rand -base64 32`
 - Production requires a random 32-byte key (base64 or hex). A passphrase stops startup, because PBKDF2 with a fixed salt is only as strong as the passphrase
 - Outside production a passphrase is accepted, and a development fallback key is used if none is set
 - The key can be read from a file with `FILE_ENCRYPTION_KEY_FILE` (Docker or Kubernetes secrets)
@@ -88,7 +88,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 ### Key Rotation
 
 - Rotating the KEK only rewraps each file's stored DEK and the stored bucket secret; the encrypted objects are never read or rewritten
-- `./rotate.sh key` (Docker) or `npm run rotate -- key` adds the next key version and keeps the older ones, which database backups from before the rotation still need. The worker rewraps the stored keys when it starts. See [Key Rotation](/docs/guides/operations/key-rotation)
+- `./rotate.sh key` (Docker) or `tma-server rotate key` adds the next key version and keeps the older ones, which database backups from before the rotation still need. The worker rewraps the stored keys when it starts. See [Key Rotation](/docs/guides/operations/key-rotation)
 - Rotation is also how a deployment moves from a passphrase to a random key
 
 ## Storage Operations
@@ -126,12 +126,12 @@ See [Orphan Review](/docs/guides/admin/orphan-review) for the admin workflow.
 
 ## S3 Bucket Protection
 
-Backend scripts apply bucket settings to the bucket saved in **Settings** → **Storage**. They read it from the database, so `.env` must point at the database and hold the same `FILE_ENCRYPTION_KEY` as the app. Run from backend directory.
+`tma-server s3` commands apply bucket settings to the bucket saved in **Settings** → **Storage**. They read it from the database, so `.env` must point at the database and hold the same `FILE_ENCRYPTION_KEY` as the app. On Docker, run them in the app container, for example `docker compose exec app tma-server s3 protect-all`.
 
 ### Apply all protections
 
 ```bash
-npm run s3:protect-all
+tma-server s3 protect-all
 ```
 
 Applies in one run: block public access; bucket policy that denies HTTP (HTTPS only); versioning; default SSE if supported; lifecycle rules.
@@ -142,20 +142,20 @@ Applies in one run: block public access; bucket policy that denies HTTP (HTTPS o
 - **Delete noncurrent versions** after 7 days (versioning cleanup).
 - **Remove expired delete markers** (tombstones from deletes on versioned bucket).
 
-From backend: `npm run s3:lifecycle` applies both lifecycle rules. See [CLI Commands](/docs/reference/cli-commands).
+`tma-server s3 lifecycle` applies the lifecycle rules, and `tma-server s3 check-lifecycle` shows the rules the bucket has. See [CLI Commands](/docs/reference/cli-commands).
 
-### Individual scripts
+### Individual commands
 
-| Command                   | Effect                                                                         |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| `npm run s3:protect-all`  | All of the below in one run                                                    |
-| `npm run s3:lifecycle`    | Lifecycle: abort incomplete multipart + delete old versions and delete markers |
-| `npm run s3:policy-https` | Bucket policy: deny HTTP (HTTPS only)                                          |
-| `npm run s3:public-block` | Block public access (private bucket)                                           |
-| `npm run s3:versioning`   | Enable versioning                                                              |
-| `npm run s3:encryption`   | Enable default SSE (AES256); not supported by all S3-compatible stores         |
+| Command                      | Effect                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `tma-server s3 protect-all`  | All of the below in one run                                                    |
+| `tma-server s3 lifecycle`    | Lifecycle: abort incomplete multipart + delete old versions and delete markers |
+| `tma-server s3 policy-https` | Bucket policy: deny HTTP (HTTPS only)                                          |
+| `tma-server s3 public-block` | Block public access (private bucket)                                           |
+| `tma-server s3 versioning`   | Enable versioning                                                              |
+| `tma-server s3 encryption`   | Enable default SSE (AES256); not supported by all S3-compatible stores         |
 
-PutBucketPolicy replaces the entire bucket policy. If you add other policy statements in the storage UI, re-running `s3:policy-https` or `s3:protect-all` overwrites them.
+PutBucketPolicy replaces the entire bucket policy. If you add other policy statements in the storage UI, re-running `s3 policy-https` or `s3 protect-all` overwrites them.
 
 ## Related Topics
 

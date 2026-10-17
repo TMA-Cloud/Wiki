@@ -322,7 +322,7 @@ pg-boss job queue tables (managed automatically).
 
 ### `bulk_import_items`
 
-Durable rollback records used by the administrative bulk-import scripts. Each row records the import run, created file or folder ID, storage key when present, item type, and tree depth. A completed import removes its rows. A failed import consumes them in batches, deleting files before folders. Only a killed process leaves rows behind; a daily worker job removes rows older than seven days.
+Durable rollback records used by `tma-server import`. Each row records the import run, created file or folder ID, storage key when present, item type, and tree depth. A completed import removes its rows. A failed import consumes them in batches, deleting files before folders. Only a killed process leaves rows behind; a daily worker job removes rows older than seven days.
 
 ### `migrations`
 
