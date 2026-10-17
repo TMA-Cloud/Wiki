@@ -7,145 +7,89 @@ Running the TMA Cloud test suites.
 
 ## Overview
 
-There are five suites, all using [Vitest](https://vitest.dev). Three run from a clean
-checkout with no services; two talk to real infrastructure.
+TMA Cloud is one Rust workspace. Unit tests live next to the code in each crate and run
+from a clean checkout with no services. One end-to-end suite talks to real infrastructure.
 
-| Suite               | Location                                          | Needs                   |
-| ------------------- | ------------------------------------------------- | ----------------------- |
-| Backend unit        | `backend/tests/unit`, `backend/tests/integration` | Nothing                 |
-| Backend integration | `backend/tests/integration-db`                    | PostgreSQL and Redis    |
-| S3 storage driver   | `backend/tests/integration-s3`                    | An S3-compatible bucket |
-| Frontend            | `frontend/tests`                                  | Nothing                 |
-| Desktop app         | `electron/tests`                                  | Nothing                 |
+| Suite              | Location                             | Needs                                         |
+| ------------------ | ------------------------------------ | --------------------------------------------- |
+| Unit (every crate) | `#[cfg(test)]` modules in `src/`     | Nothing                                       |
+| Server end to end  | `crates/tma-server/tests/api.rs`     | PostgreSQL, Redis and an S3-compatible bucket |
+| Cloud Drive core   | `crates/tma-drive/src/core/tests.rs` | Nothing (an in-memory backend)                |
 
-`backend/tests/integration` holds route-level tests that mount the real routers with
-the controllers stubbed. They need no services, so they run as part of the unit suite.
+## Commands
 
-## Backend Commands
-
-Run from the `backend` directory.
-
-### Unit Tests
+Run from the repository root.
 
 ```bash
-npm test
+cargo xtask ci
 ```
 
-Run the unit and route-level suites once. Exits non-zero on failure.
+Run what CI runs: the format check (rustfmt for Rust, Prettier for Markdown, YAML, JSON,
+HTML and CSS), the house rules below, Clippy with warnings as errors, every unit test,
+and Clippy for the WebAssembly build of the web app. Exits non-zero on failure. Without
+Node.js the Prettier half is skipped with a note; CI always runs it.
 
 ```bash
-npm run test:watch
+cargo xtask fmt
 ```
 
-Re-run affected tests as files change.
+Format everything: `cargo fmt` and Prettier 3.9.9 through `npx`. Add `--check` to only
+report.
 
 ```bash
-npm run test:coverage
+cargo xtask house
 ```
 
-Write a coverage report to `backend/coverage`.
+Check the project's own rules, which rustfmt and Clippy do not cover:
 
-### Integration Tests
+- No source file over 400 lines of code. Blank lines, comments and the test module do
+  not count. Clippy separately limits functions to 150 lines.
+- No run of 10 or more identical code lines in two places.
+- Interface colours come from the theme, never literal values, and text uses the ASCII
+  apostrophe.
+
+`cargo xtask house --sizes` lists the largest files. `cargo xtask house --near` also finds
+copies that differ only in strings or numbers; it flags look-alike data tables too, so
+it is a review aid rather than a CI check.
 
 ```bash
-npm run test:integration
+cargo test --workspace
 ```
 
-Run the suite that uses PostgreSQL and Redis. See [Integration Setup](#integration-setup) first.
+Run the unit tests only.
 
 ```bash
-npm run test:integration:coverage
+cargo test -p tma-drive
 ```
 
-Same, with a coverage report in `backend/coverage-integration`.
+Run one crate's tests (here, Cloud Drive).
 
-### S3 Tests
+### End-to-end Tests
 
 ```bash
-npm run test:s3
+cargo test -p tma-server --test api
 ```
 
-Exercise the storage driver against the bucket saved in **Settings** → **Storage**.
-The suite reads it from the database named in `.env`, decrypting the secret with the
-`FILE_ENCRYPTION_KEY` from `.env`, so a bucket must be saved first.
+Start the real server and background worker on a free port and drive them through the
+same API client the apps use. See [End-to-end Setup](#end-to-end-setup) first. Without
+the variables below, the test reports that it was skipped and passes.
 
-### Everything
+## End-to-end Setup
 
-```bash
-npm run test:all
-```
+The suite reads its connections from environment variables, never from `.env`, so it
+cannot touch working data.
 
-Run the unit suite, then the integration suite.
+| Variable                 | Value                                                     |
+| ------------------------ | --------------------------------------------------------- |
+| `TMA_TEST_DATABASE_URL`  | A database whose name contains `test`. It is wiped first. |
+| `TMA_TEST_REDIS_URL`     | A Redis database of its own, for example index `15`       |
+| `TMA_TEST_S3_ENDPOINT`   | An S3-compatible endpoint (RustFS, MinIO, ...)            |
+| `TMA_TEST_S3_ACCESS_KEY` | Its access key                                            |
+| `TMA_TEST_S3_SECRET_KEY` | Its secret key                                            |
+| `TMA_TEST_S3_BUCKET`     | A bucket for the test; created if it does not exist       |
 
-## Frontend Commands
-
-Run from the `frontend` directory.
-
-```bash
-npm test
-```
-
-Run the frontend suite once.
-
-```bash
-npm run test:watch
-```
-
-Re-run affected tests as files change.
-
-```bash
-npm run test:coverage
-```
-
-Write a coverage report to `frontend/coverage`.
-
-Test files are type-checked by their own TypeScript project:
-
-```bash
-npx tsc -b tsconfig.test.json
-```
-
-## Desktop App Commands
-
-Run from the `electron` directory.
-
-```bash
-npm test
-```
-
-Run the desktop app suite once.
-
-```bash
-npm run test:watch
-```
-
-Re-run affected tests as files change.
-
-```bash
-npm run test:coverage
-```
-
-Write a coverage report to `electron/coverage`.
-
-The suite runs under plain Node with no Electron runtime: `require('electron')` is
-redirected to an in-memory double, and `child_process.spawn` and `net.createServer`
-are replaced per test so PowerShell never runs and no named pipe is bound. Nothing is
-mounted, no window opens, and it runs the same on Windows and on the Linux CI runner.
-
-## Integration Setup
-
-The integration suite reads connection details from the project `.env`, then overrides
-database and cache settings and replaces bucket storage with an in-memory double so it never touches working data. Setup fails with an error if an
-override has not taken effect.
-
-| Override                                      | Reason                                                         |
-| --------------------------------------------- | -------------------------------------------------------------- |
-| Database in `DATABASE_URL` → `tma_cloud_test` | Its own database. Setup stops unless the name ends in `_test`. |
-| Database in `REDIS_URL` → `15`                | Its own cache. Setup stops if the index is `0`.                |
-
-Only the database part of each URL changes; the host, credentials, and parameters come from `.env`, or from the environment when `.env` does not set them, as in CI.
-
-Bucket operations use an isolated in-memory double in this suite. Each test also seeds a bucket row in `app_settings`, so code that checks for a saved bucket behaves as on a configured instance. Run `npm run test:s3` separately to verify the actual provider.
+Without the four `TMA_TEST_S3_*` variables, the upload checks are skipped and the rest
+still runs.
 
 Create the database once:
 
@@ -153,101 +97,58 @@ Create the database once:
 createdb tma_cloud_test
 ```
 
-Migrations run against it on the first test run, so the schema matches production. Each
-test starts from a truncated database, an empty in-memory bucket, and a flushed cache.
+A local bucket for the test can run in Docker:
 
-The S3 suite writes every object under a `tma-test/<run-id>/` prefix and deletes the
-prefix objects in a multi-object request when the run finishes.
+```bash
+docker run -d --rm --name tma-test-s3 -p 9100:9000 \
+  -e RUSTFS_ACCESS_KEY=tmatestkey -e RUSTFS_SECRET_KEY=tmatestsecret123 \
+  rustfs/rustfs:latest /data
+```
 
 ## What the Suites Cover
 
 ### Unit
 
-Validation and path handling, AES-256-GCM encryption, MIME detection from magic bytes,
-Redis caching, JWT handling, the auth and permission middleware, error-to-status
-mapping, and the rate limiters. Database and Redis are replaced with in-memory doubles.
+- File encryption: the streaming format, ranged decryption, key wrapping, the keyring
+  and its check values, sealed settings secrets
+- Names and paths: the file name rule, extensions, Windows-safe names, ZIP entry names
+- Listing cursors, share pages, upload sniffing, CSP hashes, rate limits, schedules
+- The API client's error messages and server-sent event parsing
+- Version comparison and other UI helpers
 
-### Integration
+### Server end to end
 
-The whole request path with nothing stubbed: real routers, real middleware, real
-controllers and models, against PostgreSQL and Redis.
+The whole request path with nothing stubbed, against PostgreSQL, Redis and a bucket:
 
-- Signup, login, sessions, revocation, CSRF
-- Upload, download, rename, move, copy, trash, restore, permanent delete
-- The parent of every upload, new folder and copy being a live folder in the account, and the database triggers that enforce it
-- The file name rule, and Windows-safe entry names in folder ZIPs
-- Folder trees uploaded in parallel, which must create each folder once
-- Sub-user permissions and the account boundary
-- Share links, expiry, and anonymous access
-- Storage quotas across an account
-- Trash retention and the 15-day cleanup job
-- Password change, its re-authentication gate, and session invalidation
+- Signup of the first account (administrator), login, wrong passwords
+- Bucket configuration, tested before it is saved
+- Upload, download (decrypted), folder uploads that create their folders, search, stars
+- Copy and permanent delete through the background worker
+- Share links, the public page, and unsharing
+- Trash and restore
+- Sub-user permissions: a view-only sub-user cannot upload
+- Signing out of every device
 
-### S3
+### Cloud Drive
 
-Single-request and unknown-length multipart uploads, full and ranged reads, atomic and
-multipart copies, single and multi-object deletion, stat, pagination, and encryption
-round trips against the configured bucket. Run it once for each supported provider
-configuration, including R2, because the main integration suite uses an in-memory
-storage double.
+The drive's behaviour, independent of the system it runs on: creating and writing files,
+empty placeholders that apps create before saving, saving the same name again,
+temporary-file-then-rename saves, Word, Excel and LibreOffice saves (the document keeps
+its ID and no backup or temporary file is uploaded), folders, moves, deletes, save-only
+mode, and names with characters Windows does not allow. The Windows sync plan (what to
+download, upload, rename or remove so a folder matches the server) is tested on its own.
 
-### Frontend
-
-API client and error handling, storage and file-name helpers, the Electron bridge,
-React hooks, and the Modal, Toast, and PermissionChecklist components.
-
-### Desktop App
-
-The main process end of every desktop feature:
-
-- Window security — context isolation, sandbox, blocked navigation and `window.open`,
-  denied permission requests, and the desktop-client header that only ever goes to the
-  configured server origin
-- The preload bridge: which channels it exposes, and that it never hands the page a
-  generic way to reach the main process
-- Open on desktop — download, watch, throttled re-upload, exported "Save As" files,
-  the size-based reuse of an already downloaded copy, and refusing programs and scripts
-  before download
-- Clipboard — the file-drop, OLE and text-as-paths sources, UTF-8 output from
-  PowerShell, folder pastes (the tree walk, links, unreadable files and the single
-  progress card), size caps, Windows names for copies (device names, letter case and
-  path length), and origin checks on server-side copies
-- Cloud Drive — the per-session bridge token and that it reaches the host on stdin,
-  the staging-directory confinement on every path the filesystem host sends, save-only mode, mount and unmount, and mounting from the auth cookie without unmounting on a token refresh
-- Updates — the installer URL, `Content-Disposition` filename sanitising, download
-  progress, and launching the installer silently through `elevate.exe`, falling back
-  to opening it through the shell
-- Save and bulk save dialogs, temp-directory cleanup, single-instance behaviour, and
-  the packaging contract the build scripts depend on
-
-## Static Checks
-
-Each Node package runs [knip](https://knip.dev) to find unused files, exports and
-dependencies:
+To try a real drive against a running server, sign in with the `TMA_URL`, `TMA_EMAIL` and
+`TMA_PASSWORD` variables and run:
 
 ```bash
-npm run knip
+cargo run -p tma-drive --example mount_test
 ```
 
-Run it from `backend`, `frontend` or `electron`. It exits non-zero when it finds
-anything. In `frontend` and `electron` it runs twice, once with tests and once without,
-so an export that only tests use is reported too. A frontend export kept for tests is
-tagged `/** @internal Exported for tests. */`. Configuration is in each package's
-`knip.jsonc`.
-
-The backend exports through `export { ... }` lists, which the `@internal` tag cannot
-mark, so its run without tests is a manual audit:
-
-```bash
-npm run knip:production
-```
-
-The Cloud Drive host in `desktop-fs` reports unused private members, unread fields and
-unused parameters as build warnings. Build with `-warnaserror` to fail on them:
-
-```bash
-dotnet build -warnaserror
-```
+It mounts the drive (Cloud Files on Windows, FUSE on Linux), then creates, saves (also the
+way Word does), renames and deletes files from a second process and checks the server
+after each step. On Linux,
+`TMA_ADAPTER=nfs` tests the macOS NFS adapter (run as root with the NFS client installed).
 
 ## Git Hooks
 
@@ -261,8 +162,8 @@ make hooks
 
 Checks staged files only:
 
-- Prettier and ESLint, per package
-- `dotnet format whitespace` for `.cs` files
+- `rustfmt` on staged `.rs` files
+- Prettier on staged Markdown, YAML, JSON, HTML and CSS files (skipped without Node.js)
 - Blocks `.env` files, conflict markers and files over 5 MB
 
 ### commit-msg
@@ -275,27 +176,27 @@ Checks staged files only:
 
 ### pre-push
 
-For each package the push changes:
-
-- Lint, format check and unit tests
-- Type checks (frontend only)
-- knip
-- `dotnet build -warnaserror` and `dotnet format` (`desktop-fs`)
+When the push changes Rust code, runs `cargo xtask ci`.
 
 A partly staged file is checked on its staged content, which is what the commit
-contains. `pre-push` runs against the working tree and skips the integration suites,
-which need PostgreSQL and Redis. Bypass a hook with `--no-verify` only when you have a
-reason to.
+contains. `pre-push` runs against the working tree and skips the end-to-end suite,
+which needs PostgreSQL, Redis and a bucket. Bypass a hook with `--no-verify` only when
+you have a reason to.
 
 ## Continuous Integration
 
-`.github/workflows/test.yml` runs lint, format check, knip, and every suite on each push
-and pull request. The integration job starts PostgreSQL and Redis service containers, so
-it does not need shared infrastructure. The `desktop-fs` checks are not part of CI.
+`.github/workflows/test.yml` runs on each push and pull request:
+
+- Format (rustfmt and Prettier), house rules, Clippy and unit tests on Linux, plus the
+  WebAssembly build
+- The end-to-end suite, with PostgreSQL and Redis service containers and a RustFS bucket
+- The desktop app and Cloud Drive on Windows, macOS and Linux, each on its own runner,
+  since every system has its own drive adapter
+- `shellcheck` on the install scripts and git hooks
 
 ## Related Topics
 
 - [CLI Commands](/docs/reference/cli-commands) - All commands
 - [Environment Variables](/docs/reference/environment-variables) - Configuration
-- [Background Workers](/docs/guides/operations/background-workers) - Cleanup jobs the tests exercise
+- [Background Workers](/docs/guides/operations/background-workers) - Jobs the tests exercise
 - [Backups](/docs/guides/operations/backups) - Database backup and restore
