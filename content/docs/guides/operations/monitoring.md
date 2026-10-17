@@ -21,30 +21,34 @@ To check the database from outside the app, use `pg_isready -d "$DATABASE_URL"`;
 
 ### What is exposed
 
-**Node.js process metrics** (`nodejs_` prefix, from `prom-client` defaults): heap and resident memory, CPU, event loop lag, active handles, garbage collection durations.
+| Metric                              | Type      | Useful for                                                                                      |
+| ----------------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `http_requests_total`               | Counter   | Traffic and error rate, by status `class` (`2xx`, `4xx`, `5xx`)                                 |
+| `audit_events_processed_total`      | Counter   | Audit throughput                                                                                |
+| `audit_events_failed_total`         | Counter   | Audit write failures, broken down by `reason`                                                   |
+| `audit_processing_duration_seconds` | Histogram | Time to write one batch of audit events                                                         |
+| `audit_last_processed_timestamp`    | Gauge     | Staleness — alert when the gap from now grows                                                   |
+| `job_queue_depth`                   | Gauge     | Backlog per `queue` and `state` — a rising `created` count means the worker is down or too slow |
 
-**Audit queue metrics:**
+On Linux the endpoint also has process metrics (`process_` prefix): CPU time, resident
+memory and open files.
 
-| Metric                              | Type      | Useful for                                                    |
-| ----------------------------------- | --------- | ------------------------------------------------------------- |
-| `audit_events_processed_total`      | Counter   | Worker throughput                                             |
-| `audit_events_failed_total`         | Counter   | Processing failures, broken down by `reason`                  |
-| `audit_queue_depth`                 | Gauge     | Backlog — a rising value means the worker is down or too slow |
-| `audit_queue_failed_depth`          | Gauge     | Jobs that exhausted their retries                             |
-| `audit_processing_duration_seconds` | Histogram | Per-event processing time                                     |
-| `audit_last_processed_timestamp`    | Gauge     | Staleness — alert when the gap from now grows                 |
-
-The two gauges are refreshed every 60 seconds from one aggregate query against the pg-boss job table. Scraping `/metrics` returns the latest values without starting another database count.
+The queue gauges are refreshed every 30 seconds from one aggregate query against the
+`job_queue` table. Scraping `/metrics` returns the latest values without starting another
+database count.
 
 ### What is not exposed
 
-There are no HTTP request counters, latency histograms, error-rate metrics, cache hit/miss counters, or storage-usage gauges. Per-request data lives in the structured logs, and storage figures are available through `GET /api/user/storage`.
+There are no latency histograms, cache hit/miss counters, or storage-usage gauges.
+Per-request data lives in the structured logs, and storage figures are available through
+`GET /api/user/storage`.
 
 ## Suggested Alerts
 
-- `audit_queue_depth` above a few hundred and climbing — the background worker is not running
-- `time() - audit_last_processed_timestamp` above a few minutes — same signal, from the other direction
-- `audit_queue_failed_depth` greater than zero — events are being lost
+- `job_queue_depth{state="created"}` above a few hundred and climbing — the background worker is not running
+- `job_queue_depth{state="failed"}` greater than zero — jobs exhausted their retries
+- `rate(http_requests_total{class="5xx"}[5m])` above zero — server errors
+- `time() - audit_last_processed_timestamp` much larger than usual — audit events are not being written
 - `/health` not answering `200` — the process is down
 - Bucket usage, provider quotas, and request failures, checked through your storage provider
 

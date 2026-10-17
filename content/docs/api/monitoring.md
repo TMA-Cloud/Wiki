@@ -32,31 +32,29 @@ Get application health and performance metrics. Restricted to IPs in `METRICS_AL
 **Response:**
 Prometheus text format.
 
-Two groups are exposed:
+| Metric                              | Type      | Labels           | Meaning                                       |
+| ----------------------------------- | --------- | ---------------- | --------------------------------------------- |
+| `http_requests_total`               | Counter   | `class`          | Responses by status class (`2xx`, `4xx`, ...) |
+| `audit_events_processed_total`      | Counter   | -                | Events written to `audit_log`                 |
+| `audit_events_failed_total`         | Counter   | `reason`         | Events that could not be written              |
+| `audit_processing_duration_seconds` | Histogram | -                | Time to write one batch of events             |
+| `audit_last_processed_timestamp`    | Gauge     | -                | Unix time of the last successful write        |
+| `job_queue_depth`                   | Gauge     | `queue`, `state` | Jobs waiting (`created`) or `failed`          |
 
-- **Node.js process metrics** collected by `prom-client`, prefixed `nodejs_` — memory, CPU, event loop lag, garbage collection, handles.
-- **Audit queue metrics**, listed below.
-
-| Metric                              | Type      | Labels   | Meaning                                |
-| ----------------------------------- | --------- | -------- | -------------------------------------- |
-| `audit_events_processed_total`      | Counter   | -        | Events written to `audit_log`          |
-| `audit_events_failed_total`         | Counter   | `reason` | Events that failed to process          |
-| `audit_queue_depth`                 | Gauge     | -        | Jobs in `created` or `retry` state     |
-| `audit_queue_failed_depth`          | Gauge     | -        | Jobs in `failed` state                 |
-| `audit_processing_duration_seconds` | Histogram | -        | Time to process one event              |
-| `audit_last_processed_timestamp`    | Gauge     | -        | Unix time of the last successful write |
-
-The two queue depth gauges are refreshed every 60 seconds with one aggregate query against the pg-boss job table.
+On Linux, process metrics (`process_` prefix: CPU, resident memory, open files) are also
+exposed. The queue depth gauges are refreshed every 30 seconds with one aggregate query
+against the `job_queue` table.
 
 **Example:**
 
 ```bash
+http_requests_total{class="2xx"} 5821
 audit_events_processed_total 1234
-audit_queue_depth 0
-nodejs_heap_size_used_bytes 4.2e+07
+job_queue_depth{queue="account-file-operations",state="created"} 0
 ```
 
-There are no HTTP request counters or latency histograms. Per-request data lives in the structured logs instead — see [Logging](/docs/guides/operations/logging).
+There are no latency histograms. Per-request data lives in the structured logs instead —
+see [Logging](/docs/guides/operations/logging).
 
 ## Version
 
@@ -70,15 +68,18 @@ Get currently deployed backend version. Requires authentication.
 
 ```json
 {
-  "backend": "3.0.0"
+  "frontend": "4.0.0",
+  "backend": "4.0.0",
+  "desktop": "4.0.0"
 }
 ```
 
-- `backend`: Backend version from backend package.json
+The server, the web app and the desktop app are built from one workspace, so all three
+report the same version.
 
 ### GET `/api/version/latest`
 
-Fetch latest versions from update feed.
+Fetch latest versions from the update feed (`VERSIONS_URL`, by default the feed published from the [TMA-Cloud/updates](https://github.com/TMA-Cloud/updates) repository). The answer is cached for ten minutes.
 
 **Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
 
@@ -88,15 +89,18 @@ The response format depends on the external update feed. Example:
 
 ```json
 {
-  "frontend": "3.0.0",
-  "backend": "3.0.0",
-  "electron": "1.0.0"
+  "frontend": "4.0.0",
+  "backend": "4.0.0",
+  "electron": "unknown",
+  "desktop": "4.0.0"
 }
 ```
 
-- `frontend`: Latest frontend version from the update feed
-- `backend`: Latest backend version from the update feed
-- `electron`: Latest Windows Electron app version from the update feed
+- `frontend`, `backend`: Latest web app and server versions from the update feed
+- `desktop`: Latest desktop app version from the update feed; the Windows desktop app installs it automatically
+- `electron`: Kept for older desktop clients; `unknown` when the feed does not list it
+
+A key missing from the feed is returned as `unknown`.
 
 **Note:** This endpoint proxies the response from the update feed. A successful response is cached in the backend process for 10 minutes, so a release can take up to 10 minutes to appear. Failed requests are not cached and return an error response.
 
