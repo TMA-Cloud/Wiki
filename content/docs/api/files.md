@@ -920,7 +920,7 @@ Get basic metadata for a single file or folder.
 
 ### POST `/api/files/:id/replace`
 
-Replace the contents of an existing file. The file ID and name stay the same; size, modified time and last access time are updated. Used when the user chooses "Replace the File" for a duplicate-name upload, and by the Windows desktop app when syncing edits from Word, Excel, PowerPoint, or other desktop editors.
+Replace the contents of an existing file. The file ID and name stay the same; size, modified time and last access time are updated. Used by the desktop app when it uploads a save of a file opened in a desktop app, and by Cloud Drive when a file is saved over.
 
 **Path Parameters:**
 
@@ -961,7 +961,7 @@ The updated file object.
 
 ### POST `/api/files/:id/derived`
 
-Upload a new file that is derived from an existing one while keeping the original file unchanged. This is used by the Windows desktop app when a user opens a document via **Open on desktop** and then uses **Save As** or **Export** (for example, exporting a Word document to PDF or saving a copy as `.docx`, `.xlsx`, or `.pptx`).
+Upload a new file that is derived from an existing one while keeping the original file unchanged. This is used by the desktop app when a user opens a document in its desktop app and then uses **Save As** or **Export** (for example, exporting a Word document to PDF or saving a copy as `.docx`, `.xlsx`, or `.pptx`).
 
 The new file is created as a separate entry in the same folder as the original file.
 

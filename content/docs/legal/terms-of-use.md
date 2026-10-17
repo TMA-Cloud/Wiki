@@ -24,7 +24,7 @@ When you install and run TMA Cloud, you are the operator of that instance. You a
 - Securing the server, secrets (such as `JWT_SECRET` and `FILE_ENCRYPTION_KEY`), storage, and network access.
 - Backing up your data and encryption keys. Lost encryption keys mean lost files; the project cannot recover them.
 - Complying with laws that apply to you and your users, including data protection laws, and giving your users your own privacy notice and terms.
-- Deciding whether to trust installers and update URLs. Desktop builds are unsigned by default; host installers only on a server you control.
+- Deciding whether to trust desktop app downloads. Desktop builds are unsigned by default; download them only from the project's releases page or a server you control.
 
 ## Accuracy
 

@@ -39,7 +39,7 @@ Everything else is allowed, including spaces, accents, emoji, the narrow no-brea
 Where a name has to become a Windows file, it is translated rather than refused:
 
 - **Folder ZIP downloads** replace `: * ? " < > |` with `_` and drop trailing dots and spaces in each entry, as browsers do for single downloads.
-- **The desktop app** writes local copies (Open on Desktop, copy to Explorer, Save As) under names that follow Microsoft's naming rules: reserved and control characters become `_`, trailing dots and spaces are dropped, and device names such as `CON`, `NUL.txt` or `COM1.log` get a leading `_`. Copies to Explorer also add a ` (n)` suffix to names that differ only in letter case and shorten long names so the staged path stays within 260 characters.
+- **The desktop app** writes local copies (Open on Desktop, copy to Explorer, Save As) under names that follow Microsoft's naming rules: reserved and control characters become `_`, trailing dots and spaces are dropped, and device names such as `CON`, `NUL.txt` or `COM1.log` get a leading `_`. Copies to Explorer also add a `(n)` suffix to names that differ only in letter case and shorten long names so the staged path stays within 260 characters.
 - **The Cloud Drive** shows each reserved character, and a trailing dot or space, as the private-use character `U+F000` plus its code, the mapping Cygwin, WSL and Syncthing use. Renames and saves turn it back, so the stored name never changes. WSL and Git Bash show the original characters.
 
 ## File Operations
@@ -111,7 +111,7 @@ The first user can turn tracking off and change the window and the write interva
 
 ### On the Cloud Drive
 
-The mounted Windows drive reports this value as the NTFS `LastAccessTime`, so Explorer's **Date accessed** column reflects it. The other three NTFS timestamps come from the modification time. Windows writes `LastAccessTime` back when a handle closes; the drive accepts and discards those writes, because the server decides what counts as a read. See [Desktop App](/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive).
+On Windows the drive reports this value as the NTFS `LastAccessTime`, so Explorer's **Date accessed** column reflects it. The other three NTFS timestamps come from the modification time. Times Windows writes back locally are never sent to the server, because the server decides what counts as a read. See [Desktop App](/docs/getting-started/desktop-app#cloud-drive).
 
 ## Storage
 

@@ -737,6 +737,8 @@ Update the hide file extensions setting (admin only). When true, file names are 
 
 ### GET `/api/user/electron-only-access-config`
 
+The path and field names keep the word `electron` from earlier versions, so older clients keep working.
+
 Get the desktop-only access setting. Accessible to any authenticated user.
 
 **Response:**
@@ -856,7 +858,7 @@ Update the password change setting (admin only). When enabled, users can change 
 
 ### GET `/api/user/active-clients`
 
-List active Electron desktop clients seen in the last 5 minutes (first user/admin only).
+List active desktop app clients seen in the last 5 minutes (first user/admin only).
 
 **Response:**
 
@@ -869,7 +871,7 @@ List active Electron desktop clients seen in the last 5 minutes (first user/admi
       "userName": "User Name",
       "userEmail": "user@example.com",
       "appVersion": "X.Y.Z",
-      "platform": "win32",
+      "platform": "windows",
       "ipAddress": "::ffff:192.168.1.1",
       "lastSeenAt": "2026-04-07T10:41:00.000Z",
       "connectedSince": "2026-04-07T10:20:00.000Z"
@@ -880,7 +882,7 @@ List active Electron desktop clients seen in the last 5 minutes (first user/admi
 
 ### POST `/api/user/client-heartbeat`
 
-Record or refresh an Electron desktop client heartbeat (authenticated users).
+Record or refresh a desktop app heartbeat (authenticated users). The desktop app sends one every minute.
 
 This endpoint supplies the desktop rows shown by `GET /api/user/active-clients` and the heartbeat used by Active Sessions. Browser presence uses `POST /api/sessions/heartbeat` instead.
 
@@ -889,7 +891,7 @@ This endpoint supplies the desktop rows shown by `GET /api/user/active-clients` 
 ```json
 {
   "appVersion": "X.Y.Z",
-  "platform": "win32",
+  "platform": "windows",
   "clientId": "0ca7c806-8ee8-4fde-80e1-f2f43e5f9bfa"
 }
 ```

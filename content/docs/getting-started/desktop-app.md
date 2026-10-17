@@ -1,262 +1,292 @@
 ---
-title: 'Desktop App (Electron)'
-description: 'Optional Windows desktop client for TMA Cloud. Loads the same web app from your server URL; no separate frontend build.'
+title: 'Desktop App'
+description: 'The TMA Cloud desktop app for Windows, macOS and Linux, with Cloud Drive and editing in local apps.'
 ---
 
-Optional Windows desktop client for TMA Cloud. Loads the same web app from your server URL; no separate frontend build.
+The TMA Cloud desktop app for Windows, macOS and Linux. It has the same interface as the
+web app, plus Cloud Drive, editing files in the computer's own apps, and copying files to
+other apps.
 
-## Prerequisites
+## Install
 
-- **Node.js** (22, 24, or 26+)
-- **TMA Cloud server** running and reachable (e.g. `https://your-tma-cloud.example.com`)
-- **npm**
+Download the installer for your system from the
+[GitHub releases](https://github.com/TMA-Cloud/TMA/releases) page:
 
-## Run from Source
+| System  | File                                | How to install                                                                                 |
+| ------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Windows | `tma-cloud_<version>_x64-setup.exe` | Run it; no administrator needed                                                                |
+| macOS   | `.dmg`                              | Open it and drag TMA Cloud to Applications                                                     |
+| Linux   | `.deb` or `.AppImage`               | `sudo apt install ./tma-cloud_<version>_amd64.deb`, or make the AppImage executable and run it |
 
-Useful for development or testing without building an installer.
+**Windows.** The installer puts the app in your user folder
+(`%LOCALAPPDATA%\TMA Cloud`), adds Start menu and desktop shortcuts, and registers an
+uninstaller in **Settings → Apps**. Nothing else is installed: Cloud Drive uses the Cloud
+Files support built into Windows 10 (version 1709) and later. For unattended installs,
+run the installer with `/S`.
 
-1. Clone the repo and go to the Electron app:
+**Linux.** The `.deb` pulls in FUSE 3 (for Cloud Drive) and the D-Bus library (for the
+saved sign-in).
 
-   ```bash
-   cd electron
-   npm install
-   ```
+**macOS.** Nothing else to install: Cloud Drive uses the NFS client built into macOS.
 
-2. Set the server URL. Create `electron/src/config/build-config.json` (copy from `src/config/build-config.example.json` if present) with:
+### Build from source
 
-   ```json
-   {
-     "serverUrl": "https://your-tma-cloud.example.com",
-     "updatorUrl": ""
-   }
-   ```
+```bash
+cargo build --release -p tma-cloud
+```
 
-   Replace `serverUrl` with your TMA Cloud URL. `updatorUrl` is optional. Set it to the base URL where installers are hosted so the app can download updates (installer URL: `<updatorUrl>/v<version>`). `updatorUrl` must use `https://`; the app refuses to download an update over plain HTTP.
+The app is in `target/release/`. On Linux, building it needs the D-Bus and FUSE
+development packages (`libdbus-1-dev`, `libfuse3-dev`).
 
-3. Start the app:
+To build the installers for the current system:
 
-   ```bash
-   npm start
-   ```
+```bash
+cargo install cargo-packager --locked
+cargo xtask package
+```
 
-   The window opens and loads the server URL. If `serverUrl` is missing, the app shows a "Server URL not configured" page.
+They are written to `target/packages/`. Set `TMA_UPDATE_REPO=owner/repo` while building to
+take updates from another repository's releases, for example to test an update.
 
-## Build Installer (Windows)
+## Sign in
 
-Builds a Windows installer with the server URL embedded so users do not need a config file.
+On first start, enter the server address (for example `https://cloud.example.com`),
+your email and password (the eye in the password field shows what you typed). The app keeps the session in the system's credential store —
+Windows Credential Manager, the macOS Keychain, or the Secret Service on Linux — so it
+stays signed in after a restart and after an update. Signing out removes it.
 
-**Admin privilege required:** Run your terminal (or IDE) **as Administrator** when building.
+The server renews the session while the app is used, and the app saves the renewed one,
+so it does not ask for the password again after the first one expires.
 
-1. In `electron/`, ensure `src/config/build-config.json` exists and contains your `serverUrl`. Set `updatorUrl` to the base URL for installer downloads if you want the packaged app to offer in-app desktop updates.
+If the server cannot be reached when the app starts (it is restarting, or the network is
+not up yet), the app keeps the sign-in and shows **Can't reach** with the server address.
+It tries again after 2, 4, 8 and 16 seconds, then every 30 seconds. **Try now** retries at
+once; **Sign in again** opens the sign-in form. The password is asked for only when the
+server refuses the session.
 
-2. Run the build:
+A session ended elsewhere (a password change, **Sign out everywhere**, or a session
+revoked in **Settings → Security**) returns the app to the sign-in form within a minute,
+even while it sits idle.
 
-   ```bash
-   npm run build:client
-   ```
+Google sign-in is available in the browser only.
 
-   This runs `prepare-client-build.js` (copies `src/main` and `src/preload` into `dist-electron/` and injects `serverUrl` into main config), then `build-clouddrive.js` (compiles the [Cloud Drive](#cloud-drive-mounted-windows-drive) host and bundles the WinFsp installer), then runs electron-builder. Output is in `electron/dist-client/` (one-click NSIS installer by default).
+Only one copy of the app runs at a time: opening it again brings the running window
+to the front.
 
-   The Cloud Drive host targets .NET 10, so building the installer also requires the **.NET 10 SDK**. The WinFsp redistributable is downloaded and verified at build time.
-
-3. For a portable executable (no installer):
-
-   ```bash
-   npm run build:client:win:portable
-   ```
-
-4. For an unpacked folder (no installer, run exe from folder):
-
-   ```bash
-   npm run build:client:win:unpacked
-   ```
-
-Builds are unsigned by default, so the Windows UAC prompt shows **Unknown publisher** on a yellow header. To sign, set `CSC_LINK` to your code-signing certificate (`.pfx` path or base64) and `CSC_KEY_PASSWORD` to its password, then run the same `build:client` flow. electron-builder then signs the app, `elevate.exe`, the uninstaller, and the installer, and UAC shows **TMA Cloud** as a verified publisher.
-
-## Install on Windows
-
-- **NSIS installer:** Run the `.exe` from `dist-client/` and accept the Windows UAC prompt. The installer has no pages: it installs to `C:\Program Files\TMA Cloud`, shows a progress window with the app icon (`src/build/installerHeaderIcon.ico`), and starts the app when done. An existing install is upgraded in its current folder. Admin rights are needed because the app installs for all users and may install WinFsp.
-- **Portable:** Copy the portable build and run the executable. No install step.
-- **Unpacked:** Run the executable inside the unpacked folder.
-
-The server URL is embedded at build time only. No config file is needed after install.
+The window opens where you left it: at the same size and position, or maximized if it
+was maximized. **Restore** after a maximized start returns it to the size it had before.
+On Windows the window appears only once it has drawn at that size, so it opens without
+a flash.
 
 ## Version and updates
 
-- The desktop app version comes from `electron/package.json` and is shown under **Settings → Updates → Desktop app**.
-- The app uses the same update feed as the web UI (`/api/version/latest`), which returns `frontend`, `backend`, and `electron` versions.
-- When any signed-in user opens the app (web or desktop), a one-time background check compares the current versions to the feed.
-- If any component is outdated, an **Updates Available** notice appears in the left sidebar above **Settings**, listing the latest versions for backend, frontend, and Electron.
-- **Desktop (Electron) updates:** When the Electron version is outdated and `updatorUrl` was set at build time, the app downloads the update by itself about three seconds after the check, and the sidebar notice shows the download progress. After the download finishes, the app starts the installer silently (`--updated /S --force-run`) through `elevate.exe`, which electron-builder ships with the app. The app then shows an **Updating TMA Cloud** screen that blocks input for three seconds and quits. Windows shows one UAC prompt; there are no installer pages. When the install finishes, the new version starts on its own. If the silent launch fails, the app opens the installer normally instead. If the download fails, the sidebar notice shows the error with a **Retry** action. If `updatorUrl` is not configured, the sidebar still shows the latest version, and the download attempt ends with the error "Updator URL is not configured".
-- **Update download checks:** The app runs the downloaded file, so it checks the download first:
-  - The version must look like `1.2.3` or `1.2.3-beta.1` (an optional leading `v` is removed). Anything else is refused before a URL is built.
-  - `updatorUrl`, and the final URL after any redirects, must be `https://`.
-  - The saved file must end in `.exe`. If the server suggests any other name through `Content-Disposition`, the app saves it as `TMA-Cloud-Setup-<version>.exe` instead.
-  - The installer is not signature-checked, because builds are unsigned by default. Host installers only on a server you control.
+- **Settings → Updates** shows the server version and this app's version.
+- **Updates install themselves on Windows.** After sign-in the app checks the published
+  release list (`/api/version/latest`). When a newer release exists, its installer
+  downloads in the background (shown in the transfers panel), then installs silently
+  once no upload or download is running, and the app starts again. On macOS and Linux
+  a notice points to the releases page.
+- **Where updates come from.** The version is the `desktop` entry of the server's
+  update feed (see [`VERSIONS_URL`](/docs/reference/environment-variables#update-feed)).
+  The installer is the release asset `tma-cloud_<version>_x64-setup.exe` on GitHub,
+  from [TMA-Cloud/TMA](https://github.com/TMA-Cloud/TMA/releases) unless the app was built
+  with another `TMA_UPDATE_REPO`. Publish the release before raising the feed's version.
+- **Check now** in **Settings** → **Updates** compares the installed and latest versions by hand.
 
 ## Active desktop clients (admin view)
 
-- Signed-in desktop clients send a heartbeat every two minutes.
-- The admin can view active clients in **Settings → Administration → Active Desktop Clients**.
+- Signed-in desktop apps send a heartbeat every minute.
+- The admin can view active clients in **Settings → Administration → Active desktop clients**.
 - Each row includes user, platform, app version, IP, and last seen time.
 - This admin list excludes browser-session presence rows.
 - Revoking sessions removes related heartbeat rows; stale rows are also purged automatically.
 
-## Desktop Editing and Open on Desktop (Windows)
+## Open files in desktop apps
 
-When you run the Windows desktop app, you can open files in their desktop applications and have changes sync back automatically.
+In the desktop app, every file opens in the computer's own app for its type — Word,
+Excel, Photos, a PDF reader — never in the browser, and every save uploads back.
 
-- **Supported:** Any file type, as Explorer does for files on a network share. Windows opens the file with its default app, or shows the **Open with** dialog when no app is registered for the type.
-- **Blocked:** Programs, scripts, installers and shortcuts (for example `.exe`, `.msi`, `.bat`, `.cmd`, `.ps1`, `.vbs`, `.js`, `.lnk`, `.url`, `.reg`) are refused before download with "Programs and scripts can't be opened from the cloud. Download the file to run it." A file from the server does not run as code on a double-click. Trailing dots and spaces in the name do not bypass the check.
-- **Where it works:** Electron desktop app on Windows only
+- **Double-click** a file, press **Enter**, or right-click → **Open**.
+- The file opens from the [Cloud Drive](#cloud-drive) folder, where it already is, with
+  the system's default app. No other copy is made. When no app is set for the type,
+  Windows asks which one to use.
+- Opening needs Cloud Drive. While it is not connected, the app says so and points to
+  **Settings → Desktop app**.
+- **Blocked:** programs, scripts, installers and shortcuts (for example `.exe`, `.msi`,
+  `.bat`, `.cmd`, `.ps1`, `.vbs`, `.js`, `.lnk`, `.reg`) are refused with "Programs and
+  scripts can't be opened from the cloud. Download the file to run it."
 
-### Open on Desktop
+### How saves sync
 
-- Right-click a file → **Open on desktop**
-- Double-clicking a file in the desktop app does the same. Folders are not opened this way.
-- A progress indicator (e.g. "Opening file… X%") appears while the file is prepared. Clicking the same file again while it is opening shows "Already opening this file on desktop. Please wait...".
+- Saving in the app saves into the Cloud Drive folder, and the drive uploads the change
+  (on Windows about two seconds after the app stops writing).
+- The same file entry is updated (the ID stays the same), also when the app saves to a
+  temporary name and renames it over the original, as Word and Excel do.
+- **Save As** or **Export** into the same folder (for example, Word → Export to PDF)
+  uploads the new file beside the original. Files saved anywhere else (Desktop,
+  Documents) stay on your computer only.
+- Office's lock files (`~$…`) and temporary files stay on your computer.
 
-### How Sync Works
+If you open a document and close it without saving, nothing is uploaded.
 
-- The desktop app downloads an encrypted copy of the file to a temporary location (or reuses a copy for large files when the cloud version is unchanged).
-- The file is opened using the default application registered in Windows (for example, Word, Excel, PowerPoint, or another associated editor).
-- While the file is open, the desktop app watches it for changes.
-- When you press **Save** in the desktop editor, the app waits for 1.5 seconds without another file-change event, hashes the final content, and uploads it back to TMA Cloud in the background. A save that arrives during an upload is queued for another check.
-- The same file entry is updated (ID stays the same); the modified time and size reflect the new version.
+## Cloud Drive
 
-If you open a document and close it without saving, no upload is performed and the stored version is unchanged.
+The desktop app shows TMA Cloud as a folder, so you can open and save files from the file
+dialogs of any application — WhatsApp, Telegram, Outlook, Office, browsers, and so on. No
+extra driver is needed on any system.
 
-- **Caching for large files:** For files of about 6 MB or more, the desktop app may reuse a previously downloaded copy from the same session instead of re-downloading. Before reuse, it checks the current file size and modification time from the server and the copy is reused only if both match. If the file was changed on the server (for example by another device or user), it is re-downloaded.
+| System  | Where it appears                       | How it works                                       |
+| ------- | -------------------------------------- | -------------------------------------------------- |
+| Windows | The `TMA Cloud` folder in your profile | Cloud Files, the system OneDrive also uses         |
+| Linux   | The `TMA Cloud` folder in your home    | FUSE (`/dev/fuse`, the `fuse3` package)            |
+| macOS   | The `TMA Cloud` folder in your home    | A local network share only this computer can reach |
 
-### Save As / Export (derived files)
+- **Connects automatically.** The folder connects after you sign in and stops syncing
+  when you sign out or close the app. It uses the app's own session — no separate login.
+  The header shows **TMA Cloud** while it is connected; click it to open the folder.
+- **Status.** **Settings → Desktop app → Cloud Drive** shows whether the drive is
+  connected, and what is missing when it cannot start.
+- **Save As anywhere.** In any app's Save dialog, choose the TMA Cloud folder as the
+  destination. The file uploads through the same pipeline as a normal upload, so
+  permissions, encryption, and audit all apply. Saving a name that exists replaces that
+  file.
+- **Office saves keep the file.** Word, Excel and LibreOffice save through a temporary
+  copy, and Word and Excel also rename the document to a backup name while they save.
+  The cloud file keeps its name and ID and gets the new version. Lock, temporary and
+  backup files (`~$…`, `*.tmp`, and Excel's eight-character names such as `B9EC1600`)
+  stay on your computer and are never uploaded.
+- **Live updates.** Changes made from the web app or another device appear in the folder
+  within a few seconds.
+- **Every name shows up.** On Windows, a name Windows cannot hold, such as
+  `Q3: plan?.docx`, is listed with a private-use character in place of each reserved
+  one. Most fonts draw these as boxes. Renaming or saving the file keeps its real name on
+  the server. See [File Names](/docs/concepts/file-system#file-names).
+- **Large folders.** A folder shows every item it contains. The app reads the server's
+  listing 500 items at a time until it reaches the end.
+- **Deleting** a file or folder in the drive moves it to the trash, as in the app.
+- **Timestamps.** The access time shows the server's last-read time; created, modified
+  and change times show the modification time.
 
-When you use **Save As** or **Export** in a desktop editor (for example, Word → Export to PDF or save a copy as `.docx`) while the file was opened via **Open on desktop**:
+### On Windows
 
-- If the new file (for example, `report.pdf` or `report-copy.docx`) is saved into the same temporary folder that the desktop app used for the original file, the desktop app:
-  - Detects the new file (supported document and export formats such as `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.csv`, `.rtf`, and similar).
-  - Uploads it as a **new file** in the same cloud folder as the original document.
-  - Shows a status toast such as `Saving exported file "report......pdf" (12.3 MB)` and `Exported file "report......pdf"` when complete.
-- Large exports may take time and the file list updates automatically when the upload finishes.
-- If you choose a different location (for example, Desktop or Documents) in the Save As dialog, the file is saved **only** on your computer and is **not** uploaded automatically.
+The folder works like OneDrive's:
 
-## Cloud Drive (mounted Windows drive)
+- **Files download when opened.** Until then each file is a placeholder that takes no
+  space, shown with a cloud in Explorer's **Status** column. A folder's contents are
+  listed the first time you open it.
+- **Changes upload in the background** about two seconds after an app stops writing.
+- **Free up space.** Right-click a file → **Free up space** to drop the downloaded copy;
+  it downloads again the next time it is opened.
+- **Moving a file out** of the folder removes it from TMA Cloud (to the trash), as with
+  any synced folder.
+- **While the app is closed** the folder stays. Folders you have opened still list, files
+  already downloaded still open, and changes made to them upload when the app starts
+  again. A folder you have never opened, or a file not downloaded yet, shows "The cloud
+  file provider is not running" until the app runs.
+- **Another account.** If a different account signs in, the previous account's synced
+  files are removed from the folder. Anything not uploaded yet is kept in a
+  `TMA Cloud (previous account …)` folder beside it.
+- **Uninstalling** removes the folder's downloaded copies and its registration with
+  Windows; nothing is deleted on the server. Anything not uploaded yet stays in the
+  `TMA Cloud` folder. Updating the app keeps the folder as it is.
 
-The Windows desktop app can mount TMA Cloud as a drive (for example `Z:`) so you can open and save files from the file dialogs of any application — WhatsApp, Telegram, Outlook, Office, browsers, and so on. It appears under **This PC** like OneDrive or Dropbox and keeps nothing on disk except a temporary cache.
+Cloud Drive needs Windows 10 version 1709 or later, where Cloud Files is built in. On
+older versions **Settings → Desktop app** says so and the rest of the app works as usual.
 
-- **Requires WinFsp.** The drive is backed by [WinFsp](https://winfsp.dev), a user-mode filesystem driver for Windows ("WinFsp - Windows File System Proxy, Copyright (C) Bill Zissimopoulos"). The installer installs it silently if it is not already present; the user does not need to do anything.
-- **Mounts automatically.** The drive appears a second or two after you sign in and is removed when you sign out or close the app. It reuses the app's existing session — no separate login.
-- **Save As anywhere.** In any app's Save dialog, choose the TMA Cloud drive as the destination. The file uploads through the same pipeline as a normal upload, so permissions, versioning, and audit all apply. Saving into an existing subfolder reuses that folder instead of creating a duplicate.
-- **Live updates.** Changes made from the web app or another device appear on the drive within a few seconds.
-- **Every name shows up.** A name Windows cannot hold, such as `Q3: plan?.docx`, is listed with a private-use character in place of each reserved one. Most fonts draw these as boxes. Renaming or saving the file on the drive keeps its real name on the server. See [File Names](/docs/concepts/file-system#file-names).
-- **Large folders.** A folder shows every item it contains. The app reads the server's listing 500 items at a time until it reaches the end.
-- **Only your Windows account can read it.** The drive grants access to the Windows user who signed in (plus `SYSTEM` and Administrators). Other accounts on the same computer cannot open the mounted drive.
-- **Temporary cache.** Opening or saving a file stages it under `%TEMP%\tma-cloud-fs\`. Each staged file is deleted when the app closes its handle, anything left over is cleared when the drive unmounts, and stale files from a previous crash are removed on the next mount.
-- **Timestamps.** Explorer's **Date accessed** column shows the server's last-read time; **Date created**, **Date modified** and the change time all show the modification time. Windows tries to write **Date accessed** back when a file is closed, but the server owns the value, so the drive ignores those writes and the next refresh restores it. A file the server has no read time for shows its modification time instead.
+### On Linux and macOS
+
+- **Only your account can read it.** The folder is owned by your user. On macOS the share
+  listens only on this computer (`127.0.0.1`), never on the network.
+- **Open files.** A file open from the drive is kept in `TMA Cloud/drive` in the user's
+  cache folder while it is open. It is deleted once the file is closed (on macOS, a few
+  seconds after the last write), and anything left by a crash is removed on the next
+  mount. On Windows, files download straight into the folder and nothing else is kept.
 
 ### Save-only mode
 
-The first user sets this for every desktop app in **Settings → Administration → Cloud Drive save-only**. Other users see the current mode in **Settings → Storage → Cloud Drive** and cannot change it.
+The first user sets this for every desktop app in **Settings → Administration → Policies
+→ Cloud Drive save-only**. **Settings → Desktop app → Access mode** shows the mode the
+drive on this computer uses.
 
-- **On (default):** folders and files stay browsable and **Save As** still works, but opening or copying file content from the drive is blocked (Windows shows "Access denied"). Use this to keep people opening files through the app while still allowing Save As uploads.
+- **On:** folders and files stay browsable and **Save As** still works, but opening or
+  copying file content from the drive is refused ("Access denied"). Files you open in
+  TMA Cloud stay readable for 12 hours, and files you **Copy** in TMA Cloud for a day, so
+  they can be edited or pasted.
 - **Off:** files can be opened and copied from the drive normally.
 
-The desktop app reads the mode from the server when the drive mounts and every minute after that, and applies a change without remounting. The first user's own drive applies a change at once. Until the server answers, and if it cannot be reached, the drive stays save-only.
+The app reads the mode when the drive mounts and every minute after that, and applies a
+change without remounting. Until the server answers, the drive stays save-only.
 
-## Clipboard Integration (Windows desktop app)
+## Copy and paste with other apps (Windows)
 
-The Windows desktop app uses a single Copy / Cut / Paste model that bridges the cloud and OS clipboards. One Copy covers both in-app pastes and Explorer pastes, and Paste figures out the right source automatically.
+**Copy** (or **Ctrl+C**) in the desktop app also puts the files and folders on the
+Windows clipboard, so **Paste** in Explorer, on the desktop, in Outlook or in a chat app
+pastes the real files. Folders keep their structure. The clipboard holds the items'
+paths in the [Cloud Drive](#cloud-drive) folder, so nothing is copied beforehand: Windows
+downloads the files while it pastes them. Without Cloud Drive, the copy pastes in TMA
+Cloud only.
 
-### Context Menu
+Pasting back inside TMA Cloud still copies on the server, without uploading anything.
+**Cut** (or **Ctrl+X**) moves items between folders on the server, and empties the
+Windows clipboard so an older copy from another app is not pasted by mistake.
 
-- **Copy:** Right-click one or more items → **Copy**. The selection goes to the in-app clipboard immediately so you can paste it into another folder inside TMA Cloud, and it is also written to the Windows clipboard in the background so you can paste in Explorer. Files are downloaded for the Windows clipboard four at a time. Folders and selections over 200 MB are kept on the in-app clipboard only — those still paste between folders in TMA Cloud, but Explorer pastes are skipped. The toast tells you which path applied. If you copy something else before the download finishes, the finished download does not replace the newer copy.
-- **Cut:** Right-click → **Cut**. Moves within TMA Cloud only. Cut items show a Windows-Explorer-style faded look until paste completes.
-- **Paste:** Right-click in a folder → **Paste**. Right-clicking a folder pastes into that folder; right-clicking a file or empty space pastes into the open folder, as in Explorer. Paste uses whichever clipboard was written last, as Windows does. If another app put files or folders on the Windows clipboard after your last in-app Copy or Cut, those are uploaded. Otherwise the cloud clipboard is used (server-side copy or move, no re-upload). Physical files on the Windows clipboard stream from disk through the Electron main process into the current folder; their contents are not converted to base64 or copied across renderer IPC.
+The other way works too. These paste into the open folder with **Ctrl+V** or the
+**Paste** button, and upload:
 
-Every in-app Copy or Cut also takes the Windows clipboard, including folder copies, copies over 200 MB and cuts. Those write the item names as text, so files copied in Explorer before the in-app Copy are not pasted by mistake.
+- Files and folders copied in Explorer or any other app
+- Files that exist only inside another app, such as Outlook attachments and messages or
+  files copied from a zip folder in Explorer (up to 500 MB at once)
+- A copied image or screenshot, as `Pasted image <date> <time>.png`
+- File paths copied as text, for example with Explorer's **Copy as path**
 
-A copy can be pasted any number of times. A cut is used up by its paste. When a paste ends, the open folder is refreshed, even if you opened another folder while the server was still copying.
+Paste takes whichever copy is newer.
+See [Paste from Explorer](/docs/guides/user/upload-files#paste-from-explorer-windows-desktop-app).
 
-A paste fails with a message when:
+## Pointers
 
-- Some of the copied or cut items were deleted or moved to the trash since the Copy or Cut.
-- The folder you paste into was deleted or moved to the trash.
-- A folder would be moved into itself or one of its subfolders.
+The app uses its own pointers, drawn in the app's colours, in a light and a dark set
+that follow the theme: an arrow over files, a hand on buttons, a text beam in fields,
+and grab, zoom and busy pointers where they apply. The same pointers appear in the
+browser and in the desktop app on Windows, macOS and Linux. On a Linux desktop that
+runs Wayland the app keeps the system's pointers, because Wayland only lets apps pick
+from the system's own set; under X11 it shows its own. Resize arrows at the window's
+edges stay the system's.
 
-When a pasted item has the same name as an item of the same type in the folder, both are kept and the pasted one gets a name such as `report (1).pdf`. Items pasted back into their own folder keep their names.
+## Drag and drop
 
-Copy, Cut and Paste follow the same rules from the context menu and the keyboard:
+Drop files or folders from the computer onto the window to upload them into the open
+folder (the root outside **My Files**). Folders keep their structure.
 
-- Nothing in the **Trash** can be copied or cut.
-- Paste works only in **My Files**, because **Starred** and **Shared** have no current folder to paste into.
-- Sub-users need **Upload & create** to copy and to paste a copy, and **Modify** to cut and to paste a cut.
-- Holding down **Ctrl+C**, **Ctrl+X** or **Ctrl+V** acts once, not once per key repeat.
+## Keyboard Shortcuts
 
-The OS clipboard side of Paste supports Explorer copy, Outlook attachments, Snipping Tool, the OLE file clipboard used by other apps, and clipboard text containing file paths (e.g. Copy as path, IDE "Copy path/reference"). Virtual OLE files have no disk path, so Electron extracts them in the main process and uploads them from bounded memory without writing a plaintext upload file to `%TEMP%` or sending file data through renderer IPC. Because that content is held whole in memory, one paste of virtual files is capped at 500 MB in total. The backend still performs the normal streaming encryption before object storage.
-
-The app reads the Windows clipboard through PowerShell with its output set to UTF-8. Windows PowerShell 5.1 otherwise writes in the console code page, which turns characters such as the narrow no-break space that newer Windows time formats put before AM and PM into `?`, so the pasted file would not be found under its real name.
-
-Pasted files use the same size and quota checks as a normal upload — the max upload size setting and the account's remaining space — rather than separate clipboard limits. A file the server would refuse is reported in the upload-issues dialog and the rest of the paste continues.
-
-**Folders copied in Explorer** paste with their whole tree, the same way a dropped folder uploads:
-
-- Each file goes up with its path below the folder, and the server creates the folders on the way. Folder creation is atomic, so files uploading in parallel never create the same folder twice.
-- Pasting into a folder that already holds a folder of that name, in any letter case, merges into it, as Explorer does. Files that clash get a `(n)` suffix.
-- Links and junctions are reported and not followed, so a folder that links back to itself cannot loop. Empty folders are skipped, as they are when dropped.
-- A file that cannot be read, for example a workbook Excel has open, is reported in the upload-issues dialog and the rest continue.
-- One paste is capped at 50,000 files.
-
-**Files copied to Explorer** are written under names Windows accepts:
-
-- Reserved characters become `_`, trailing dots and spaces are dropped, and device names such as `CON.txt` get a leading `_`.
-- Names that differ only in case get a `(n)` suffix, so `Report.pdf` and `report.pdf` stay two files.
-- Long names are shortened, keeping the extension, so the staged path stays within the 260-character limit that Explorer still enforces.
-- If a file cannot be downloaded, the toast names it instead of reporting a full copy.
-
-### Paste Progress
-
-Clipboard uploads run in the Electron main process and appear in the same floating upload panel as a browser upload.
-
-- Up to eight loose files get a progress card each, with the file name and size. A pasted folder, or more files than that, gets one card for the whole paste, such as **Trip — 120 files**, as a dropped folder does in the browser.
-- **Cancel** on a card stops that upload: the read stream and the network request both end. On a folder card it stops the whole paste.
-- A completed card clears after a few seconds; a failed one shows its error and stays longer.
-- Bodies stream from disk (or from main-process memory for virtual files) instead of being buffered, so the percentage reflects bytes actually sent.
-
-### Keyboard Shortcuts
-
-- **Ctrl+A / Cmd+A:** Select all files and folders in the current view.
-- **Ctrl+C / Cmd+C:** Copy (cloud clipboard, plus Windows clipboard when files fit).
-- **Ctrl+X / Cmd+X:** Cut (moves within TMA Cloud only).
-- **Ctrl+V / Cmd+V:** Paste from whichever clipboard was written last.
-- **Ctrl+Shift+I / Cmd+Shift+I:** Open **Get Info** for the currently selected file or folder (desktop app only and single selection).
+- **Arrow keys, Home, End, Page Up/Down:** Move the selection (with **Shift**: select a range).
+- **Type a name:** Select the next item whose name starts with the letters typed.
+- **Ctrl+A / Cmd+A:** Select all items in the current view.
+- **Ctrl+C / Ctrl+X / Ctrl+V:** Copy, cut and paste within TMA Cloud.
+- **Delete:** Move the selection to the trash (in the trash: delete forever).
+- **F2:** Rename the selected item.
 - **Enter:** Open the selected file or folder.
-- **Backspace:** Go back to the previous folder.
-- **Alt+Up:** Go to the parent folder.
-- **Letters:** Type the first letters of a name to select it.
-- **Tab:** Move focus into the file list, and out again with the next **Tab**.
-- **Arrow keys, Home, End, Page Up, Page Down:** Move the selection. Add **Shift** to select a range, or **Ctrl** to move without selecting and **Ctrl+Space** to add or remove the outlined item.
+- **Backspace:** Go back to the previous folder; **Alt+Up** goes to the parent folder.
+- **Escape:** Clear the selection.
+- **Ctrl+K:** Focus the search field.
 
-The last six also work in the browser. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation).
-
-## Folder navigation (back/forward)
-
-In the Windows desktop app, the file manager supports back/forward folder navigation.
-
-- **Toolbar:** Back and Forward buttons appear in the file manager header (left of the breadcrumbs). They move through the folder history.
-- **Keyboard:** **Backspace** goes back, the same as the Back button. **Alt+Up** goes to the parent folder.
-- **Mouse:** Mouse back/forward (side buttons, e.g. typical browser back/forward) trigger folder back/forward when the file manager is in use. They are ignored when the pointer is over an input, textarea, select, or a dialog.
-
-Navigation history is updated when you open a folder, click a breadcrumb, or go to **My Files**. Forward history is cleared when you navigate to a new folder.
+The same shortcuts work in the browser. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation) for details.
 
 ## Desktop-only mode (optional)
 
-- When the administrator enables **Desktop app only access** in **Settings → Administration** from the desktop app, the backend rejects browser access to the main app.
-- The desktop app continues to work because it sends the required HTTP header on its requests.
+- When the administrator enables **Desktop app only** in **Settings → Administration**,
+  the server rejects browser access to the main app.
+- The desktop app continues to work because it sends the required HTTP header on its
+  requests.
 - Share links (`/s/*`), `/health`, and `/metrics` still respond as normal.
-- The OnlyOffice file and callback endpoints also stay open, because the Document Server calls them without the desktop header.
-- Browsers that open the main URL see a simple page stating that the instance is configured for desktop app access only.
+- The OnlyOffice file and callback endpoints also stay open, because the Document Server
+  calls them without the desktop header. Documents the desktop app opens in the browser
+  use a one-minute link, which is allowed too.
+- Browsers that open the main URL see a simple page stating that the instance is
+  configured for desktop app access only.
 
 ## Related Topics
 
-- [Architecture — Electron Desktop App](/docs/concepts/architecture#electron-desktop-app) - How the desktop app fits in the system
-- [Manage Folders](/docs/guides/user/manage-folders) - Folders and navigation (breadcrumbs, back/forward)
-- [Upload Files](/docs/guides/user/upload-files) - Upload, copy to computer, and clipboard usage
+- [Architecture — Desktop App](/docs/concepts/architecture#desktop-app) - How the desktop app fits in the system
+- [Manage Folders](/docs/guides/user/manage-folders) - Folders and navigation
+- [Upload Files](/docs/guides/user/upload-files) - Uploading and downloading

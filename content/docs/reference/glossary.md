@@ -23,7 +23,11 @@ Any endpoint that accepts an `ids` array and processes multiple files in one req
 
 ### Cloud Drive
 
-A Windows drive the desktop app can mount (via WinFsp) so files can be opened and saved from any application's file dialogs. Backed by the `desktop-fs` host and `clouddrive.cjs` in the main process. See [Desktop App](/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive).
+A `TMA Cloud` folder the desktop app provides so files can be opened and saved from any application's file dialogs: through [Cloud Files](#cloud-files) on Windows, FUSE on Linux and a local NFS share on macOS. It runs inside the desktop app and uses its session. See [Desktop App](/docs/getting-started/desktop-app#cloud-drive).
+
+### Cloud Files
+
+The Windows API that OneDrive and other sync apps use: files appear as placeholders that download when opened. The desktop app uses it for the [Cloud Drive](#cloud-drive) on Windows 10 (version 1709) and later.
 
 ### Derived file
 
@@ -112,7 +116,3 @@ A per-user counter that increments when the user logs out of all devices or chan
 ### Trash
 
 The per-user soft-delete area. Deleting a file moves it here; files auto-purge after 15 days. Trash counts toward the user's storage quota.
-
-### WinFsp
-
-Windows File System Proxy — a user-mode filesystem driver for Windows. The desktop app uses it to provide the [Cloud Drive](#cloud-drive). Installed by the desktop installer if not already present. GPLv3 with a FLOSS exception; see [winfsp.dev](https://winfsp.dev).

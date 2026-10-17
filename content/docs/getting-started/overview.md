@@ -28,7 +28,7 @@ Before you begin, ensure you have:
 
 1. **[Installation Guide](/docs/getting-started/installation)** - Step-by-step installation instructions
 2. **[Docker Compose / Docker](/docs/getting-started/docker)** - Deploy with `docker-compose` (curl, no clone) or prebuilt images
-3. **[Desktop App (Electron)](/docs/getting-started/desktop-app)** - Build and install the Windows desktop client
+3. **[Desktop App](/docs/getting-started/desktop-app)** - Install the desktop app for Windows, macOS or Linux
 4. **[Environment Setup](/docs/getting-started/environment-setup)** - Configure environment variables
 5. **[First Login](/docs/getting-started/first-login)** - Create your first account
 
