@@ -57,12 +57,12 @@ The check covers the items loaded in the open folder. In a very large folder, a 
 
 ### Upload Progress and Cancel
 
-- A panel in the bottom-right corner lists uploads and downloads, with a progress bar for each. Its heading names the work, for example **Uploading 2 of 5 files** or **Uploaded report.pdf**
+- A panel in the bottom-right corner lists uploads and downloads, one line per file with its icon and name. A running file adds a progress bar below its name, and a finished one shows a mark for how it went. The panel's heading names the work, for example **Uploading 2 of 5 files** or **Uploaded report.pdf**
 - When everything finishes without an error, the panel closes after five seconds (it stays open while the pointer is over it). After a failure it stays until you close it
 - Notifications appear above the panel
 - Three uploads run at a time; the rest wait in the queue
 - Each running or waiting transfer has a **Cancel** button
-- A failed upload stays in the list with the reason, and the other files still upload
+- A failed upload stays in the list with the reason below its name (hover to see all of a long reason), and the other files still upload
 - When a batch finishes with failures, a dialog lists the files that were not uploaded, grouped by reason (up to 50 names per reason). **Copy details** copies every file and its reason. Uploads you cancelled are not listed
 - Files that finished before a cancel stay in the folder
 - The same panel shows work the server does for you, with a moving bar until it finishes: moving to the trash, restoring, deleting forever, emptying the trash, copying and moving
@@ -155,7 +155,7 @@ None of these keys act while you type in a text field such as search, or while a
 - **Export / Save As (desktop app):** When a file opened in its desktop app is saved as a new file in the same folder (for example a `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.csv`, or `.rtf`), the new file is uploaded as a separate file in the same cloud folder. A file saved anywhere else (for example Desktop or Documents) is not uploaded.
 - **Preview (desktop app):** Right-click an image → **Preview** to see it in the built-in viewer instead of its desktop app
 - **Image Viewing:** In the browser, opening an image shows it in the built-in viewer; the Left and Right arrow keys move to the previous and next image. Scroll (or pinch) to zoom at the pointer, drag to move around a zoomed image, double-click to zoom in or back out, and press **+**, **-** or **0** to zoom in, out or back to fit
-- **Other files:** In the browser, opening a file that has no viewer (a `.zip`, for example) shows a short notice that it can't be opened in the browser, instead of downloading it. Use **Download** to save it. Opening it again while the notice is up does not repeat it
+- **Other files:** In the browser, opening a file that has no viewer (a `.zip`, for example) shows the notice "No preview for .zip files. Use Download." instead of downloading it. Opening it again while the notice is up does not repeat it
 
 ## Best Practices
 

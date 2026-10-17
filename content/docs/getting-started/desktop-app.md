@@ -64,6 +64,10 @@ It tries again after 2, 4, 8 and 16 seconds, then every 30 seconds. **Try now** 
 once; **Sign in again** opens the sign-in form. The password is asked for only when the
 server refuses the session.
 
+A request that receives nothing from the server for two minutes, for example after the
+network drops or the computer wakes from sleep, fails with an error instead of waiting
+forever. Cloud Drive requests stop waiting the same way.
+
 A session ended elsewhere (a password change, **Sign out everywhere**, or a session
 revoked in **Settings → Security**) returns the app to the sign-in form within a minute,
 even while it sits idle.
@@ -260,7 +264,7 @@ folder (the root outside **My Files**). Folders keep their structure.
 ## Keyboard Shortcuts
 
 - **Arrow keys, Home, End, Page Up/Down:** Move the selection (with **Shift**: select a range).
-- **Type a name:** Select the next item whose name starts with the letters typed.
+- **Type a name:** Select the next item whose name starts with the letters typed. Pressing the same letter again moves to the next item that starts with it.
 - **Ctrl+A / Cmd+A:** Select all items in the current view.
 - **Ctrl+C / Ctrl+X / Ctrl+V:** Copy, cut and paste within TMA Cloud.
 - **Delete:** Move the selection to the trash (in the trash: delete forever).
