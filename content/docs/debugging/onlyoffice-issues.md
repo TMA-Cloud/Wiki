@@ -76,20 +76,20 @@ Troubleshooting OnlyOffice integration problems.
 
 **Check:**
 
-1. The background worker is running: `npm run worker` or `docker compose ps worker`
-2. The `onlyoffice-forcesave` queue has a schedule for the document key
+1. The background worker is running: `docker compose ps worker`, or `tma-server worker` outside Docker
+2. The `job_schedules` table has a row named `onlyoffice:<document key>`
 3. Callback logs show status 6 with `forcesavetype: 0`
 
 **If no schedule appears:**
 
 1. Check app logs for `[ONLYOFFICE-AUTOSAVE] Failed to schedule document`
-2. Verify PostgreSQL and the pg-boss schema are reachable from the app
+2. Verify PostgreSQL is reachable from the app
 3. Open the document again after resolving the queue error
 
 **If force-save jobs fail:**
 
 1. Check the OnlyOffice URL is correct and reachable from the worker
-2. If OnlyOffice uses HTTPS with a self-signed certificate, verify `rejectUnauthorized: false` is set in the request options
+2. If OnlyOffice uses HTTPS with a self-signed certificate, set `ONLYOFFICE_REJECT_UNAUTHORIZED=false` so the app accepts it when it downloads saved documents, or give the Document Server a trusted certificate
 3. Check OnlyOffice container logs: `docker logs onlyoffice_documentserver`
 
 **If forcesave commands return non-200:**

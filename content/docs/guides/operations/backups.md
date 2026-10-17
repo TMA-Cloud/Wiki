@@ -7,7 +7,7 @@ Backup and restore procedures for TMA Cloud.
 
 ## What to Backup
 
-- **Database:** PostgreSQL database (all schemas including `pgboss`). It includes the bucket and Google sign-in settings with their encrypted secrets
+- **Database:** PostgreSQL database, including the job queue tables (`job_queue`, `job_schedules`). It includes the bucket and Google sign-in settings with their encrypted secrets
 - **Files:** S3 bucket contents
 - **Configuration:** `.env` file
 - **Encryption key:** See [Encryption Key](#encryption-key)
@@ -119,7 +119,7 @@ sha256=a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
 public.users=5
 public.files=218
 public.audit_log=1340
-pgboss.job_common=64
+public.job_queue=64
 ```
 
 ## Database Restore

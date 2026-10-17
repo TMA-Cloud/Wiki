@@ -139,7 +139,7 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 ### Audit Trail
 
 - **Recorded events:** Authentication, file, sharing, document, admin, and account actions
-- **Queue:** pg-boss stores events until the worker writes them
+- **Writing:** each process batches events in memory and writes them about every half second; see [Audit Logs](/docs/guides/operations/audit-logs)
 - **Retention:** Rows older than 30 days are removed by the scheduled cleanup job
 - **Queries:** The `audit_log` table and `audit_activity` view expose stored events
 

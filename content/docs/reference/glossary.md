@@ -35,7 +35,11 @@ An OnlyOffice command that tells the document server to flush the current editor
 
 ### Heartbeat
 
-A presence signal sent every two minutes by a signed-in browser or desktop client. A session is shown as online when its latest heartbeat is less than three minutes old. Missing heartbeats change the displayed status to offline; they do not revoke the session.
+A presence signal sent by a signed-in browser tab (every two minutes) or desktop app (every minute). A session is shown as online when its latest heartbeat is less than three minutes old. Missing heartbeats change the displayed status to offline; they do not revoke the session.
+
+### Job queue
+
+The `job_queue` table in PostgreSQL, used for large file-tree operations, object cleanup, maintenance, orphan review, share linking, and OnlyOffice force-save commands. The API adds jobs and the worker (`tma-server worker`) runs them. See [Background Workers](/docs/guides/operations/background-workers).
 
 ### JWT (JSON Web Token)
 
@@ -72,10 +76,6 @@ Either a stored object that no `files` row points at, or a `files` row whose sto
 ### Permission
 
 One capability a sub-user can be granted: `files.download`, `files.upload`, `files.edit`, `files.share`, `files.delete`, or `files.trash`. Stored in `users.permissions`. Account owners hold all of them implicitly and are never checked against the list. Anything not granted is refused. See [Authorization](/docs/concepts/authorization).
-
-### pg-boss
-
-The PostgreSQL-backed job queue used for audit writes, large file-tree operations, maintenance, orphan review, and OnlyOffice force-save commands. The web process submits jobs and maintains schedules; the standalone worker executes them.
 
 ### Share domain
 

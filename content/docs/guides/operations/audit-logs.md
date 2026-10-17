@@ -7,24 +7,15 @@ Audit events recorded by TMA Cloud.
 
 ## Overview
 
-TMA Cloud queues authentication, file, sharing, document, admin, and account events in pg-boss. The worker writes them to PostgreSQL.
+TMA Cloud records authentication, file, sharing, document, admin, and account events in the `audit_log` table.
+
+Recording an event never slows a request down. Each process (the API and the worker) hands its events to an in-memory buffer, and a writer task saves them in batches: up to 200 events in one insert, at least every half second. Events still in the buffer are written when the process shuts down normally.
+
+If a batch fails, its events are retried one at a time, so one bad row does not lose the others. An event whose user was deleted in the meantime is saved without the user. If the buffer is full (10,000 events waiting), new events go to the application log instead and a warning is logged.
 
 ## Configuration
 
-### Environment Variables
-
-```bash
-AUDIT_WORKER_CONCURRENCY=5  # Concurrent events processed
-AUDIT_JOB_TTL_SECONDS=82800  # Job TTL (must be < 24h)
-```
-
-### Starting the Background Worker
-
-```bash
-npm run worker
-```
-
-**Important:** Audit events are queued but not written to the database until the worker processes them. The same worker also runs maintenance and OnlyOffice force-save jobs, so keep it running in production.
+There is nothing to configure and no separate process to run: audit writing is part of `tma-server serve` and `tma-server worker`. Retention is handled by the daily audit log cleanup; see [Background Workers](/docs/guides/operations/background-workers#maintenance-schedule).
 
 ## Audit Events
 
@@ -174,36 +165,11 @@ ORDER BY created_at DESC;
 
 `metadata` has no general GIN index because the application does not filter on arbitrary JSON fields. Constrain administrative searches by indexed columns such as `action`, `user_id`, `account_owner_id`, or `created_at` before inspecting metadata.
 
-## Background Worker Management
+## Checking That Events Are Written
 
-### Monitor Worker
-
-```bash
-npm run worker
-# Logs identify the service as "background-worker"
-```
-
-### Check Queue Status
-
-The queue is named `audit-events`, in the `pgboss` schema.
-
-```sql
--- View pending jobs
-SELECT * FROM pgboss.job
-WHERE name = 'audit-events' AND state IN ('created', 'retry')
-ORDER BY created_on DESC;
-
--- View failed jobs
-SELECT * FROM pgboss.job
-WHERE name = 'audit-events' AND state = 'failed'
-ORDER BY created_on DESC LIMIT 100;
-```
-
-These are the same two counts exposed as the `audit_queue_depth` and `audit_queue_failed_depth` metrics on `/metrics`.
-
-### Worker Concurrency
-
-Audit deliveries fetched together are validated and inserted in one multi-row statement. Higher values create larger batches and can increase database load. The default is 5; raise it only after measuring a sustained queue backlog.
+- `audit_last_processed_timestamp` and `audit_events_processed_total` on `/metrics` show the last write and the total. `audit_events_failed_total` counts events that could not be saved.
+- Failures are logged as `Audit batch failed; retrying row by row` and `Failed to write audit event`.
+- A full buffer is logged as `Audit queue unavailable, event logged to application log only`.
 
 ## Related Topics
 

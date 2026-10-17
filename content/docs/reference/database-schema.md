@@ -207,7 +207,7 @@ Active user sessions.
 
 A session is invalid once its `token_version` falls behind the user's current one, which is how "logout everywhere" and a password change end every session at once.
 
-**Retention:** rows older than 30 days are removed in bounded batches by the daily 02:45 UTC worker job.
+**Retention:** rows older than 30 days are removed in bounded batches by the daily 04:20 UTC worker job.
 
 ### `file_operation_results`
 
@@ -215,7 +215,7 @@ Idempotency results for durable file operations.
 
 | Column         | Type        | Description                              |
 | -------------- | ----------- | ---------------------------------------- |
-| `job_id`       | UUID        | Primary key; the pg-boss job ID          |
+| `job_id`       | UUID        | Primary key; the `job_queue` job ID      |
 | `user_id`      | TEXT        | Account that owns the operation          |
 | `task`         | TEXT        | Operation type, currently `copy`         |
 | `output`       | JSONB       | Stable result returned by a worker retry |
@@ -223,7 +223,7 @@ Idempotency results for durable file operations.
 
 **Indexes:** `completed_at`
 
-The copy transaction writes its result with the new file rows. If pg-boss retries the same job after that commit, the worker returns this result instead of inserting another copy. Rows older than 30 days are removed in bounded batches by the daily 02:50 UTC worker job.
+The copy transaction writes its result with the new file rows. If the queue retries the same job after that commit, the worker returns this result instead of inserting another copy. Rows older than 30 days are removed in bounded batches by the daily 04:50 UTC worker job.
 
 ### `mfa_backup_codes`
 
@@ -288,7 +288,7 @@ Audit trail events.
 
 **Indexes:** `(user_id, created_at DESC)` where `user_id IS NOT NULL`, `(account_owner_id, created_at DESC)`, `action`, `created_at DESC`, `request_id`, `(resource_type, resource_id)` where both are set, and `(created_at DESC, action, error_message)` where status is `failure` or `error`. There is no general `metadata` GIN index; application queries use the indexed columns, avoiding the write cost of maintaining an index for administrative JSON searches.
 
-**Retention:** rows older than 30 days are removed by the daily 02:15 UTC worker job. `cleanup_old_audit_logs(30)` deletes at most 10,000 rows per call, and one job processes at most 20 batches.
+**Retention:** rows older than 30 days are removed by the daily 03:40 UTC worker job. `cleanup_old_audit_logs(30)` deletes at most 10,000 rows per call, and one job processes at most 20 batches.
 
 ## Views
 
@@ -316,9 +316,46 @@ ORDER BY created_at DESC
 LIMIT 100;
 ```
 
-### `pgboss.*`
+### `job_queue`
 
-pg-boss job queue tables (managed automatically).
+Background jobs (migration 055). Workers claim rows with `FOR UPDATE SKIP LOCKED` and are woken by `NOTIFY tma_jobs`. See [Background Workers](/docs/guides/operations/background-workers).
+
+| Column                    | Type        | Description                                                          |
+| ------------------------- | ----------- | -------------------------------------------------------------------- |
+| `id`                      | UUID        | Primary key                                                          |
+| `queue`                   | TEXT        | Queue name, for example `account-file-operations`                    |
+| `data`                    | JSONB       | Job input                                                            |
+| `state`                   | TEXT        | `created`, `active`, `completed`, `failed`, or `cancelled`           |
+| `singleton_key`           | TEXT        | Orders one account's jobs (FIFO) and de-duplicates scheduled jobs    |
+| `retry_count`             | INTEGER     | Attempts used so far                                                 |
+| `retry_limit`             | INTEGER     | Attempts allowed after the first (default 3)                         |
+| `retry_delay_seconds`     | INTEGER     | First retry delay (default 60)                                       |
+| `retry_backoff`           | BOOLEAN     | Double the delay on each retry (default true)                        |
+| `retry_delay_max_seconds` | INTEGER     | Longest retry delay (default 3600)                                   |
+| `expire_seconds`          | INTEGER     | An `active` job older than this is put back in the queue             |
+| `start_after`             | TIMESTAMPTZ | Earliest time the job may run                                        |
+| `started_at`              | TIMESTAMPTZ | When the current attempt started                                     |
+| `completed_at`            | TIMESTAMPTZ | When the job finished                                                |
+| `keep_seconds`            | INTEGER     | How long a finished row is kept before it is removed (default 86400) |
+| `output`                  | JSONB       | Result, read by `GET /api/files/jobs/:jobId`                         |
+| `error`                   | TEXT        | Last error                                                           |
+| `created_at`              | TIMESTAMPTZ | Default now()                                                        |
+
+**Indexes:** ready jobs per queue `(queue, created_at)` where `state = 'created'`; `(queue, singleton_key, state)` for keyed jobs; `started_at` of active jobs; `completed_at` of finished jobs.
+
+### `job_schedules`
+
+Cron schedules: the maintenance jobs and one row per open OnlyOffice document (`onlyoffice:<document key>`).
+
+| Column        | Type        | Description                        |
+| ------------- | ----------- | ---------------------------------- |
+| `name`        | TEXT        | Primary key                        |
+| `queue`       | TEXT        | Queue the job is added to          |
+| `cron`        | TEXT        | Five-field cron expression, in UTC |
+| `data`        | JSONB       | Job input                          |
+| `last_run_at` | TIMESTAMPTZ | The last minute a job was added    |
+| `created_at`  | TIMESTAMPTZ | Default now()                      |
+| `updated_at`  | TIMESTAMPTZ | Default now()                      |
 
 ### `bulk_import_items`
 

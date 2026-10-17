@@ -7,51 +7,42 @@ Troubleshooting audit logging problems.
 
 ## Audit Events Not Logging
 
-### Worker Not Running
+Audit events are written by the process that records them (`tma-server serve` or
+`tma-server worker`), in batches about every half second. There is no separate audit
+worker to start.
 
 **Check:**
 
-1. Verify the background worker is running: `npm run worker`
-2. Check worker logs for errors
-3. Verify worker in Docker: `docker compose ps`
+1. The database is reachable from the app: `docker compose logs app` shows no connection
+   errors
+2. The app log for `Audit batch failed; retrying row by row` or
+   `Failed to write audit event`, which include the database error
+3. `audit_events_failed_total` on `/metrics`
 
 **Solutions:**
 
-1. Start the background worker: `npm run worker`
-2. Check worker logs
-3. Verify environment variables
+1. Fix the database error shown in the log (connection, permissions, disk space)
+2. Make sure migrations ran: the app applies them at startup, and
+   `tma-server migrate` applies them by hand
 
-### Events Queued But Not Processed
+## Events Only in the Application Log
 
-**Check:**
+**Symptom:** The log shows `Audit queue unavailable, event logged to application log only`.
 
-1. Worker is running
-2. Database connection working
-3. Queue status: Check `pgboss.job` table
-
-**Solutions:**
-
-1. Restart the background worker
-2. Check database connection
-3. Verify `AUDIT_WORKER_CONCURRENCY` setting
-
-## Queue Issues
-
-### Jobs Stuck
-
-**Check:**
-
-```sql
-SELECT * FROM pgboss.job
-WHERE name = 'audit-events' AND state IN ('created', 'retry')
-ORDER BY created_on DESC;
-```
+**Cause:** More than 10,000 events were waiting to be written, usually because the
+database is very slow or unreachable.
 
 **Solutions:**
 
-1. Restart worker
-2. Check for database locks
-3. Verify job TTL settings
+1. Check database health and load
+2. The events in question are in the application log with their action name; they are
+   not added to `audit_log` later
+
+## Events Missing After a Crash
+
+Events are held in memory for up to half a second before they are written. A normal stop
+(`docker compose stop`, Ctrl+C) writes them first. A process that is killed outright can
+lose the last half second of events.
 
 ## Related Topics
 

@@ -7,45 +7,48 @@ Background services and workers in TMA Cloud.
 
 ## Overview
 
-TMA Cloud uses one standalone worker process for audit writes, file operations, object cleanup, scheduled maintenance, admin-requested orphan work, share auto-linking, and OnlyOffice force-save commands. Jobs are stored in PostgreSQL by pg-boss, so schedules and retries survive process restarts.
+TMA Cloud uses one worker process for file operations, object cleanup, scheduled maintenance, admin-requested orphan work, share auto-linking, and OnlyOffice force-save commands. Jobs are stored in PostgreSQL in the `job_queue` table, so schedules and retries survive restarts.
 
-The worker is also the only supervising pg-boss instance: it owns job maintenance (retention, expiry, monitoring) and cron evaluation. The application process creates the queues it sends to and applies schema migrations so it can boot against a fresh database, but it only produces jobs.
+A job is saved in the same database as the request that created it. Workers claim jobs with `FOR UPDATE SKIP LOCKED`, so several worker processes never take the same job, and the server wakes them with a PostgreSQL `NOTIFY` instead of making them poll.
+
+Audit events do not go through the queue. Each process batches them and writes them itself; see [Audit Logs](/docs/guides/operations/audit-logs).
 
 ## Background Worker
 
 **Command:**
 
 ```bash
-npm run worker
+tma-server worker
 ```
+
+For development, `tma-server serve --with-worker` runs the API and the worker in one process.
 
 **Configuration:**
 
-- `AUDIT_WORKER_CONCURRENCY` - Audit batch size and concurrency cap. OnlyOffice force-save concurrency is capped at four.
-- `AUDIT_JOB_TTL_SECONDS` - Audit job TTL.
+- `AUDIT_WORKER_CONCURRENCY` - The most jobs one worker runs at once per queue (default 5). Each queue also has its own cap: maintenance and orphan work run one at a time, the others up to four.
 
-The worker must run in production. Without it, queued audit events, file operations, object cleanup, and maintenance do not run, and open OnlyOffice documents do not receive periodic force-save commands.
+The worker must run in production. Without it, file operations, object cleanup and maintenance do not run, and open OnlyOffice documents do not receive periodic force-save commands.
 
 ### Queues
 
-| Queue                     | Work                                                                                     |
-| ------------------------- | ---------------------------------------------------------------------------------------- |
-| `audit-events`            | Validates audit events and inserts each fetched batch in one query                       |
-| `background-maintenance`  | Runs singleton cleanup jobs                                                              |
-| `onlyoffice-forcesave`    | Sends force-save commands with per-document ordering                                     |
-| `orphan-maintenance`      | Runs admin-requested orphan scans and selected cleanup                                   |
-| `account-file-operations` | Copies files, handles large moves and restores, and performs permanent deletion          |
-| `object-cleanup`          | Deletes unreferenced or superseded object versions after upload, replace, or save errors |
-| `file-operations`         | Drains jobs queued before the account queue was added and continues sliced trash cleanup |
-| `share-linking`           | Adds newly created items to the shares their parent folder belongs to                    |
+| Queue                     | Work                                                                                                            |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `background-maintenance`  | Runs the scheduled cleanup jobs below                                                                           |
+| `onlyoffice-forcesave`    | Sends force-save commands to the Document Server                                                                |
+| `orphan-maintenance`      | Runs admin-requested orphan scans and selected cleanup                                                          |
+| `account-file-operations` | Copies files, handles large moves and restores, performs permanent deletion, and continues sliced trash cleanup |
+| `object-cleanup`          | Deletes unreferenced or superseded object versions after upload, replace, or save errors                        |
+| `share-linking`           | Adds newly created items to the shares their parent folder belongs to                                           |
 
-Failed jobs retry with backoff. `account-file-operations` and `share-linking` use strict FIFO ordering per account, so two mutations for one account cannot overtake each other while other accounts can run concurrently. Copy jobs use their pg-boss job ID as an idempotency key. A committed retry returns the original copied IDs from `file_operation_results` instead of creating another copy.
+Failed jobs retry with exponential backoff, up to a limit per queue. A job left running past its time limit (for example because its worker crashed) is put back in the queue. Finished jobs are kept for a while (one hour to seven days, depending on the queue) and then removed.
+
+`account-file-operations` and `share-linking` use strict FIFO ordering per account, so two changes for one account cannot overtake each other while other accounts run at the same time. Copy jobs use their job ID as an idempotency key. A retry after a committed copy returns the original copied IDs from `file_operation_results` instead of creating another copy.
 
 HTTP handlers keep validation, authorization, small metadata-only changes, and response streaming in the web process. They queue retryable object-store work and operations that can outlive an HTTP request.
 
 ### Maintenance Schedule
 
-Schedules use UTC.
+Schedules use UTC. The worker checks for due schedules every 20 seconds, and each schedule runs once per due minute even with several workers.
 
 | Job                      | Schedule        | What it does                                                     |
 | ------------------------ | --------------- | ---------------------------------------------------------------- |
@@ -85,7 +88,7 @@ Orphan jobs are not scheduled and never delete anything unless the first user se
 
 ### OnlyOffice Force-Save
 
-Opening an editable document creates one durable pg-boss schedule for its document key. The interval is five minutes. The worker calls the OnlyOffice `/command` service, and the callback streams the returned document through encryption to object storage. Closing the document removes its schedule; an OnlyOffice response that says the document is no longer open also removes it.
+Opening an editable document creates one schedule for its document key in the `job_schedules` table. The interval is five minutes. The worker calls the OnlyOffice `/command` service, and the callback streams the returned document through encryption to object storage. Closing the document removes its schedule; an OnlyOffice response that says the document is no longer open also removes it.
 
 See [OnlyOffice API](/docs/api/onlyoffice#auto-save).
 
@@ -94,7 +97,8 @@ See [OnlyOffice API](/docs/api/onlyoffice#auto-save).
 These remain in the main application because they own HTTP-process state:
 
 - Access times are buffered from requests and flushed in one statement per write interval, 10 seconds by default. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
-- Audit queue gauges are refreshed for the Prometheus registry exposed by that process.
+- Audit events are batched and written by the process that recorded them.
+- Queue depth gauges are refreshed for the Prometheus registry exposed by that process.
 - Redis pub/sub, SSE keepalives, and rate-limit timers stay with the web process.
 
 ## Running Workers
@@ -103,15 +107,15 @@ These remain in the main application because they own HTTP-process state:
 
 ```bash
 # Terminal 1 - Main application
-npm start
+tma-server serve
 
 # Terminal 2 - Background worker (required)
-npm run worker
+tma-server worker
 ```
 
 ### Docker
 
-The worker runs as its own container and shares the app image:
+The worker runs as its own container from the same image, with the command `tma-server worker`:
 
 ```bash
 docker compose up -d
@@ -121,8 +125,14 @@ docker compose up -d
 ## Monitoring Workers
 
 - Check `docker compose logs -f worker` or the worker process logs.
-- Monitor `audit_queue_depth` and `audit_queue_failed_depth`.
-- Check recent rows in the pg-boss job table for `background-maintenance`, `account-file-operations`, `object-cleanup`, `file-operations`, `share-linking`, `orphan-maintenance`, and `onlyoffice-forcesave` failures.
+- Monitor `job_queue_depth` (see [Monitoring](/docs/guides/operations/monitoring)).
+- Check failed jobs and their errors:
+
+  ```sql
+  SELECT queue, error, completed_at FROM job_queue
+  WHERE state = 'failed' ORDER BY completed_at DESC LIMIT 20;
+  ```
+
 - Verify cleanup counts and OnlyOffice command errors in worker logs.
 - Watch for `Repaired drifted folder aggregates` warnings from the weekly folder aggregate check.
 
