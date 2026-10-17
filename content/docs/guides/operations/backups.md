@@ -139,7 +139,7 @@ The restore process:
 5. Only when that worked, renames your current database aside and renames the restored one into its place. It then drops the old one. If the rename fails, the old database is put back.
 6. Runs `ANALYZE` to update query planner statistics.
 7. Reports table and row counts so you can check the result.
-8. Clears the Redis cache of the Compose project with `FLUSHDB` on the database in `REDIS_URL`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 5 minutes for the entries to expire.
+8. Clears the Redis cache of the Compose project with `FLUSHDB` on the database in `REDIS_URL`, because cached rows from before the restore may no longer exist. Redis holds only cache entries and event messages. With a host or `DB_CONTAINER` database, run `FLUSHDB` yourself or wait 10 minutes for the entries to expire.
 9. Starts the services it stopped. It does this even when the restore fails.
 
 If the restore fails at any step, the script says so and your database keeps its data. It also drops the scratch database. While it runs, the server needs enough free disk space for two copies of the database.
