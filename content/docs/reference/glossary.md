@@ -11,7 +11,7 @@ A top-level login — one with no `parent_user_id`. Owns the files, folders and 
 
 ### Admin / first user
 
-The first account created on a fresh deployment. Permanently stored in `app_settings.first_user_id`. Sees the Administration section in Settings and controls signup, storage, and MFA settings. Separate from account ownership: every account is an owner, but only one is the admin.
+The first account created on a fresh deployment. Permanently stored in `app_settings.first_user_id`. Sees the Administration page in Settings and controls signup, storage, and MFA settings. Separate from account ownership: every account is an owner, but only one is the admin.
 
 ### Audit log
 

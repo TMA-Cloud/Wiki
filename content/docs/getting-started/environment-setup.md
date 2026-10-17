@@ -46,7 +46,7 @@ Use `rediss://` for TLS. The number after the last `/` is the Redis database.
 | `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                       |
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, the auth cookie has no `Secure` flag |
 
-Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known Proxies**. See [Known Proxies](/docs/guides/admin/known-proxies). The session timeout and last-opened tracking are set there too; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known proxies**. See [Known Proxies](/docs/guides/admin/known-proxies). The session timeout and last-opened tracking are set there too; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
 ## Google Sign-In (Optional)
 

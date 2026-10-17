@@ -92,7 +92,7 @@ Moving a shared item to trash also stops the link from serving it. Unlike unshar
 
 - Optional custom share domain
 - Isolated from main application
-- Configure in Settings → Share Base URL (admin only)
+- Configure in Settings → Administration → Share link address (admin only)
 
 ## Accessing Shared Files
 

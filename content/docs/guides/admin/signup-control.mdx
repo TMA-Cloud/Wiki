@@ -8,8 +8,8 @@ Control user registration in TMA Cloud (admin only).
 ## Enable/Disable Signup
 
 1. Go to **Settings**
-2. Open the **Administration** section (visible only to the first user)
-3. Use the **Allow User Signup** toggle
+2. Open the **Administration** page (visible only to the first user)
+3. Use the **Allow sign-up** toggle under **Policies**
 4. Changes apply immediately
 
 **When enabled:** Anyone can create an account. First user to sign up becomes admin.
@@ -19,8 +19,8 @@ Control user registration in TMA Cloud (admin only).
 ## Hide File Extensions
 
 1. Go to **Settings**
-2. Open the **Administration** section (visible only to the first user)
-3. Use the **Hide file extensions** toggle
+2. Open the **Administration** page (visible only to the first user)
+3. Use the **Hide file extensions** toggle under **Policies**
 4. Changes apply immediately for all users
 
 **When on:** File names in the file manager and in the rename dialog are shown without extensions.
@@ -30,20 +30,20 @@ Control user registration in TMA Cloud (admin only).
 ## Password Change
 
 1. Go to **Settings**
-2. Open the **Administration** section (visible only to the first user)
-3. Use the **Allow password change** toggle
+2. Open the **Administration** page (visible only to the first user)
+3. Use the **Allow password changes** toggle under **Policies**
 4. Changes apply immediately for all users
 
 **When on:** Users see a **Change password** option in **Settings** → **Security** and can change their password. Password changes log out all sessions and require login again.
 
-**When off:** The change password option is hidden and `/api/change-password` returns 403 for all users.
+**When off:** The change password option is replaced by a note that password changes are turned off, and `/api/change-password` returns 403 for all users.
 
 ## Desktop app only access
 
 1. Open the **Desktop app**
 2. Go to **Settings**
-3. Open the **Administration** section (visible only to the first user)
-4. Use the **Desktop app only access** toggle
+3. Open the **Administration** page (visible only to the first user)
+4. Use the **Desktop app only** toggle under **Policies**
 5. Changes apply immediately for all users
 
 **When on:** The main app only accepts requests from the desktop app. Only Share links (`/s/*`), `/health`, `/metrics`, and the OnlyOffice file and callback endpoints stay available.
@@ -53,11 +53,11 @@ Control user registration in TMA Cloud (admin only).
 ## Cloud Drive save-only
 
 1. Go to **Settings**
-2. Open the **Administration** section (visible only to the first user)
-3. Use the **Cloud Drive save-only** toggle
+2. Open the **Administration** page (visible only to the first user)
+3. Use the **Cloud Drive save-only** toggle under **Policies**
 4. Mounted drives apply the change within a minute
 
-**When on:** The [Cloud Drive](/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive) can be browsed and saved into, but other apps cannot open or copy files from it (default).
+**When on:** The [Cloud Drive](/docs/getting-started/desktop-app#cloud-drive) can be browsed and saved into, but other apps cannot open or copy files from it (default).
 
 **When off:** Other apps can open and copy files from the drive.
 
@@ -71,13 +71,13 @@ Control user registration in TMA Cloud (admin only).
 ## First User
 
 - The first user to sign up is the administrator
-- Only this user sees the Administration section and the signup toggle
+- Only this user sees the **Administration** page and the signup toggle
 - First user ID is stored in `app_settings.first_user_id` and is immutable
 - Admin status is enforced on the server; the client cannot override it
 
 ## Use Cases
 
-- **Public:** Enable signup for self-registration; monitor users in Settings → Registered Users
+- **Public:** Enable signup for self-registration; monitor users in **Settings** → **Administration** → **Registered users**
 - **Private:** Disable signup; no one is allowed to signup
 
 ## Related Topics

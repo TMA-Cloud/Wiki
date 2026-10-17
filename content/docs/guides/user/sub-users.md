@@ -18,14 +18,13 @@ Use sub-users instead of handing your password to a colleague. Because each pers
 ## Creating a Sub-user
 
 1. Go to **Settings** → **Sub-users**
-2. Click **Manage sub-users**
-3. Click **Add sub-user**
-4. Fill in the details:
+2. Click **Add sub-user**
+3. Fill in the details:
    - **Name** - Required. Shown in the audit log next to their actions
    - **Email** - Their login email. Must not already be in use anywhere on the instance
    - **Password** - At least 8 characters
-5. Tick the permissions they should have (see below)
-6. Click **Create sub-user**
+4. Tick the permissions they should have (see below)
+5. Click **Create sub-user**
 
 New sub-users start with all permissions ticked. Untick the ones you do not want to grant before creating.
 
@@ -50,7 +49,7 @@ Two shortcuts are available above the list: **Allow all** ticks every permission
 
 ### Changing Permissions Later
 
-1. Go to **Settings** → **Sub-users** → **Manage sub-users**
+1. Go to **Settings** → **Sub-users**
 2. Click the permission summary in the sub-user's row to open its checklist
 3. Tick or untick permissions
 4. Click **Save permissions**
@@ -65,9 +64,9 @@ If a request is made anyway, the server rejects it with `403` and a message nami
 
 ## Removing a Sub-user
 
-1. Go to **Settings** → **Sub-users** → **Manage sub-users**
+1. Go to **Settings** → **Sub-users**
 2. Click the trash icon in the sub-user's row
-3. Click **Confirm**
+3. Click **Confirm remove**
 
 Removing a sub-user deletes only the login. Files stay in your account, because they were always stored under your account rather than the sub-user's. The sub-user's active sessions are ended immediately.
 

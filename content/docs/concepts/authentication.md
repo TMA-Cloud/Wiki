@@ -49,7 +49,7 @@ Sessions expire after a period of **inactivity**, not a fixed period after login
 - `sessions.last_activity` is updated on each authenticated request and is what the idle check reads
 - After the idle window passes with no requests, the session ends and the user logs in again
 
-The first user sets the window under **Settings** → **Administration** → **Session Timeout**, from 1 to 365 days. A change applies to existing sessions without a restart. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+The first user sets the window under **Settings** → **Administration** → **Session timeout**, from 1 to 365 days. A change applies to existing sessions without a restart. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
 ### Active Sessions
 

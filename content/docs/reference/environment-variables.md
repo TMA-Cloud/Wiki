@@ -22,7 +22,7 @@ Complete reference for all environment variables in TMA Cloud.
 
 **`BACKEND_URL`:** The URL users and the OnlyOffice document server use to reach the app, including the port if it is not 80 or 443. OnlyOffice downloads files and sends saves to this URL, so set it to the public address behind a reverse proxy. It does not change the port the app listens on.
 
-Reverse proxy trust is configured in **Settings** → **Administration** → **Known Proxies**, not through an environment variable. See [Known Proxies](/docs/guides/admin/known-proxies).
+Reverse proxy trust is configured in **Settings** → **Administration** → **Known proxies**, not through an environment variable. See [Known Proxies](/docs/guides/admin/known-proxies).
 
 ## Database Configuration
 

@@ -10,7 +10,7 @@ Manage users in TMA Cloud (admin only).
 ### Viewing Users
 
 1. Go to **Settings** → **Administration** (admin only)
-2. Click **Show all users** under Registered Users
+2. Click **Show all users** under **Registered users**
 3. View user details (email, name, storage usage)
 
 Sub-users appear in this list under the account they belong to. The list also reports `parentUserId` and, for sub-users, their granted permissions.
@@ -20,8 +20,8 @@ Accounts load automatically in cursor batches as you scroll. Each batch keeps an
 ### Viewing Active Desktop Clients
 
 1. Go to **Settings** → **Administration** (admin only)
-2. Click **View clients** under Active Desktop Clients
-3. Review active Electron clients (version, platform, IP, last seen)
+2. Click **View clients** under **Active desktop clients**
+3. Review active desktop app clients (version, platform, IP, last seen)
 
 ### User Information
 
@@ -29,7 +29,7 @@ Accounts load automatically in cursor batches as you scroll. Each batch keeps an
 - **Name:** Display name
 - **Storage Usage:** Current storage usage
 - **Storage Limit:** Configured limit
-- **MFA Status:** MFA enabled/disabled
+- **MFA Status:** MFA enabled/disabled, with totals and the adoption percentage above the list
 - **Created Date:** Account creation date
 
 ## Creating Users
@@ -38,7 +38,7 @@ Accounts load automatically in cursor batches as you scroll. Each batch keeps an
 
 - **Enable Signup:** Allow public registration
 - **Disable Signup:** No one is allowed to signup
-- Toggle in **Settings** → **Administration** → **Allow User Signup**
+- Toggle in **Settings** → **Administration** → **Allow sign-up**
 
 ### Sub-users
 
@@ -69,7 +69,7 @@ Any account, including yours, can add extra logins that share its files and quot
 
 ### Passwords
 
-- When **Allow password change** is enabled in **Settings** → **Administration**, users can change their own password. There is no way for an admin to set another user's password from the interface.
+- When **Allow password changes** is on in **Settings** → **Administration**, users can change their own password. There is no way for an admin to set another user's password from the interface.
 
 ## Best Practices
 

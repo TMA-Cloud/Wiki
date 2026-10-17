@@ -9,9 +9,12 @@ Configure custom domain for share links in TMA Cloud (admin only).
 
 ### Configuration
 
-1. Navigate to **Settings** → **Share Base URL**
-2. Enter custom base URL (e.g., `https://share.example.com`)
-3. Click **Save Settings**
+1. Navigate to **Settings** → **Administration**
+2. Open **Share link address** under **Integrations**
+3. Enter custom base URL (e.g., `https://share.example.com`)
+4. Click **Save**
+
+Clear the field and save to go back to the address people sign in at.
 
 ### Default Behavior
 

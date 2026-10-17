@@ -10,7 +10,7 @@ Configure storage limits for users in TMA Cloud (admin only).
 ### Default Behavior
 
 - **S3:** No disk; default is unlimited when no limit set. **Settings** → **Storage** → **Usage** shows the amount used, and adds a bar with the percentage and free space once a limit is set.
-- No hardcoded limits; configurable per user; set via **Settings** → **Administration** → **Registered Users**
+- No hardcoded limits; configurable per user; set via **Settings** → **Administration** → **Registered users**
 
 ### Per-User Limits
 
@@ -23,10 +23,12 @@ Configure storage limits for users in TMA Cloud (admin only).
 ### For Individual Users
 
 1. Navigate to **Settings** → **Administration**
-2. Open **Registered Users**
-3. Select the user
-4. Set storage limit (MB, GB, or TB)
-5. Save changes
+2. Click **Show all users** under **Registered users**
+3. Click the pencil next to the user's limit
+4. Enter a number and pick the unit (MB, GB, or TB)
+5. Press Enter or click the check mark. The arrow button removes the limit, and Escape or the cross cancels
+
+An empty box also removes the limit. A limit below what the account already stores is refused, with the amount it has to clear. Sub-users show **Inherited**, because they use their owner's quota.
 
 ### Limit Validation
 
@@ -54,7 +56,7 @@ The maximum size for a single uploaded file. Applies to all users.
 ### Configuring
 
 1. Navigate to **Settings** → **Storage**
-2. Click the pencil icon next to **Max upload size**
+2. Click **Max upload size** under **Limits** to open it
 3. Enter a value and select the unit (MB or GB)
 4. Click **Save**
 

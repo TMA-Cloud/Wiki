@@ -8,8 +8,8 @@ Set how long an idle session lasts and how TMA Cloud records when files and fold
 ## Where to Find Them
 
 1. Navigate to **Settings** → **Administration**
-2. Open **Session Timeout** or **Last Opened Tracking** under **Sessions & activity**
-3. Change the values and click **Save Settings**
+2. Open **Session timeout** or **Last opened tracking** under **Sessions and activity**
+3. Change the values and click **Save**
 
 Every backend process re-reads the settings every 15 seconds. The process that handled the save applies them at once.
 
@@ -26,7 +26,7 @@ A change applies to existing sessions:
 - **Shorter timeout:** a session idle longer than the new value is refused on its next request, and the user signs in again.
 - **Longer timeout:** a token issued under the shorter value is re-issued for the new length on its next request.
 
-The background worker deletes sessions that are idle past the timeout, and sessions ended by a password change or **Logout All**. A session is never deleted because of its age alone.
+The background worker deletes sessions that are idle past the timeout, and sessions ended by a password change or **Sign out everywhere**. A session is never deleted because of its age alone.
 
 Choose a value that fits how the workspace is used. The [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) suggests shorter idle timeouts for higher-risk data. A short timeout signs out users who leave the app open but unused, including the desktop app.
 

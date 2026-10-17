@@ -72,7 +72,7 @@ http://your-domain.com/s/{token}
 
 ### Custom Share Domain
 
-Configure a custom share base URL in Settings → Share Base URL (admin only).
+Configure a custom share base URL in Settings → Administration → Share link address (admin only).
 
 When configured:
 

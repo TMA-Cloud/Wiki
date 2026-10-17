@@ -16,7 +16,7 @@ Let people sign in with their Google account (admin only). Google sign-in is not
 ## Configuration
 
 1. Navigate to **Settings** → **Administration**
-2. Open **Google Sign-In** under **Integrations**
+2. Open **Google sign-in** under **Integrations**
 3. Check the **Authorized redirect URI**. It is filled in from the address the page was opened on, so open Settings through the public address users sign in on
 4. Enter the **Client ID** and **Client secret**
 5. Click **Check and save**

@@ -14,9 +14,9 @@ Trusting every proxy would let a direct client forge `X-Forwarded-For`. The serv
 ## Configuration
 
 1. Navigate to **Settings** → **Administration**
-2. Open **Known Proxies** under **Networking**
-3. Enter a comma-separated list of proxy IP addresses, CIDR ranges, or hostnames
-4. Click **Save Settings**
+2. Open **Known proxies** under **Network**
+3. Enter the proxy IP addresses, CIDR ranges, or hostnames, separated by commas or one per line
+4. Click **Save**. A note reminds you that the change applies after a restart
 5. Restart the backend server or container
 
 Examples:
@@ -45,7 +45,7 @@ proxy_set_header Host $host;
 
 ## Verify the Result
 
-After restarting, sign in through the reverse proxy and open **Settings** → **Security** → **Active Sessions**, then click **Refresh**. The IP should be the client address. Authenticated requests and heartbeats update an existing session's stored IP, so an online device does not need to sign in again.
+After restarting, sign in through the reverse proxy and open **Settings** → **Security** → **View sessions**, then click **Refresh**. The IP should be the client address. Authenticated requests and heartbeats update an existing session's stored IP, so an online device does not need to sign in again.
 
 ## Related Topics
 

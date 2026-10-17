@@ -107,7 +107,7 @@ Recording a read on every request would turn each read into a database write. Tw
 
 The effect is at most one write per item per window, batched. The number of statements is set by the flush interval rather than by how many users are reading, so it does not grow with traffic. Timestamps may lag by the flush interval plus the window, which is why the value is documented as approximate.
 
-The first user can turn tracking off and change the window and the write interval under **Settings** → **Administration** → **Last Opened Tracking**. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+The first user can turn tracking off and change the window and the write interval under **Settings** → **Administration** → **Last opened tracking**. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
 ### On the Cloud Drive
 
