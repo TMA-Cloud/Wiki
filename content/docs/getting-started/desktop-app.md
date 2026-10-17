@@ -250,8 +250,8 @@ Pasting back inside TMA Cloud still copies on the server, without uploading anyt
 **Cut** (or **Ctrl+X**) moves items between folders on the server, and empties the
 Windows clipboard so an older copy from another app is not pasted by mistake.
 
-The other way works too. These paste into the open folder with **Ctrl+V** or the
-**Paste** button, and upload:
+The other way works too. These paste into the open folder with **Ctrl+V** or **Paste**
+in the right-click menu on empty space, and upload:
 
 - Files and folders copied in Explorer or any other app
 - Files that exist only inside another app, such as Outlook attachments and messages or
@@ -274,8 +274,9 @@ edges stay the system's.
 
 ## Drag and drop
 
-Drop files or folders from the computer onto the window to upload them into the open
-folder (the root outside **My Files**). Folders keep their structure.
+Drop files or folders from the computer onto the window: the Upload dialog opens with
+them listed, to check before they upload into the open folder (the root outside
+**My Files**). Folders keep their structure.
 
 ## Keyboard Shortcuts
 
@@ -283,7 +284,7 @@ folder (the root outside **My Files**). Folders keep their structure.
 - **Type a name:** Select the next item whose name starts with the letters typed. Pressing the same letter again moves to the next item that starts with it.
 - **Ctrl+A / Cmd+A:** Select all items in the current view.
 - **Ctrl+C / Ctrl+X / Ctrl+V:** Copy, cut and paste within TMA Cloud.
-- **Delete:** Move the selection to the trash (in the trash: delete forever).
+- **Delete:** Move the selection to the trash after you confirm (in the trash: delete forever).
 - **F2:** Rename the selected item.
 - **Enter:** Open the selected file or folder.
 - **Backspace:** Go back to the previous folder; **Alt+Up** goes to the parent folder.
