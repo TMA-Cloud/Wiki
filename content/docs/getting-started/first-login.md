@@ -7,18 +7,20 @@ Create your first account and get started with TMA Cloud.
 
 ## Creating Your First Account
 
-1. Navigate to the TMA Cloud application in your browser
-   - Production: `http://localhost:3000`
-   - Development: `http://localhost:5173`
+1. Open the TMA Cloud address in your browser, for example `http://localhost:3000`
 
-2. Click **"Sign Up"** or navigate to the signup page
+2. Click **New here? Create an account**
 
 3. Fill in your details:
-   - **Email** - Your email address
-   - **Password** - A strong password
    - **Name** - Your display name
+   - **Email** - Your email address
+   - **Password** and **Confirm password** - A strong password
 
-4. Click **"Create Account"**
+4. Click **Create account**
+
+## Password Managers
+
+In the browser the sign-in fields are ordinary form fields with the standard `autocomplete` hints, so the browser's own password manager and extensions such as Bitwarden or 1Password can fill the email and password. After a successful sign-in or new account the browser can offer to save the login; a failed sign-in is not saved. The authentication code field is marked as a one-time code.
 
 ## First User Privileges
 
