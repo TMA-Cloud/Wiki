@@ -39,6 +39,9 @@ tma-server migrate
 
 Apply database migrations and exit. `serve` and `worker` also apply them at startup.
 
+- Each migration file runs in one transaction together with its row in the `migrations` table. A migration that fails is rolled back completely, the app does not start, and the same migration runs again on the next start.
+- A PostgreSQL advisory lock is held while migrations run, so when several app instances start at once, only one applies migrations and the others wait for it.
+
 ### Health Check
 
 ```bash
@@ -86,6 +89,8 @@ cargo run -p tma-cloud
 ```
 
 Run the desktop app.
+
+## Admin Commands
 
 ### S3 bucket
 
@@ -190,7 +195,7 @@ Prebuilt Docker images are available on GitHub Container Registry:
 
 ```bash
 docker pull ghcr.io/tma-cloud/tma:latest
-docker pull ghcr.io/tma-cloud/tma:3.0.0
+docker pull ghcr.io/tma-cloud/tma:4.0.0
 ```
 
 ### Build Image from Source
@@ -202,7 +207,7 @@ make build
 Build Docker image with default tag.
 
 ```bash
-make build IMAGE_TAG=3.0.0
+make build IMAGE_TAG=4.0.0
 ```
 
 Build Docker image with custom tag. The `version` image label is read from the workspace `Cargo.toml` regardless of the tag you pass.
@@ -224,14 +229,6 @@ make help
 ```
 
 List the available targets and configuration variables.
-
-## Git Hooks
-
-```bash
-make hooks
-```
-
-Use the repository's git hooks from `.githooks/`. Run once per clone. It sets `core.hooksPath` to `.githooks`. See [Testing — Git Hooks](/docs/guides/operations/testing#git-hooks) for what each hook checks.
 
 ### Docker Compose
 
@@ -265,6 +262,14 @@ docker compose logs -f app
 
 View logs from app service only.
 
+## Git Hooks
+
+```bash
+make hooks
+```
+
+Use the repository's git hooks from `.githooks/`. Run once per clone. It sets `core.hooksPath` to `.githooks`. See [Testing — Git Hooks](/docs/guides/operations/testing#git-hooks) for what each hook checks.
+
 ## Database Commands
 
 ### PostgreSQL
@@ -274,13 +279,6 @@ psql "$DATABASE_URL"
 ```
 
 Connect to the PostgreSQL database with the URL from `.env`. `psql` reads the same URL, including `sslmode` and other parameters, as the app. On Docker, run it in the container: `docker compose exec postgres sh -c 'psql "$DATABASE_URL"'`.
-
-### Migrations
-
-Migrations run automatically on application startup (or with `tma-server migrate`).
-
-- Each migration file runs in one transaction together with its row in the `migrations` table. A migration that fails is rolled back completely, the app does not start, and the same migration runs again on the next start.
-- A PostgreSQL advisory lock is held while migrations run, so when several app instances start at once, only one applies migrations and the others wait for it.
 
 ### Backup & Restore
 
@@ -294,7 +292,7 @@ Full database backup. Outputs a compressed `.dump` file with a `.meta` sidecar (
 ./db-backup-restore.sh restore backups/<file>.dump
 ```
 
-Restore database from a backup. Validates integrity before touching the database, restores in single-transaction mode.
+Restore database from a backup. Checks the file first, restores into a scratch database, and replaces the live database only when that worked.
 
 ```bash
 ./db-backup-restore.sh verify backups/<file>.dump
