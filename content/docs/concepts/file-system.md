@@ -42,6 +42,12 @@ Where a name has to become a Windows file, it is translated rather than refused:
 - **The desktop app** writes local copies (Open on Desktop, copy to Explorer, Save As) under names that follow Microsoft's naming rules: reserved and control characters become `_`, trailing dots and spaces are dropped, and device names such as `CON`, `NUL.txt` or `COM1.log` get a leading `_`. Copies to Explorer also add a `(n)` suffix to names that differ only in letter case and shorten long names so the staged path stays within 260 characters.
 - **The Cloud Drive** shows each reserved character, and a trailing dot or space, as the private-use character `U+F000` plus its code, the mapping Cygwin, WSL and Syncthing use. Renames and saves turn it back, so the stored name never changes. WSL and Git Bash show the original characters.
 
+### Name Clashes
+
+A new folder or a rename cannot take a name that another file or folder in the same folder already has. Letter case is ignored, as in Explorer and Finder, so `Report.pdf` and `report.PDF` clash, and a file and a folder cannot share a name. Items in the trash do not count. The server refuses the request with `409`, and the New folder and Rename dialogs say so before sending.
+
+Copies, moves and pastes keep both instead, giving the new item a numbered name such as `Photos (1)`, and an upload asks whether to replace the existing file or keep both; see [Upload Files](/docs/guides/user/upload-files) and [Manage Folders](/docs/guides/user/manage-folders#name-conflicts).
+
 ## File Operations
 
 ### Supported Operations

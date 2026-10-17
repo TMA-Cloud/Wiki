@@ -176,6 +176,7 @@ The created folder object.
 **Errors:**
 
 - `404`: `parentId` is not a folder in the account, or it is in the trash. The message is `Target folder not found` and nothing is created.
+- `409`: A file or folder in the parent already has this name, ignoring letter case. The message is `An item with this name is already here`. See [Name Clashes](/docs/concepts/file-system#name-clashes).
 - `422`: The name breaks the rules above.
 
 ## Check Upload Storage
@@ -446,6 +447,12 @@ The updated file or folder object.
   "modified": "2024-01-01T00:00:00Z"
 }
 ```
+
+**Errors:**
+
+- `404`: No item with this `id` in the account.
+- `409`: Another file or folder in the same folder already has this name, ignoring letter case. The message is `An item with this name is already here`. Changing only the letter case of the item's own name is allowed.
+- `422`: The name breaks the rules above.
 
 ## Star Files
 
