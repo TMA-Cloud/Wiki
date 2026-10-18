@@ -147,6 +147,23 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
 
 If you open a document and close it without saving, nothing is uploaded.
 
+### Who is editing
+
+While you have a document open in Word, Excel, PowerPoint or LibreOffice from the Cloud
+Drive folder, TMA Cloud marks it as yours for editing:
+
+- Everyone else in the account sees **Your name is editing** on the file, and you see
+  **You are editing**.
+- On their computers the file is read-only, so Office opens it read-only instead of
+  letting two people change it at once. If they open it from the desktop app, it tells
+  them who is editing.
+- In the browser, the document opens for viewing only.
+- When you close the document, the file is free again within a few seconds.
+
+If your computer crashes or goes offline, the file frees itself within a few
+minutes. Other apps (for example a text editor) leave no sign that a file is open, so
+they do not mark it as being edited; the next section covers what happens then.
+
 ### When someone else saved first
 
 Two people can have the same file open. If someone else saves it after you opened it,

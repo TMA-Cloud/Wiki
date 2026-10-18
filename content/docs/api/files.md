@@ -975,6 +975,64 @@ Every file object carries `contentVersion`, which every replace and OnlyOffice s
 - `404` - File not found or not owned by the user
 - `400` - No file in request or invalid file type
 - `409` - `baseVersion` is not the file's current `contentVersion`: someone else saved after this copy was opened. The refusal is recorded in the audit log as a failed `file.update` with reason `stale_version`.
+- `409` - Someone else holds the file's [edit lock](#edit-locks): "Name is editing this file".
+
+## Edit Locks
+
+While a file is open for editing in the desktop app, the app holds an edit lock on it. Others see who is editing, Cloud Drive gives them the file read-only, and the server refuses their saves until the lock is gone.
+
+A lock is a two-minute lease that the app renews about every 40 seconds. If the app stops renewing it (it crashed, or the computer went offline), the lock simply runs out, so a file is never stuck locked.
+
+While a file is locked, every file object in listings and search results carries a `lock`:
+
+```json
+{
+  "id": "file_123",
+  "name": "Budget.xlsx",
+  "lock": {
+    "userId": "user_789",
+    "name": "Sam",
+    "since": "2026-10-18T09:12:00Z",
+    "expiresAt": "2026-10-18T09:14:00Z"
+  }
+}
+```
+
+OnlyOffice opens a file locked by someone else in view mode.
+
+### POST `/api/files/:id/lock`
+
+Take the edit lock on a file, or renew your own. Needs the **files.edit** permission.
+
+**Response:**
+
+```json
+{
+  "acquired": true,
+  "lock": {
+    "userId": "user_123",
+    "name": "Alex",
+    "since": "2026-10-18T09:12:00Z",
+    "expiresAt": "2026-10-18T09:14:00Z"
+  }
+}
+```
+
+When someone else holds it, `acquired` is `false` and `lock` says who. Taking and releasing a lock are recorded in the audit log as `file.lock` and `file.unlock`.
+
+**Errors:**
+
+- `404` - File not found, not a file, or in the trash
+
+### DELETE `/api/files/:id/lock`
+
+Release your edit lock. Releasing a lock you do not hold does nothing.
+
+**Response:**
+
+```json
+{ "released": true }
+```
 
 ## Upload Derived File (e.g. Exported Document/PDF)
 
