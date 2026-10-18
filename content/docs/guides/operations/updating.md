@@ -5,6 +5,8 @@ description: 'Update a Docker install to a new version with update.sh.'
 
 Update a Docker install to a new version with `update.sh`.
 
+When a new version is published, **Settings → Updates** in the web and desktop apps shows it to the administrator, with a link to its release notes and to this page.
+
 ## Run an Update
 
 `setup.sh` puts `update.sh` in the install directory. Run it there:

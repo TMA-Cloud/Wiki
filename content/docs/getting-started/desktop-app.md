@@ -83,6 +83,15 @@ a flash.
 ## Version and updates
 
 - **Settings → Updates** shows the server version and this app's version.
+- **When an update is available**, the sidebar says so, and **Settings → Updates** adds an
+  **Update to v…** section:
+  - **Release notes** opens that version's entry in the [changelog](/docs/changelog/overview).
+  - **Update guide** opens [Updating](/docs/guides/operations/updating). Only the
+    administrator (the first user) sees it, because only they can update the server.
+    Everyone else is told that their admin takes care of server updates.
+
+  The web app shows the same section. Both links open in the browser; nothing pops up.
+
 - **When it checks.** After sign-in, and then every 6 hours while the app stays signed
   in, the app reads the published release list (`/api/version/latest`). **Check now** in
   **Settings** → **Updates** checks at once.

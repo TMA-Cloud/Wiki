@@ -25,6 +25,17 @@ export function ChangelogOverview() {
 
   const preferredVersionTag = useMemo(() => {
     if (!index) return '';
+    // `?version=4.0.1` (as the app links "What's new") opens that release.
+    const requested =
+      typeof window === 'undefined'
+        ? ''
+        : (new URLSearchParams(window.location.search).get('version') ?? '')
+            .trim()
+            .replace(/^v/i, '');
+    const asked = requested
+      ? index.versions.find((v) => v.version === requested)?.tag
+      : undefined;
+    if (asked) return asked;
     if (index.latest) {
       return (
         index.versions.find((v) => v.version === index.latest)?.tag ??
