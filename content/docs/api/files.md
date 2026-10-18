@@ -20,7 +20,8 @@ Listing, searching, and reading file details are available to every member of an
 | `files.edit`     | `POST /move`, `POST /rename`, `POST /star`, `POST /:id/replace`                                              |
 | `files.share`    | `POST /share`, `POST /share/links`, `POST /link-parent-share`                                                |
 | `files.delete`   | `POST /delete`                                                                                               |
-| `files.trash`    | `POST /trash/restore`, `POST /trash/delete`, `POST /trash/empty`                                             |
+| `files.restore`  | `POST /trash/restore`                                                                                        |
+| `files.purge`    | `POST /trash/delete`, `POST /trash/empty`                                                                    |
 
 A request without the required permission returns `403` with a message naming it:
 

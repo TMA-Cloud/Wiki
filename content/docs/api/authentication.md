@@ -202,7 +202,8 @@ Get the current authenticated user's profile, including what this login is allow
     "files.edit",
     "files.share",
     "files.delete",
-    "files.trash"
+    "files.restore",
+    "files.purge"
   ]
 }
 ```

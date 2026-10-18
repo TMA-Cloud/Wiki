@@ -56,14 +56,15 @@ Sub-users can do whatever their permissions allow within the owner's account. Th
 
 Owners hold every permission over their own account and are never checked against a list. Sub-users are granted permissions individually:
 
-| Permission      | Key              | Covers                                                   |
-| --------------- | ---------------- | -------------------------------------------------------- |
-| Download        | `files.download` | Single and bulk download, opening files in the viewer    |
-| Upload & create | `files.upload`   | Upload, folder creation, copy, derived files             |
-| Modify          | `files.edit`     | Rename, move, star, replace contents, document editing   |
-| Share           | `files.share`    | Create and revoke share links, read existing share links |
-| Move to trash   | `files.delete`   | Soft delete                                              |
-| Manage trash    | `files.trash`    | Restore, permanent delete, empty trash                   |
+| Permission         | Key              | Covers                                                   |
+| ------------------ | ---------------- | -------------------------------------------------------- |
+| Download           | `files.download` | Single and bulk download, opening files in the viewer    |
+| Upload & create    | `files.upload`   | Upload, folder creation, copy, derived files             |
+| Modify             | `files.edit`     | Rename, move, star, replace contents, document editing   |
+| Share              | `files.share`    | Create and revoke share links, read existing share links |
+| Move to trash      | `files.delete`   | Soft delete                                              |
+| Restore from trash | `files.restore`  | Restore items from the trash                             |
+| Delete permanently | `files.purge`    | Permanent delete, empty trash                            |
 
 Browsing is not a permission. Listing folders, searching, and reading file details are available to every member of an account.
 

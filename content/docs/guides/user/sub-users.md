@@ -32,14 +32,17 @@ New sub-users start with all permissions ticked. Untick the ones you do not want
 
 Each sub-user has its own set of permissions. Anything left unticked is denied.
 
-| Permission          | Allows                                                   |
-| ------------------- | -------------------------------------------------------- |
-| **Download**        | Download files and folders, and open them in the viewer  |
-| **Upload & create** | Upload files, create folders, and copy existing items    |
-| **Modify**          | Rename, move, star, and edit document contents           |
-| **Share**           | Create and revoke share links, and copy existing links   |
-| **Move to trash**   | Send files and folders to the trash                      |
-| **Manage trash**    | Restore items from the trash and delete them permanently |
+| Permission             | Allows                                                  |
+| ---------------------- | ------------------------------------------------------- |
+| **Download**           | Download files and folders, and open them in the viewer |
+| **Upload & create**    | Upload files, create folders, and copy existing items   |
+| **Modify**             | Rename, move, star, and edit document contents          |
+| **Share**              | Create and revoke share links, and copy existing links  |
+| **Move to trash**      | Send files and folders to the trash                     |
+| **Restore from trash** | Put items in the trash back where they were             |
+| **Delete permanently** | Delete items in the trash for good, and empty the trash |
+
+Restoring and deleting permanently are separate, so a sub-user can recover mistakes without being able to destroy anything. Sub-users who had **Manage trash** before the split have both.
 
 Browsing is always allowed. Every sub-user can open folders, search, and see file details, even with nothing ticked.
 
