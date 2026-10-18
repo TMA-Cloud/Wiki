@@ -12,7 +12,7 @@ Create shareable links for files and folders in TMA Cloud.
 1. Right-click on a file
 2. Select **"Share"**
 3. Choose an expiry option (7 days, 30 days, or no expiration)
-4. Copy the generated link
+4. Click **Copy** at the end of the link. It turns green and says **Copied**, and a **Link copied** notice appears
 
 ### Folder Share
 
@@ -62,19 +62,19 @@ Re-sharing an already-shared file lets you change the expiry.
 - Links with no expiration show `∞` beside the share icon
 - Expired links show a red clock icon and "Link expired" label
 
-Open **Get Info** on a shared file or folder to see when it was shared, how much time remains, and the exact expiration time. A link with no expiration shows **Never expires**.
+The **Share** dialog of a shared item says how long its link has left, for example "27 days, 19 hours remaining". Open **Get Info** on a shared file or folder to see when it was shared, how much time remains, and the exact expiration time. A link with no expiration shows **Never expires**.
 
 ### Copying Links
 
 - Right-click a shared item → **Copy link** (with several selected, every shared item's link is copied, one per line)
-- Or open **Share** on it and use **Copy** beside its link
+- Or open **Share** on it and use **Copy** at the end of its link
 - Share via email, messaging, etc.
 
 A shared item shows a link icon beside its name, in the list and on grid tiles. Hover the icon to see when it was shared and how long the link lasts. Once a link expires the icon goes away.
 
 ### Revoking Shares
 
-- Right-click and select **"Unshare"**, or use the toolbar
+- Open **Share** on the item and click **Stop sharing**, at the bottom left, away from **Done**
 - Immediate access revocation
 - Link becomes invalid
 
