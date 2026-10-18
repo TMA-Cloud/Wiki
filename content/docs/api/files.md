@@ -943,6 +943,7 @@ Replace the contents of an existing file. The file ID and name stay the same; si
 **Form Data:**
 
 - `file` - New file content (required). Single file in `multipart/form-data`.
+- `baseVersion` - Optional. The `contentVersion` the client's copy came from. If the file has been saved since (by someone else, or by OnlyOffice), the replace is refused with `409` and nothing changes. Without it the replace always lands, as the web app's deliberate **Replace** does.
 
 **Validation:**
 
@@ -962,14 +963,18 @@ The updated file object.
   "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "parentId": "folder_456",
   "starred": false,
-  "modified": "2024-01-01T12:00:00Z"
+  "modified": "2024-01-01T12:00:00Z",
+  "contentVersion": 4
 }
 ```
+
+Every file object carries `contentVersion`, which every replace and OnlyOffice save raises by one. `modified` cannot serve as a version, because uploads keep the client's own file time.
 
 **Errors:**
 
 - `404` - File not found or not owned by the user
 - `400` - No file in request or invalid file type
+- `409` - `baseVersion` is not the file's current `contentVersion`: someone else saved after this copy was opened. The refusal is recorded in the audit log as a failed `file.update` with reason `stale_version`.
 
 ## Upload Derived File (e.g. Exported Document/PDF)
 

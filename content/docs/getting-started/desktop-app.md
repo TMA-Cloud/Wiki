@@ -147,6 +147,19 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
 
 If you open a document and close it without saving, nothing is uploaded.
 
+### When someone else saved first
+
+Two people can have the same file open. If someone else saves it after you opened it,
+your next save does not overwrite theirs. Instead:
+
+- Their version stays as the file.
+- Your save is uploaded beside it as **name (conflicted copy date time)**, for example
+  `Report (conflicted copy 2026-10-15 1946).xlsx`, so neither save is lost.
+- On Windows the file in the Cloud Drive folder goes back to their version.
+
+Open both and copy your changes across, then delete the conflicted copy. Saving several
+times while the file stays open never conflicts with your own earlier saves.
+
 ## Cloud Drive
 
 The desktop app shows TMA Cloud as a folder, so you can open and save files from the file
