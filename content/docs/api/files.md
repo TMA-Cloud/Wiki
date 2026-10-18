@@ -983,6 +983,8 @@ While a file is open for editing in the desktop app, the app holds an edit lock 
 
 A lock is a two-minute lease that the app renews about every 40 seconds. If the app stops renewing it (it crashed, or the computer went offline), the lock simply runs out, so a file is never stuck locked.
 
+A lock belongs to a user on one desktop install. The desktop app sends its install id in the `X-TMA-Device` header with every request, and the lock records it as `deviceId`. The same user signed in on another computer, or in the browser, is kept out like anyone else: they cannot take the lock, and their saves are refused.
+
 While a file is locked, every file object in listings and search results carries a `lock`:
 
 ```json
@@ -993,16 +995,17 @@ While a file is locked, every file object in listings and search results carries
     "userId": "user_789",
     "name": "Sam",
     "since": "2026-10-18T09:12:00Z",
-    "expiresAt": "2026-10-18T09:14:00Z"
+    "expiresAt": "2026-10-18T09:14:00Z",
+    "deviceId": "6f1c2e0a-8f4b-4d2a-9a51-3c0e7b2d9f10"
   }
 }
 ```
 
-OnlyOffice opens a file locked by someone else in view mode.
+OnlyOffice opens a locked file in view mode, also for the user who holds the lock.
 
 ### POST `/api/files/:id/lock`
 
-Take the edit lock on a file, or renew your own. Needs the **files.edit** permission.
+Take the edit lock on a file, or renew your own from the same install (`X-TMA-Device`). Needs the **files.edit** permission.
 
 **Response:**
 
@@ -1018,7 +1021,7 @@ Take the edit lock on a file, or renew your own. Needs the **files.edit** permis
 }
 ```
 
-When someone else holds it, `acquired` is `false` and `lock` says who. Taking and releasing a lock are recorded in the audit log as `file.lock` and `file.unlock`.
+When someone else holds it, or you hold it from another install, `acquired` is `false` and `lock` says who. Taking and releasing a lock are recorded in the audit log as `file.lock` and `file.unlock`.
 
 **Errors:**
 
@@ -1026,7 +1029,7 @@ When someone else holds it, `acquired` is `false` and `lock` says who. Taking an
 
 ### DELETE `/api/files/:id/lock`
 
-Release your edit lock. Releasing a lock you do not hold does nothing.
+Release your edit lock, taken from the same install. Releasing a lock you do not hold does nothing.
 
 **Response:**
 

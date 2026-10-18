@@ -160,6 +160,10 @@ Drive folder, TMA Cloud marks it as yours for editing:
 - In the browser, the document opens for viewing only.
 - When you close the document, the file is free again within a few seconds.
 
+This also holds for you on another computer. If you left a document open on your
+work PC, your laptop shows **You are editing on another computer** and opens it
+read-only, so you cannot overwrite your own unsaved work by accident.
+
 If your computer crashes or goes offline, the file frees itself within a few
 minutes. Other apps (for example a text editor) leave no sign that a file is open, so
 they do not mark it as being edited; the next section covers what happens then.
