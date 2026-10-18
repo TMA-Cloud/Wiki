@@ -87,7 +87,6 @@ For validation errors, the response includes a `details` field:
 - `429` - Too Many Requests (rate limit or backup-code cooldown)
 - `499` - Client Closed Request (upload cancelled by the client)
 - `500` - Server Error
-- `503` - Service Unavailable (Google OAuth requested while disabled)
 
 ## Related Topics
 

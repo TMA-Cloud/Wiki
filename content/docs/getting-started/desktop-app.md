@@ -72,8 +72,6 @@ A session ended elsewhere (a password change, **Sign out everywhere**, or a sess
 revoked in **Settings → Security**) returns the app to the sign-in form within a minute,
 even while it sits idle.
 
-Google sign-in is available in the browser only.
-
 Only one copy of the app runs at a time: opening it again brings the running window
 to the front.
 

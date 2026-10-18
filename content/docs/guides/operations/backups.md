@@ -7,7 +7,7 @@ Backup and restore procedures for TMA Cloud.
 
 ## What to Backup
 
-- **Database:** PostgreSQL database, including the job queue tables (`job_queue`, `job_schedules`). It includes the bucket and Google sign-in settings with their encrypted secrets
+- **Database:** PostgreSQL database, including the job queue tables (`job_queue`, `job_schedules`). It includes the bucket settings with their encrypted secret
 - **Files:** S3 bucket contents
 - **Configuration:** `.env` file
 - **Encryption key:** See [Encryption Key](#encryption-key)

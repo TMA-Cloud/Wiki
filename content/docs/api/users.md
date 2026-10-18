@@ -576,64 +576,6 @@ Replace the known proxy list (admin only).
 
 The backend loads this list at startup. Restart every backend instance after an update.
 
-## Google Sign-In Configuration
-
-### GET `/api/user/google-auth-config`
-
-Get the saved Google OAuth client (admin only). The client secret is never returned.
-
-**Response:**
-
-```json
-{
-  "configured": true,
-  "version": 3,
-  "clientId": "123456789-abc123.apps.googleusercontent.com",
-  "redirectUri": "https://cloud.example.com/api/google/callback",
-  "updatedAt": "2026-10-09T12:00:00.000Z"
-}
-```
-
-When no client is saved, the response is `{ "configured": false, "version": 0 }`.
-
-### PUT `/api/user/google-auth-config`
-
-Check the client with Google, then save it (admin only).
-
-**Request Body:**
-
-```json
-{
-  "clientId": "123456789-abc123.apps.googleusercontent.com",
-  "clientSecret": "GOCSPX-...",
-  "redirectUri": "https://cloud.example.com/api/google/callback",
-  "expectedVersion": 3
-}
-```
-
-**Validation:**
-
-- `clientId`: Required. Must end in `.apps.googleusercontent.com`.
-- `clientSecret`: Required unless a secret is saved for the same `clientId`; empty keeps the saved one.
-- `redirectUri`: Required. `https://` (or `http://` on localhost), a domain name, no query or fragment, path `/api/google/callback`.
-- `expectedVersion`: Optional. The `version` the edit started from; a mismatch returns `409`.
-
-**Response:** The saved settings, as returned by `GET`.
-
-**Errors:**
-
-- `400` - Invalid input, or Google rejected the client ID or secret
-- `409` - The settings changed since `expectedVersion`
-- `502` - Google could not be reached or gave an unexpected answer
-
-**Rate limiting:** 20 saves per 15 minutes per user.
-
-### DELETE `/api/user/google-auth-config`
-
-Turn Google sign-in off and delete the saved client (admin only). Accounts keep their Google link.
-
-**Response:** `{ "configured": false, "version": 4 }`
-
 ## Session and Access Time Configuration
 
 ### GET `/api/user/activity-config`

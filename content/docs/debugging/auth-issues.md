@@ -16,7 +16,6 @@ Troubleshooting authentication problems.
 3. Verify signup is enabled (if creating new account)
 4. Check for rate limiting (25 attempts per 15 minutes per IP and email). Failed logins are also limited to 100 per 15 minutes per IP and 20 per 15 minutes per account; the second can be reached by someone else trying the same email, and clears after 15 minutes
 5. For MFA: verify/disable limited to 5 attempts per minute
-6. For a Google-only account (created with **Continue with Google**), password login always returns **Invalid credentials**, because the account has no password. Use Google sign-in
 
 ### MFA Issues
 
@@ -35,16 +34,6 @@ Troubleshooting authentication problems.
 5. Backup codes are 8 characters and contain no dashes. The login and MFA-disable fields strip any dashes you type, so `ABCD-EFGH` and `ABCDEFGH` both work in the app but a direct API call is compared as sent, so send the code without separators
 6. A backup code works once. Check the remaining count under **Settings** → **Security**; regenerating replaces all ten and invalidates the old set
 7. If rate-limited, wait one minute and retry
-
-### Google Sign-in Returns to the Login Page with an Error
-
-| Message on the login page    | Cause and fix                                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------------- |
-| Sign-in expired or tampered  | Missing or invalid `oauth_flow` cookie. Retry from the login page in the same browser |
-| Email not verified           | Google account email is unverified so verify in Google, then retry                    |
-| Signup is currently disabled | No account exists and new signups are off, Admin must enable                          |
-
-If `oauth_flow` never reaches the callback, check that the redirect URI under **Settings** → **Administration** → **Google sign-in** uses the same host as the page the user started from, since the cookie is only sent back to that host. If Google shows `redirect_uri_mismatch`, add that exact URI to the OAuth client in Google Cloud. See [Google Sign-In](/docs/guides/admin/google-sign-in).
 
 ### Password Rejected When Setting It
 

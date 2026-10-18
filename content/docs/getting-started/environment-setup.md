@@ -48,10 +48,6 @@ Use `rediss://` for TLS. The number after the last `/` is the Redis database.
 
 Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known proxies**. See [Known Proxies](/docs/guides/admin/known-proxies). The session timeout and last-opened tracking are set there too; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
-## Google Sign-In (Optional)
-
-Google sign-in is not configured through environment variables. After the first login, the first user enters the OAuth client in **Settings** → **Administration** → **Google Sign-In**. See [Google Sign-In](/docs/guides/admin/google-sign-in).
-
 ## File Storage
 
 The S3-compatible bucket is not set in `.env`. After the first account is created, connect it in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).

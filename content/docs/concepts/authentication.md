@@ -15,15 +15,6 @@ TMA Cloud supports multiple authentication methods:
 - JWT token-based sessions
 - httpOnly cookies for token storage
 
-### Google OAuth (Optional)
-
-- OAuth 2.0 authorization code flow with a `state` value and PKCE (`S256`). Both are held in a short-lived HTTP-only `oauth_flow` cookie and checked on the callback, so a callback that the browser did not start is refused
-- Requests only `openid`, `profile`, and `email`; no offline access or refresh token
-- Turned on by the first user in **Settings**, with the client secret stored encrypted. See [Google Sign-In](/docs/guides/admin/google-sign-in)
-- Automatic account creation when signup is enabled
-- Linked to an existing email/password account with the same email
-- Account creation and linking by email require Google to report the email as verified (`email_verified`). A Google account already linked by its Google ID signs in without this check
-
 ### Multi-Factor Authentication (MFA)
 
 - TOTP-based (Time-based One-Time Password), 30-second steps
@@ -64,7 +55,7 @@ The first user sets the window under **Settings** → **Administration** → **S
 
 - **Token Versioning:** Invalidate all tokens on logout-all
 - **Rate Limiting:** 25 login/signup attempts per 15 minutes per IP/email; failed logins also limited to 100 per 15 minutes per IP and 20 per 15 minutes per account; MFA verify/disable 5 attempts per minute; backup code regeneration 3 attempts per 10 minutes with 5-minute cooldown. See [Rate Limits](/docs/reference/rate-limits)
-- **Login Timing:** Unknown emails and Google-only accounts still run a bcrypt comparison, so response time does not reveal which emails have accounts
+- **Login Timing:** Unknown emails and accounts with no password still run a bcrypt comparison, so response time does not reveal which emails have accounts
 - **Audit Logging:** All authentication events logged
 - **Password Change:** When enabled by the admin, users change their own password from Settings → Security. Two gates apply before the change is accepted: the session must be less than 10 minutes old, and an MFA or backup code is required when MFA is on. On success every session and token for that login is invalidated
 

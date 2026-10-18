@@ -245,4 +245,4 @@ See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/ope
 
 **Cloud Drive:** Cloud Files (Windows), FUSE (Linux), NFS (macOS)
 
-**Integration:** OnlyOffice, Google OAuth
+**Integration:** OnlyOffice

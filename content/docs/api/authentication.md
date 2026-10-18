@@ -88,7 +88,7 @@ The authenticated user's object, including `isSubUser` and the login's `permissi
 
 **Error cases:**
 
-- `401 Invalid credentials` - Wrong password, unknown email, or an account that has no password (Google-only). The three cases return the same message and take the same time.
+- `401 Invalid credentials` - Wrong password, unknown email, or an account that has no password. The three cases return the same message and take the same time.
 - `400 MFA code required` - The account has MFA and no `mfaCode` was sent.
 - `401 Invalid MFA code`
 
@@ -135,7 +135,7 @@ This endpoint:
 
 - Requires authentication.
 - Is only available when password change is enabled by the first user (admin).
-- Only works for accounts that have a local email/password (not Google-only accounts).
+- Only works for accounts that have a password.
 - Requires **recent** authentication: the session must have been created within the last 10 minutes. An older session is rejected with `403` and the user has to log in again first.
 - Requires a valid MFA or backup code in `mfaCode` when MFA is enabled on the account, regardless of session age.
 
@@ -174,7 +174,7 @@ On success, all existing sessions and tokens are invalidated. The user must log 
 - `401 Invalid MFA code.`
 - `400 Current password is incorrect`
 - `400 New password must be different from the current password`
-- `400 Password change is not available for this account` [Accounts created with Google]
+- `400 Password change is not available for this account` [Accounts with no password]
 
 Failed attempts are recorded as `auth.password_change` audit events with a `reason` in the metadata.
 
@@ -214,71 +214,6 @@ Get the current authenticated user's profile, including what this login is allow
 - `permissions`: What this login may do. Owners receive the full set; sub-users receive only what was granted. See [Authorization](/docs/concepts/authorization).
 
 **Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
-
-## Google OAuth
-
-### GET `/api/google/enabled`
-
-Check whether the first user has saved a Google OAuth client. See [Google Sign-In](/docs/guides/admin/google-sign-in).
-
-**Response:**
-
-```json
-{
-  "enabled": true
-}
-```
-
-### GET `/api/google/login`
-
-Initiate the Google OAuth login flow. This will redirect the user to Google's authentication page. Returns `503` while Google sign-in is off.
-
-The response sets an HTTP-only `oauth_flow` cookie, valid for 10 minutes, holding a random `state` value and a PKCE code verifier. The redirect to Google carries the `state` and the `S256` code challenge. Scopes are `openid`, `profile`, and `email`, with `prompt=select_account`.
-
-### GET `/api/google/callback`
-
-The callback endpoint for Google to redirect to after successful authentication. Returns `503` while Google sign-in is off, so a flow started before it was turned off cannot finish.
-
-The callback clears the `oauth_flow` cookie and checks that the `state` query parameter matches it before redeeming the code with the PKCE verifier. Failures redirect to the app with an `error` query parameter, which the login page shows as a message:
-
-| Redirect                   | Cause                                                                                                 |
-| -------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `/?error=oauth_state`      | The `oauth_flow` cookie is missing or expired, or `state` does not match                              |
-| `/?error=email_unverified` | Google reports the email as unverified, and the Google account is not already linked                  |
-| `/?error=signup_disabled`  | No account exists for this Google login and signup is disabled                                        |
-| `/?mfa_required=true`      | The account has MFA. Complete sign-in with [`POST /api/google/mfa-verify`](#post-apigooglemfa-verify) |
-
-**Rate limiting:** 25 attempts per 15 minutes per IP/email.
-
-### POST `/api/google/mfa-verify`
-
-Complete Google OAuth sign-in when the account has MFA enabled. The Google callback sets a short-lived `mfa_pending` HTTP-only cookie that identifies the pending login.
-
-**Request Body:**
-
-```json
-{
-  "mfaCode": "123456"
-}
-```
-
-The code may be a six-digit TOTP or an unused backup code.
-
-**Response:**
-
-```json
-{
-  "success": true
-}
-```
-
-**Error cases:**
-
-- `400 MFA code required`
-- `401 Invalid MFA code`
-- `401 MFA session expired or missing. Please sign in again.`
-
-**Rate limiting:** 5 attempts per minute per IP.
 
 ## Multi-Factor Authentication
 

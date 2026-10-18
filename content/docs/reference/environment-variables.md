@@ -72,16 +72,12 @@ Background jobs are stored in the `job_queue` and `job_schedules` tables of the 
 
 The session timeout is not an environment variable. The first user sets it in **Settings** → **Administration**; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
 
-## Google Sign-In (Optional)
-
-Google sign-in is not configured through environment variables. The first user enters the OAuth client in **Settings** → **Administration**, and its client secret is stored encrypted in the database. See [Google Sign-In](/docs/guides/admin/google-sign-in).
-
 ## File Storage
 
-| Variable                   | Required         | Default             | Description                                             |
-| -------------------------- | ---------------- | ------------------- | ------------------------------------------------------- |
-| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | KEKs for files, the bucket secret and the Google secret |
-| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY`            |
+| Variable                   | Required         | Default             | Description                                  |
+| -------------------------- | ---------------- | ------------------- | -------------------------------------------- |
+| `FILE_ENCRYPTION_KEY`      | Yes (production) | Development default | KEKs for files and the bucket secret         |
+| `FILE_ENCRYPTION_KEY_FILE` | No               | -                   | Path to a file holding `FILE_ENCRYPTION_KEY` |
 
 **`FILE_ENCRYPTION_KEY`:** A single key, or a keyring of `version:key` entries after a rotation: one per line in a key file, comma-separated in `.env`. A key without a version is version 1. The highest version encrypts new data and the others still decrypt. In production the newest key must be a random 32-byte key, written as base64 (44 characters) or hex (64 characters). The server refuses to start with a passphrase. Generate a key with `tma-server key generate`. Outside production a passphrase is accepted and stretched with PBKDF2.
 
