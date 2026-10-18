@@ -83,7 +83,7 @@ The backend derives the largest possible encrypted object from this setting and 
 
 - Files count toward limit
 - Trash counts until permanently deleted
-- Usage tracked by statement-level database triggers
+- Usage tracked by database triggers on file inserts, deletes and size changes
 - Uploads and replacements lock the account row while checking quota, preventing concurrent requests from overshooting a finite limit
 - Cache invalidated on file operations
 

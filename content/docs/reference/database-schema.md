@@ -87,8 +87,11 @@ Files and folders.
 | `aggregate_size`         | BIGINT      | Total bytes below a folder; zero for files               |
 | `aggregate_file_count`   | INTEGER     | Descendant file count maintained for folders             |
 | `aggregate_folder_count` | INTEGER     | Descendant folder count maintained for folders           |
+| `content_version`        | BIGINT      | Raised by every replace and OnlyOffice save, default 1   |
 
-**Indexes:** `user_id`, `parent_id`, `deleted_at`, `created_at`, partial index and unique index on `path` where `path IS NOT NULL`, `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, `dek_kek_version` for encrypted files, `(deleted_at, id)` for bounded trash cleanup, covering indexes for active-file statistics and storage-usage reconciliation, and folder-list page indexes for name, modified time, last access, and effective size.
+**Indexes:** `user_id`, `parent_id`, `created_at`, unique `(path, user_id, type)` where `path IS NOT NULL` (also used for lookups by `path`), `(user_id, accessed_at DESC)` where `deleted_at IS NULL`, `dek_kek_version` for encrypted files, `(deleted_at, id)` for bounded trash cleanup, covering indexes for active-file statistics and storage-usage reconciliation, and folder-list page indexes for name, modified time, last access, and effective size.
+
+**Folder totals and usage:** `files_aggregate_insert` and `files_aggregate_delete` are statement-level triggers: they group the statement's rows by parent and add each group's totals to every ancestor folder once, so an upload batch, copy or permanent delete of many items updates each ancestor once rather than once per item. Moves (`files_aggregate_update`) are handled row by row. `files_storage_insert` and `files_storage_delete` keep `users.storage_used` per statement; `files_storage_update` is a row trigger that fires only when `size`, `type` or `user_id` changes, so starring, sharing and access-time updates cost nothing extra.
 
 **Hierarchy constraint:** `files_parent_not_self` rejects a row whose `parent_id` equals its own `id`. Move operations also reject indirect descendant cycles, and recursive reads keep a visited-ID path so legacy bad data cannot loop forever.
 
@@ -103,6 +106,19 @@ Name search is backed by a trigram GIN index from `pg_trgm` on `lower(name)` and
 **File timestamps:** `modified` is the file's own timestamp — uploads and copies preserve the client's original mtime, so it can be years old on a row written seconds ago. `created_at` is when the row was written and is what orphan detection uses to tell an in-flight write from an orphan. `accessed_at` is when the item was last read, and `accessed_by` which signed-in user read it: the owner or a sub-user, or null for a share-link visitor. `shared_at` is set when an item joins a share and cleared when it is unshared. Re-sharing an active item does not change it. Renames and moves change neither `path` nor `created_at`, and they do not count as reads, so `accessed_at` is left alone as well. Reading an item never changes `modified`.
 
 **`accessed_at` precision:** The value is written at most once per update window per item, one hour by default, so it can lag a read by up to that long. This follows NTFS, which guarantees its last-access time only to within an hour, and Linux's `relatime`. Writes are buffered in memory and flushed in batches, so a read never waits on the update. See [File System](/docs/concepts/file-system#last-access-time).
+
+### `file_locks`
+
+Edit locks: who is editing a file in a desktop app or in OnlyOffice right now. A lock is a lease; an expired row counts as free and is replaced by the next lock.
+
+| Column        | Type        | Description                                                                      |
+| ------------- | ----------- | -------------------------------------------------------------------------------- |
+| `file_id`     | TEXT        | Primary key, FK → files.id (cascade)                                             |
+| `user_id`     | TEXT        | Who holds it, FK → users.id (cascade)                                            |
+| `owner_id`    | TEXT        | The account the file belongs to, FK → users.id (cascade)                         |
+| `acquired_at` | TIMESTAMPTZ | When it was taken, default now()                                                 |
+| `expires_at`  | TIMESTAMPTZ | End of the lease                                                                 |
+| `device_id`   | TEXT        | The desktop install, or `onlyoffice:` and the document key for a browser session |
 
 ### `share_links`
 
@@ -197,7 +213,7 @@ Active user sessions.
 | `created_at`    | TIMESTAMPTZ | Default now()                          |
 | `last_activity` | TIMESTAMPTZ | Default now()                          |
 
-**Indexes:** `(user_id, created_at DESC)`, `(user_id, token_version)`, `last_activity`
+**Indexes:** `(user_id, token_version)`, `last_activity`
 
 A session is invalid once its `token_version` falls behind the user's current one, which is how "logout everywhere" and a password change end every session at once.
 
@@ -252,7 +268,7 @@ Browser-session presence and desktop app heartbeat records.
 | `last_seen_at` | TIMESTAMPTZ  | Last heartbeat timestamp              |
 | `created_at`   | TIMESTAMPTZ  | First heartbeat timestamp             |
 
-**Indexes:** `user_id`, `last_seen_at`
+**Indexes:** `user_id`. The table holds one row per desktop install or web session, so `last_seen_at` is left unindexed and each heartbeat update stays a cheap in-place (HOT) update.
 
 The Active Sessions list treats a session as online only when a matching row was seen in the last three minutes. Browser presence rows use `web` for `app_version` and `platform`; the Active Desktop Clients admin list excludes them.
 

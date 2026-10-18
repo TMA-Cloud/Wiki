@@ -9,7 +9,7 @@ Background services and workers in TMA Cloud.
 
 TMA Cloud uses one worker process for file operations, object cleanup, scheduled maintenance, admin-requested orphan work, share auto-linking, and OnlyOffice force-save commands. Jobs are stored in PostgreSQL in the `job_queue` table, so schedules and retries survive restarts.
 
-A job is saved in the same database as the request that created it. Workers claim jobs with `FOR UPDATE SKIP LOCKED`, so several worker processes never take the same job, and the server wakes them with a PostgreSQL `NOTIFY` instead of making them poll.
+A job is saved in the same database as the request that created it. Workers claim jobs with `FOR UPDATE SKIP LOCKED`, so several worker processes never take the same job, and the server wakes them with a PostgreSQL `NOTIFY` instead of making them poll. An idle queue looks again only when its next delayed job (a retry or a scheduled run) comes due, and at least every 30 seconds in case a notification was missed while the worker reconnected. Finishing a keyed job sends a `NOTIFY` too, so the next job with that key starts without waiting.
 
 Audit events do not go through the queue. Each process batches them and writes them itself; see [Audit Logs](/docs/guides/operations/audit-logs).
 

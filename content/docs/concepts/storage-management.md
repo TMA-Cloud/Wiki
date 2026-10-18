@@ -32,7 +32,7 @@ Storage limits and management in TMA Cloud.
 
 ### Tracking
 
-- Reads are constant-time from `users.storage_used`; statement-level database triggers update the counter after file inserts, updates, and deletes
+- Reads are constant-time from `users.storage_used`; database triggers update the counter once per statement for inserts and deletes, and per row for the updates that change a file's size, type or owner
 - Upload and replacement transactions lock the account row before checking quota. Long object-store copies reserve their bytes first and release the reservation in the metadata transaction, so concurrent API instances cannot approve the same free space twice.
 - **S3:** Total = per-user limit or null (Unlimited). Free = limit − used or null. No disk.
 - Visual charts and indicators; per-user usage statistics
