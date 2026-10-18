@@ -11,7 +11,7 @@ Manage users in TMA Cloud (admin only).
 
 1. Go to **Settings** → **Administration** (admin only)
 2. Click **Show all users** under **Registered users**
-3. View user details (email, name, storage usage)
+3. View user details (name, email, storage usage)
 
 Sub-users appear in this list under the account they belong to. The list also reports `parentUserId` and, for sub-users, their granted permissions.
 
@@ -25,12 +25,13 @@ Accounts load automatically in cursor batches as you scroll. Each batch keeps an
 
 ### User Information
 
-- **Email:** User email address
-- **Name:** Display name
-- **Storage Usage:** Current storage usage
-- **Storage Limit:** Configured limit
-- **MFA Status:** MFA enabled/disabled, with totals and the adoption percentage above the list
-- **Created Date:** Account creation date
+- **User:** Display name, with the email address under it
+- **Storage:** Current storage usage, with a bar when the account has a limit
+- **Limit:** Configured limit, or **Default**
+- **Two-factor:** **On** or **Off**, with how many users have it on and the adoption percentage above the list
+- **Joined:** The day the account was created. Hover over it for the exact time
+
+On a narrow screen, **Joined** and then **Two-factor** are hidden so names stay readable.
 
 ## Creating Users
 

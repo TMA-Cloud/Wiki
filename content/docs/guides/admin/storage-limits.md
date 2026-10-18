@@ -24,11 +24,11 @@ Configure storage limits for users in TMA Cloud (admin only).
 
 1. Navigate to **Settings** → **Administration**
 2. Click **Show all users** under **Registered users**
-3. Click the pencil next to the user's limit
+3. Click the user's limit (**Default** when none is set). An editor opens under their row
 4. Enter a number and pick the unit (MB, GB, or TB)
-5. Press Enter or click the check mark. The arrow button removes the limit, and Escape or the cross cancels
+5. Press Enter or click **Save**. **Use default** removes the limit, and Escape or **Cancel** closes the editor
 
-An empty box also removes the limit. A limit below what the account already stores is refused, with the amount it has to clear. Sub-users show **Inherited**, because they use their owner's quota.
+An empty box also removes the limit. A limit below what the account already stores is refused, with the amount it has to clear. Sub-users show **Inherited**, because they use their owner's quota. An account with a limit shows a small bar under its usage, which turns amber at 80% and red at 95%.
 
 ### Limit Validation
 

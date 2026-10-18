@@ -17,7 +17,7 @@ Manage multi-factor authentication in TMA Cloud (admin only).
 
 ### View MFA Status
 
-- The **Registered users** list shows each user's MFA status, and above it how many users have MFA on and off and the adoption percentage
+- The **Registered users** list shows each user's MFA status (**On** or **Off**), and above it how many users have MFA on, with the adoption percentage and a bar
 
 ### MFA Configuration
 
