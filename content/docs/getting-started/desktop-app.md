@@ -164,9 +164,20 @@ This also holds for you on another computer. If you left a document open on your
 work PC, your laptop shows **You are editing on another computer** and opens it
 read-only, so you cannot overwrite your own unsaved work by accident.
 
-If your computer crashes or goes offline, the file frees itself within a few
-minutes. Other apps (for example a text editor) leave no sign that a file is open, so
-they do not mark it as being edited; the next section covers what happens then.
+**Other files on Windows:** when you open any other file from the desktop app (a text
+file, an image, a PDF), it stays marked as yours until the program Windows started for
+it closes. Some programs give no way to tell when that is, and then the file is not
+marked:
+
+- a program that was already running and takes the file into its open window;
+- apps from the Microsoft Store, such as Photos.
+
+Files you open straight from the Cloud Drive folder in File Explorer are marked only for
+Office and LibreOffice documents. On Linux and macOS, only Office and LibreOffice
+documents are marked.
+
+If your computer crashes or goes offline, the file frees itself within a few minutes.
+When a file is not marked, the next section covers what happens if two people save it.
 
 ### When someone else saved first
 
