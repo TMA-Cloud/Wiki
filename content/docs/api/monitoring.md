@@ -60,7 +60,7 @@ see [Logging](/docs/guides/operations/logging).
 
 ### GET `/api/version`
 
-Get currently deployed backend version. Requires authentication.
+Get the versions running here. Requires authentication.
 
 **Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
 
@@ -68,8 +68,8 @@ Get currently deployed backend version. Requires authentication.
 
 ```json
 {
-  "frontend": "4.0.0",
-  "backend": "4.0.0",
+  "server": "4.0.0",
+  "web": "4.0.0",
   "desktop": "4.0.0"
 }
 ```
@@ -89,16 +89,26 @@ The response format depends on the external update feed. Example:
 
 ```json
 {
-  "frontend": "4.0.0",
-  "backend": "4.0.0",
+  "server": "4.0.0",
+  "web": "4.0.0",
   "desktop": "4.0.0"
 }
 ```
 
-- `frontend`, `backend`: Latest web app and server versions from the update feed
+- `server`, `web`: Latest server and web app versions from the update feed
 - `desktop`: Latest desktop app version from the update feed; the desktop app installs it where it can update itself (see [Desktop App](/docs/getting-started/desktop-app#version-and-updates))
 
 A key missing from the feed is returned as `unknown`.
+
+The feed is a `versions.json` with the same three keys:
+
+```json
+{
+  "server": "4.0.0",
+  "web": "4.0.0",
+  "desktop": "4.0.0"
+}
+```
 
 **Note:** This endpoint proxies the response from the update feed. A successful response is cached in the backend process for 10 minutes, so a release can take up to 10 minutes to appear. Failed requests are not cached and return an error response.
 
