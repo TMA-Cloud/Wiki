@@ -9,14 +9,18 @@ Create your first account and get started with TMA Cloud.
 
 1. Open the TMA Cloud address in your browser, for example `http://localhost:3000`
 
-2. Click **New here? Create an account**
+2. Under the sign-in card, click **Create an account**
 
 3. Fill in your details:
    - **Name** - Your display name
    - **Email** - Your email address
-   - **Password** and **Confirm password** - A strong password
+   - **Password** - At least 8 characters. The line under the field ticks green once it is long enough, and the eye at the end of the field shows what you typed
 
-4. Click **Create account**
+4. Click **Create account**. If something is missing, a message above the button says what to fix
+
+If your account has two-factor authentication, signing in takes a second step: after the password, enter the 6-digit code from your authenticator app or a backup code, then click **Verify**. **Use a different account** goes back to the first step.
+
+In the desktop app the card also asks for the **Server** address, and says **Connected** under it once the server answers.
 
 ## Password Managers
 
