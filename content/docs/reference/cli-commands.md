@@ -58,7 +58,7 @@ From the repository root:
 cargo xtask ci
 ```
 
-Run the checks CI runs: formatting (rustfmt and Prettier), the house rules (file size, copied code, theme colours), Clippy with warnings as errors, all unit tests, and the WebAssembly build of the web app.
+Run the checks CI runs: formatting (rustfmt and Prettier), the house rules (file size, copied code and duplicate functions, unused dependencies, theme colours), Clippy with warnings as errors, all unit tests, and the WebAssembly build of the web app.
 
 ```bash
 cargo xtask fmt
@@ -70,7 +70,7 @@ Format Rust with rustfmt and Markdown, YAML, JSON, HTML and CSS with Prettier. `
 cargo xtask house
 ```
 
-Check the house rules on their own: no file over 400 lines of code, no copied blocks of 10 or more lines, and theme colours only. `--sizes` lists the largest files; `--near` also reports copies that differ only in literals.
+Check the house rules on their own: no file over 400 lines of code, no copied blocks of 10 or more lines, no two functions with the same body, no unused dependencies, and theme colours only. `--sizes` lists the largest files; `--near` also reports copies that differ only in literals.
 
 ```bash
 cargo test -p tma-server --test api

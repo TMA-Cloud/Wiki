@@ -44,9 +44,20 @@ Check the project's own rules, which rustfmt and Clippy do not cover:
 
 - No source file over 400 lines of code. Blank lines, comments and the test module do
   not count. Clippy separately limits functions to 150 lines.
-- No run of 10 or more identical code lines in two places.
+- No run of 10 or more identical code lines in two places, and no two functions with the
+  same body of 3 or more lines, whatever their names.
+- No dependency that a crate's code never names. One needed only for a feature or for
+  linking is listed under `[package.metadata.cargo-machete] ignored`.
 - Interface colours come from the theme, never literal values, and text uses the ASCII
   apostrophe.
+
+Deprecated and unused code is refused by the compiler itself, not only in CI: the
+workspace lints deny `deprecated` and the whole `unused` group, so `cargo check`,
+`cargo build` and `trunk build` fail on a deprecated call or an unused import, variable,
+function, field or result. A lint can be silenced only with
+`#[expect(lint, reason = "...")]`; Clippy rejects `#[allow]` and missing reasons, and an
+`expect` that nothing triggers any more is itself an error, so a stale suppression
+cannot hide dead code.
 
 `cargo xtask house --sizes` lists the largest files. `cargo xtask house --near` also finds
 copies that differ only in strings or numbers; it flags look-alike data tables too, so
