@@ -165,12 +165,14 @@ work PC, your laptop shows **You are editing on another computer** and opens it
 read-only, so you cannot overwrite your own unsaved work by accident.
 
 **Other files on Windows:** when you open any other file from the desktop app (a text
-file, an image, a PDF), it stays marked as yours until the program Windows started for
-it closes. Some programs give no way to tell when that is, and then the file is not
-marked:
+file, an image, a PDF), it stays marked as yours while a window shows it. Programs name
+the open file in their title bar ("Notes.txt - Notepad"), and TMA Cloud watches for
+that:
 
-- a program that was already running and takes the file into its open window;
-- apps from the Microsoft Store, such as Photos.
+- The file is free again about 15 seconds after its window closes.
+- If no window names the file within 30 seconds, it is not marked.
+- A program with tabs, such as Notepad, names only the tab in front. Switching to
+  another tab for more than 15 seconds frees the file.
 
 Files you open straight from the Cloud Drive folder in File Explorer are marked only for
 Office and LibreOffice documents. On Linux and macOS, only Office and LibreOffice
