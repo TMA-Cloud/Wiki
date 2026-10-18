@@ -152,7 +152,7 @@ None of these keys act while you type in a text field such as search, or while a
 
 ### Document Editing and Viewers
 
-- **OnlyOffice Integration:** In the browser, opening a document (`.docx`, `.xlsx`, `.pptx`, and similar) edits it in OnlyOffice inside TMA Cloud when OnlyOffice is configured. **Open in tab** moves it to its own tab; **Close** returns to your files
+- **OnlyOffice Integration:** In the browser, opening a document (`.docx`, `.xlsx`, `.pptx`, and similar) edits it in OnlyOffice inside TMA Cloud when OnlyOffice is configured. **Open in tab** moves it to its own tab; **Close** returns to your files. One person edits a document at a time: while someone else has it open for editing (in the browser or the desktop app), it opens for viewing and TMA Cloud says who is editing
 - **Desktop app:** Opening any file (double-click, **Enter** or **Open**) opens it in the computer's app for its type (Word, Excel, Photos, and so on), never in the browser. Every save uploads back. Programs, scripts and shortcuts are not opened. See [Desktop App](/docs/getting-started/desktop-app#open-files-in-desktop-apps)
 - **Export / Save As (desktop app):** When a file opened in its desktop app is saved as a new file in the same folder (for example a `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.csv`, or `.rtf`), the new file is uploaded as a separate file in the same cloud folder. A file saved anywhere else (for example Desktop or Documents) is not uploaded.
 - **Preview (desktop app):** Right-click an image → **Preview** to see it in the built-in viewer instead of its desktop app

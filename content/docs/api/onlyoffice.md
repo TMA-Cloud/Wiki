@@ -13,6 +13,8 @@ Get OnlyOffice editor configuration for a file.
 
 **Permission:** `files.download`. A sub-user without it receives `403`. Without `files.edit` the editor opens in view-only mode.
 
+**Edit locks:** a config in `edit` mode takes the file's [edit lock](/docs/api/files#edit-locks) for its document session. While anyone holds the lock (another browser session or a desktop app), the config comes back in `view` mode. Every open gets its own document key, so two browser sessions would otherwise save over each other instead of co-editing.
+
 **Rate limiting:** General API limit (10000 per 15 minutes per user).
 
 **Validation:**
@@ -123,6 +125,8 @@ Documents are saved to storage periodically while being edited, not just on clos
 3. OnlyOffice responds by calling the callback endpoint with status 6 and `forcesavetype: 0`.
 4. The callback handler streams the current document through encryption to object storage, without loading the whole document into memory. After the database points at the new object, deletion of the old object is queued.
 5. When all users close the document (status 2 or 4), the app removes its schedule. A command response that says the document is no longer open also removes it.
+
+The same events drive the session's edit lock. A browser session's lock lasts ten minutes; each force-save tick and each status 1 callback (a user joined or left) renews it. Status 2 or 4, or a tick that finds the document closed, releases it. A browser that disappears without OnlyOffice noticing frees the file within ten minutes.
 
 The command service is an OnlyOffice-supported server API. A successful command returns `error: 0`; `error: 4` means there are no changes to save, and `error: 1` that the document is no longer open. Other command and network errors are retried by the queue.
 

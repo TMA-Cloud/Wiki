@@ -1001,7 +1001,7 @@ While a file is locked, every file object in listings and search results carries
 }
 ```
 
-OnlyOffice opens a locked file in view mode, also for the user who holds the lock.
+An OnlyOffice editing session in the browser holds the lock too. Its `deviceId` starts with `onlyoffice:` followed by the document key, which no desktop install id can look like. OnlyOffice opens a locked file in view mode, also for the user who holds the lock.
 
 ### POST `/api/files/:id/lock`
 

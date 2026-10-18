@@ -158,6 +158,9 @@ Drive folder, TMA Cloud marks it as yours for editing:
   letting two people change it at once. If they open it from the desktop app, it tells
   them who is editing.
 - In the browser, the document opens for viewing only.
+- It works the other way round too: while someone edits a document in OnlyOffice in the
+  browser, it is read-only in everyone's Cloud Drive and in other browsers, and the row
+  says who is editing.
 - When you close the document, the file is free again within a few seconds.
 
 This also holds for you on another computer. If you left a document open on your
