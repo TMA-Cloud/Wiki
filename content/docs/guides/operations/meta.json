@@ -8,6 +8,7 @@
     "backups",
     "updating",
     "key-rotation",
-    "testing"
+    "testing",
+    "load-testing"
   ]
 }

@@ -10,11 +10,12 @@ Running the TMA Cloud test suites.
 TMA Cloud is one Rust workspace. Unit tests live next to the code in each crate and run
 from a clean checkout with no services. One end-to-end suite talks to real infrastructure.
 
-| Suite              | Location                             | Needs                                         |
-| ------------------ | ------------------------------------ | --------------------------------------------- |
-| Unit (every crate) | `#[cfg(test)]` modules in `src/`     | Nothing                                       |
-| Server end to end  | `crates/tma-server/tests/api.rs`     | PostgreSQL, Redis and an S3-compatible bucket |
-| Cloud Drive core   | `crates/tma-drive/src/core/tests.rs` | Nothing (an in-memory backend)                |
+| Suite              | Location                             | Needs                                                                        |
+| ------------------ | ------------------------------------ | ---------------------------------------------------------------------------- |
+| Unit (every crate) | `#[cfg(test)]` modules in `src/`     | Nothing                                                                      |
+| Server end to end  | `crates/tma-server/tests/api.rs`     | PostgreSQL, Redis and an S3-compatible bucket                                |
+| Cloud Drive core   | `crates/tma-drive/src/core/tests.rs` | Nothing (an in-memory backend)                                               |
+| Load test          | `crates/tma-drive/examples/load`     | A throwaway server; see [Load Testing](/docs/guides/operations/load-testing) |
 
 ## Commands
 
