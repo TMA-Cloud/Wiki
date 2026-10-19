@@ -54,7 +54,7 @@ Start it from that folder with `tma-server serve --with-worker`.
 
 ## Run It
 
-Point the tool at the server with `TMA_URL`. Use `127.0.0.1` rather than `localhost`: on Windows, `localhost` tries IPv6 first, and the server listens on IPv4, so every new connection waits about 300 ms before falling back, which shows up as slow sign-ins and first requests. The `TMA_LOAD_S3_*` variables let `seed` connect the bucket; without them it keeps the server's own.
+Point the tool at the server with `TMA_URL`. The `TMA_LOAD_S3_*` variables let `seed` connect the bucket; without them it keeps the server's own.
 
 ```bash
 export TMA_URL=http://127.0.0.1:3200 TMA_LOAD_S3_ENDPOINT=http://localhost:59001 TMA_LOAD_S3_BUCKET=tma-load TMA_LOAD_S3_ACCESS_KEY=loadkey TMA_LOAD_S3_SECRET_KEY=loadsecret123

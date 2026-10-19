@@ -20,6 +20,8 @@ Complete reference for all environment variables in TMA Cloud.
 
 **`PORT`:** Without Docker, the API listens on this port. With Docker Compose, it is the host port: `compose.yml` publishes `${PORT}:3000` and sets `PORT=3000` inside the container, so the app always listens on 3000, the port the image exposes and its health check uses. With `docker run`, map the port instead: `-p 8080:3000`.
 
+The server listens on every address, IPv6 and IPv4 alike, so a client that tries IPv6 first (Windows does for `localhost`, and anyone does for a name with an IPv6 address) connects at once instead of waiting to fall back. This includes containers with IPv6 turned off. Only on a kernel without IPv6 at all does it listen on IPv4 alone; the startup log says which.
+
 **`BACKEND_URL`:** The URL users and the OnlyOffice document server use to reach the app, including the port if it is not 80 or 443. OnlyOffice downloads files and sends saves to this URL, so set it to the public address behind a reverse proxy. It does not change the port the app listens on.
 
 Reverse proxy trust is configured in **Settings** → **Administration** → **Known proxies**, not through an environment variable. See [Known Proxies](/docs/guides/admin/known-proxies).
@@ -109,12 +111,12 @@ Force-save runs every five minutes. The standalone worker must be running for sc
 
 ## Logging Configuration
 
-| Variable              | Required | Default                          | Description                                      |
-| --------------------- | -------- | -------------------------------- | ------------------------------------------------ |
-| `LOG_LEVEL`           | No       | `info`                           | Log level (error, warn, info, debug, trace)      |
-| `LOG_FORMAT`          | No       | text                             | `json` for one JSON object per line              |
-| `RUST_LOG`            | No       | -                                | Per-module filter; overrides `LOG_LEVEL`         |
-| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics` |
+| Variable              | Required | Default                          | Description                                                                                                                    |
+| --------------------- | -------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `LOG_LEVEL`           | No       | `info`                           | Log level (error, warn, info, debug, trace)                                                                                    |
+| `LOG_FORMAT`          | No       | text                             | `json` for one JSON object per line                                                                                            |
+| `RUST_LOG`            | No       | -                                | Per-module filter; overrides `LOG_LEVEL`                                                                                       |
+| `METRICS_ALLOWED_IPS` | No       | `127.0.0.1,::ffff:127.0.0.1,::1` | Comma-separated IPs allowed to access `/metrics`. Loopback in either family matches loopback, so `127.0.0.1` also admits `::1` |
 
 See [Logging](/docs/guides/operations/logging).
 
