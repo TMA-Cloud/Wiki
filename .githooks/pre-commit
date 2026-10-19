@@ -1,0 +1,38 @@
+#!/bin/sh
+# Checks staged docs before each commit: Prettier on the staged files, then the
+# house rules in WRITING.md. Turn on once per clone with `npm run hooks`.
+set -eu
+
+cd "$(git rev-parse --show-toplevel)"
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.md' '*.mdx' '*.json' '*.mjs' '*.ts' '*.tsx' '*.css' '*.yml')
+[ -n "$staged" ] || exit 0
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "pre-commit: Node.js not found, skipping the docs checks" >&2
+  exit 0
+fi
+
+if ! printf '%s\n' "$staged" | xargs npx --no-install prettier --check --log-level warn; then
+  echo "pre-commit: run npm run format" >&2
+  exit 1
+fi
+
+if ! node scripts/check-docs.mjs; then
+  echo "pre-commit: fix the problems above (rules in WRITING.md)" >&2
+  exit 1
+fi
+
+# The code comparison needs the app checkout ($TMA_REPO, or found next to the wiki).
+if printf '%s\n' "$staged" | grep -q '^content/docs/'; then
+  code=0
+  node scripts/check-against-code.mjs || code=$?
+  case $code in
+    0) ;;
+    2) echo "pre-commit: no app checkout found, skipping the code comparison" >&2 ;;
+    *)
+      echo "pre-commit: the docs disagree with the app's code (see above)" >&2
+      exit 1
+      ;;
+  esac
+fi
