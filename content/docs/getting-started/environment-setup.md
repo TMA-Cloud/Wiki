@@ -71,9 +71,10 @@ Generate a key with `openssl rand -base64 32`, or `tma-server key generate`. Bac
 
 ## Background Worker
 
-| Variable             | Required | Default | Description                                     |
-| -------------------- | -------- | ------- | ----------------------------------------------- |
-| `WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
+| Variable             | Required | Default | Description                                                                                                                                                             |
+| -------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue                                                                                                                         |
+| `UPLOAD_MEMORY_MB`   | No       | `512`   | Memory uploads may buffer at once across the server (at least 64). When it is in use, further large uploads wait their turn instead of the server running out of memory |
 
 ## Web App
 

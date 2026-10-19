@@ -977,6 +977,34 @@ Every file object carries `contentVersion`, which every replace and OnlyOffice s
 - `409` - `baseVersion` is not the file's current `contentVersion`: someone else saved after this copy was opened. The refusal is recorded in the audit log as a failed `file.update` with reason `stale_version`.
 - `409` - Someone else holds the file's [edit lock](#edit-locks): "Name is editing this file".
 
+## Folder Changes
+
+### GET `/api/files/changes`
+
+Which folders' listings changed since a cursor, so an app that keeps folders in sync (Cloud Drive) lists only those again. The live event stream says _that_ something changed; this says _where_.
+
+**Query Parameters:**
+
+- `since` - The `cursor` from the previous answer. Without it, the answer is a fresh cursor and `reset`.
+
+**Response:**
+
+```json
+{
+  "cursor": "1844674",
+  "folders": ["folder_123", null],
+  "reset": false
+}
+```
+
+- `cursor` - Send it as `since` next time. A string, because it can pass what a JSON number holds exactly.
+- `folders` - Folders to list again; `null` is the root. A folder may appear again in the next answer, and listing it twice is harmless.
+- `reset` - List every folder again: there was no cursor, it is older than the kept history (seven days), or more than 1,000 folders changed.
+
+A folder is reported when an item is created in it, removed from it (permanently or to the trash), renamed, moved in or out, given new contents, or when someone starts or stops editing a file in it. Renewing an edit lock and reading a file are not changes.
+
+The cursor is the oldest database transaction still running when the answer was made. Everything older has finished, so no change can appear behind a cursor once it has passed. Changes already committed past it are included too, so they show at once.
+
 ## Edit Locks
 
 While a file is open for editing in the desktop app, the app holds an edit lock on it. Others see who is editing, Cloud Drive gives them the file read-only, and the server refuses their saves until the lock is gone.

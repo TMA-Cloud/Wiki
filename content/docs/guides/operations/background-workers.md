@@ -58,6 +58,7 @@ Schedules use UTC. The worker checks for due schedules every 20 seconds, and eac
 | Session cleanup          | Daily at 04:20  | Removes `sessions` rows older than 30 days                       |
 | Operation-result cleanup | Daily at 04:50  | Removes `file_operation_results` rows older than 30 days         |
 | Import-manifest cleanup  | Daily at 05:25  | Removes `bulk_import_items` rows older than 7 days               |
+| Change-feed cleanup      | Daily at 05:35  | Removes `file_changes` rows older than 7 days                    |
 | Share link cleanup       | Sunday at 06:10 | Removes share links whose `expires_at` has passed                |
 | Heartbeat cleanup        | Hourly at :07   | Removes `client_heartbeats` rows not seen in the last 10 minutes |
 | Quota reservations       | Hourly at :37   | Removes expired `storage_reservations` rows                      |
@@ -67,6 +68,8 @@ Start times are spread across the window rather than stacked on the same minutes
 Trash is read in batches of 500. Stored objects are deleted with the S3 multi-object API before their database rows are removed. One run is capped by batch count and runtime; if work remains, the worker queues another slice. If object deletion fails, the rows remain for retry.
 
 Move-to-trash and restore requests stay synchronous for trees up to 1,000 items. Larger trees use `account-file-operations`. Copy, permanent delete, and Empty Trash always use that queue. The web request validates the selected roots and counts a tree when needed, but does not load every descendant or storage key into application memory.
+
+Copies are server-side: the object store copies each object, 24 at a time, and no file data passes through TMA Cloud. Permanent delete works through the tree in batches of 4,000, deleting each batch's objects (up to eight requests of 1,000 keys at once) before its rows.
 
 Queued file endpoints return `202` and a `jobId`. The client polls `GET /api/files/jobs/:jobId` until the job completes or fails. Job status is account-scoped; a caller cannot read another account's result.
 

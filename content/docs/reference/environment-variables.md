@@ -128,9 +128,10 @@ The feed is published from the [TMA-Cloud/updates](https://github.com/TMA-Cloud/
 
 ## Background Worker
 
-| Variable             | Required | Default | Description                                     |
-| -------------------- | -------- | ------- | ----------------------------------------------- |
-| `WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue |
+| Variable             | Required | Default | Description                                                                                                                                                             |
+| -------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WORKER_CONCURRENCY` | No       | `5`     | The most jobs the worker runs at once per queue                                                                                                                         |
+| `UPLOAD_MEMORY_MB`   | No       | `512`   | Memory uploads may buffer at once across the server (at least 64). When it is in use, further large uploads wait their turn instead of the server running out of memory |
 
 `update.sh` renames an older `AUDIT_WORKER_CONCURRENCY` line in `.env` to `WORKER_CONCURRENCY`. Audit events do not go through the worker; see [Audit Logs](/docs/guides/operations/audit-logs).
 

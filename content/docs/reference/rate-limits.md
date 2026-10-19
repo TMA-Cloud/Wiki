@@ -35,8 +35,10 @@ The per-account limit applies to anyone who knows the email, so repeated failed 
 
 ### General API Limiter
 
-- **Limit:** 10000 requests per 15 minutes, keyed per user when authenticated and per IP address otherwise.
-- **Purpose:** Limits general API usage. Keying on the user means colleagues sharing an office IP do not share a bucket.
+- **Limit:** 30000 requests per 15 minutes per signed-in user; 10000 per 15 minutes per IP address for requests without a session.
+- **Purpose:** Limits general API usage. Keying on the user means colleagues sharing an office IP do not share a bucket. A desktop app keeping a large drive in sync, or copying a folder of thousands of files into Cloud Drive, legitimately makes many requests, so signed-in users get the larger budget.
+- **Not counted:** the live event stream, `GET /api/files/events`. It is one long request with its own cap per user, and cutting it would leave apps unaware of changes.
+- **Refusals are heard:** a refused request's body (an upload's, mostly) is read, up to 32 MB within 30 seconds, before the `429` is sent. A client sends the whole body before it reads the reply, so answering mid-body made it report the server unreachable instead.
 - **Endpoints:**
   - Public endpoints (e.g. `GET /api/signup-status`).
   - Authenticated auth and profile endpoints (e.g. `/api/profile`, `/api/sessions`, `/api/sessions/heartbeat`, `/api/sessions/offline`, `/api/mfa/*`, `/api/logout`).

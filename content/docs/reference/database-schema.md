@@ -97,7 +97,9 @@ Files and folders.
 
 **Parent must be a folder:** a parent is always a folder of the same account. Upload, bulk upload, folder creation, copy and move check that it is a live folder before writing, and answer `404 Target folder not found` otherwise. The database enforces the type and account part: `files_parent_insert` and `files_parent_update` reject a row whose parent is a file or belongs to another account, and `files_children_update` refuses to change the type or account of a folder that still has children. They are row-level `AFTER` triggers, so a copy that inserts a folder and its children in one statement passes. Their `WHEN` clauses skip updates that leave `parent_id`, `user_id` and `type` alone. Migration `054_enforce_folder_parents` moved rows an earlier paste had stored under a file up to their nearest folder, adding a `(n)` suffix on a name clash as a move does.
 
-**Triggers:** `files_storage_insert`, `files_storage_update`, and `files_storage_delete` update the account owner's `storage_used` counter once per statement from transition tables. `files_aggregate_insert`, `files_aggregate_update`, and `files_aggregate_delete` adjust ancestor folder totals when a row is inserted, moved, resized, changes type, or is removed.
+**Triggers:** `files_storage_insert`, `files_storage_update`, and `files_storage_delete` update the account owner's `storage_used` counter once per statement from transition tables. `files_aggregate_insert`, `files_aggregate_update`, and `files_aggregate_delete` adjust ancestor folder totals when a row is inserted, moved, resized, changes type, or is removed. `files_changes_insert`, `files_changes_update` and `files_changes_delete` record the folders whose listing changed in `file_changes`.
+
+**Lock order:** every write locks its account's `users` row, then the folders whose totals change by id, then updates them. The `files_a_lock_accounts_*` triggers fire before the totals and storage triggers (triggers run in name order), and write transactions that lock rows themselves lock the account first. Row locks that do not change a key use `FOR NO KEY UPDATE`, so they do not block foreign-key checks. Before migration `066_lock_folders_in_order`, writes locked folders in whatever order their walk produced and deadlocked under load. Access-time flushes skip rows a write holds (`SKIP LOCKED`) instead of waiting.
 
 **Aggregate columns:** These three columns are the only source of a folder's size and counts; no read path recomputes them. Incremental trigger maintenance can drift, because a delta that would take a counter below zero is clamped rather than carried. `reconcile_folder_aggregates(user_id)` recomputes them for one account from its own rows and returns how many folders were stored wrong. The worker runs it weekly. Trashed descendants are counted, matching the triggers.
 
@@ -119,6 +121,23 @@ Edit locks: who is editing a file in a desktop app or in OnlyOffice right now. A
 | `acquired_at` | TIMESTAMPTZ | When it was taken, default now()                                                 |
 | `expires_at`  | TIMESTAMPTZ | End of the lease                                                                 |
 | `device_id`   | TEXT        | The desktop install, or `onlyoffice:` and the document key for a browser session |
+
+### `file_changes`
+
+The change feed behind `GET /api/files/changes`: one row per folder whose listing a statement changed.
+
+| Column       | Type        | Description                                                 |
+| ------------ | ----------- | ----------------------------------------------------------- |
+| `owner_id`   | TEXT        | The account                                                 |
+| `folder_id`  | TEXT        | The folder whose listing changed; NULL is the root          |
+| `xid`        | XID8        | The writing transaction, default `pg_current_xact_id()`     |
+| `changed_at` | TIMESTAMPTZ | When, default now(); rows older than seven days are removed |
+
+Inserts and deletes on `files` add one row per folder per statement. Updates add rows only when a column a listing shows changes (name, folder, trash state, type, size, modified time, content version, MIME type, owner), so folder totals and access times write nothing here. Taking, releasing or handing over an edit lock adds a row for the file's folder; renewing one does not.
+
+### `file_change_floor`
+
+One row: the newest transaction whose changes were pruned. A cursor at or below it may have missed changes, so its client starts over with a full resync.
 
 ### `share_links`
 

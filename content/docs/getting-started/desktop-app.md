@@ -233,7 +233,10 @@ extra driver is needed on any system.
   backup files (`~$…`, `*.tmp`, and Excel's eight-character names such as `B9EC1600`)
   stay on your computer and are never uploaded.
 - **Live updates.** Changes made from the web app or another device appear in the folder
-  within a few seconds.
+  within a few seconds. The server says something changed; the app then asks which folders
+  changed and lists again only those it has open, so a busy account does not make every
+  computer list every folder after each change. It also asks once a minute, in case a
+  notice was lost, and lists all its open folders again every 30 minutes.
 - **Every name shows up.** On Windows, a name Windows cannot hold, such as
   `Q3: plan?.docx`, is listed with a private-use character in place of each reserved
   one. Most fonts draw these as boxes. Renaming or saving the file keeps its real name on
