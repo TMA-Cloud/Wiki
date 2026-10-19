@@ -125,7 +125,7 @@ Separate limits apply to sign-in, uploads and the general API. See [Rate Limits]
 
 The backend ignores forwarded client IP headers unless the connecting reverse proxy is listed under **Settings** → **Administration** → **Known proxies**. This prevents a direct client from supplying its own `X-Forwarded-For` value.
 
-### Desktop app only access (optional)
+### Desktop App Only Access (Optional)
 
 - Admins can place an instance into a mode where the backend requires a custom HTTP header that only the desktop app sends
 - The middleware checks this header for all main app routes and blocks requests that do not include it

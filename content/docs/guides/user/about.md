@@ -30,3 +30,8 @@ description: 'See which version you run, find the docs and release notes, and re
 | License           | The MIT License                                             |
 
 Every link opens in your browser. To check for a newer version, see **Settings** → **Updates** ([Updating](/docs/guides/operations/updating)).
+
+## Related Topics
+
+- [Updating](/docs/guides/operations/updating) - Install a new version
+- [Desktop App](/docs/getting-started/desktop-app) - Version and updates in the desktop app

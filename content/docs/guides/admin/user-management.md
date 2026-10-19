@@ -1,15 +1,15 @@
 ---
 title: 'User Management'
-description: 'Manage users in TMA Cloud (admin only).'
+description: 'Manage users in TMA Cloud (first user only).'
 ---
 
-Manage users in TMA Cloud (admin only).
+Manage users in TMA Cloud (first user only).
 
 ## User Overview
 
 ### Viewing Users
 
-1. Go to **Settings** → **Administration** (admin only)
+1. Go to **Settings** → **Administration** (first user only)
 2. Click **Show all users** under **Registered users**
 3. View user details (name, email, storage usage)
 
@@ -19,7 +19,7 @@ Accounts load automatically in cursor batches as you scroll. Each batch keeps an
 
 ### Viewing Active Desktop Clients
 
-1. Go to **Settings** → **Administration** (admin only)
+1. Go to **Settings** → **Administration** (first user only)
 2. Click **View clients** under **Active desktop clients**
 3. Review active desktop app clients (version, platform, IP, last seen)
 

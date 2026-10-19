@@ -124,7 +124,7 @@ See [Orphan Review](/docs/guides/admin/orphan-review) for the admin workflow.
 
 `tma-server s3` commands apply bucket settings to the bucket saved in **Settings** → **Storage**. They read it from the database, so `.env` must point at the database and hold the same `FILE_ENCRYPTION_KEY` as the app. On Docker, run them in the app container, for example `docker compose exec app tma-server s3 protect-all`.
 
-### Apply all protections
+### Apply All Protections
 
 ```bash
 tma-server s3 protect-all
@@ -132,7 +132,7 @@ tma-server s3 protect-all
 
 Applies in one run: block public access; bucket policy that denies HTTP (HTTPS only); versioning; default SSE if supported; lifecycle rules.
 
-### Lifecycle rules
+### Lifecycle Rules
 
 - **Abort incomplete multipart uploads** after 1 day (no effect on completed objects).
 - **Delete noncurrent versions** after 7 days (versioning cleanup).
@@ -140,7 +140,7 @@ Applies in one run: block public access; bucket policy that denies HTTP (HTTPS o
 
 `tma-server s3 lifecycle` applies the lifecycle rules, and `tma-server s3 check-lifecycle` shows the rules the bucket has. See [CLI Commands](/docs/reference/cli-commands).
 
-### Individual commands
+### Individual Commands
 
 | Command                      | Effect                                                                         |
 | ---------------------------- | ------------------------------------------------------------------------------ |

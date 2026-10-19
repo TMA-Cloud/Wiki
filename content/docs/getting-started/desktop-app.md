@@ -29,7 +29,7 @@ saved sign-in).
 
 **macOS.** Nothing else to install: Cloud Drive uses the NFS client built into macOS.
 
-### Build from source
+### Build from Source
 
 ```bash
 cargo build --release -p tma-cloud
@@ -48,7 +48,7 @@ cargo xtask package
 They are written to `target/packages/`. Set `TMA_UPDATE_REPO=owner/repo` while building to
 take updates from another repository's releases, for example to test an update.
 
-## Sign in
+## Sign In
 
 On first start, enter the server address (for example `https://cloud.example.com`),
 your email and password (the eye in the password field shows what you typed). The app keeps the session in the system's credential store —
@@ -80,7 +80,7 @@ was maximized. **Restore** after a maximized start returns it to the size it had
 On Windows the window appears only once it has drawn at that size, so it opens without
 a flash.
 
-## Version and updates
+## Version and Updates
 
 - **Settings** → **Updates** shows the server version and this app's version.
 - **When an update is available**, the sidebar says so, and **Settings** → **Updates** adds an
@@ -120,7 +120,7 @@ a flash.
   the release before raising the feed's version. Until the feed has a `desktop` entry,
   the app reports no update.
 
-## Active desktop clients (admin view)
+## Active Desktop Clients (Admin View)
 
 - Signed-in desktop apps send a heartbeat every minute.
 - The admin can view active clients in **Settings** → **Administration** → **Active desktop clients**.
@@ -128,7 +128,7 @@ a flash.
 - This admin list excludes browser-session presence rows.
 - Revoking sessions removes related heartbeat rows; stale rows are also purged automatically.
 
-## Open files in desktop apps
+## Open Files in Desktop Apps
 
 In the desktop app, every file opens in the computer's own app for its type — Word,
 Excel, Photos, a PDF reader — never in the browser, and every save uploads back.
@@ -143,7 +143,7 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
   `.bat`, `.cmd`, `.ps1`, `.vbs`, `.js`, `.lnk`, `.reg`) are refused with "Programs and
   scripts can't be opened from the cloud. Download the file to run it."
 
-### How saves sync
+### How Saves Sync
 
 - Saving in the app saves into the Cloud Drive folder, and the drive uploads the change
   (on Windows about two seconds after the app stops writing).
@@ -156,7 +156,7 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
 
 If you open a document and close it without saving, nothing is uploaded.
 
-### Who is editing
+### Who Is Editing
 
 While you have a document open in Word, Excel, PowerPoint or LibreOffice from the Cloud
 Drive folder, TMA Cloud marks it as yours for editing:
@@ -193,7 +193,7 @@ documents are marked.
 If your computer crashes or goes offline, the file frees itself within a few minutes.
 When a file is not marked, the next section covers what happens if two people save it.
 
-### When someone else saved first
+### When Someone Else Saved First
 
 Two people can have the same file open. If someone else saves it after you opened it,
 your next save does not overwrite theirs. Instead:
@@ -282,7 +282,7 @@ older versions **Settings** → **Desktop app** says so and the rest of the app 
   seconds after the last write), and anything left by a crash is removed on the next
   mount. On Windows, files download straight into the folder and nothing else is kept.
 
-### Save-only mode
+### Save-only Mode
 
 The first user sets this for every desktop app in **Settings** → **Administration** → **Policies**
 → **Cloud Drive save-only**. **Settings** → **Desktop app** → **Access mode** shows the mode the
@@ -297,7 +297,7 @@ drive on this computer uses.
 The app reads the mode when the drive mounts and every minute after that, and applies a
 change without remounting. Until the server answers, the drive stays save-only.
 
-## Copy and paste with other apps (Windows)
+## Copy and Paste with Other Apps (Windows)
 
 **Copy** (or **Ctrl+C**) in the desktop app also puts the files and folders on the
 Windows clipboard, so **Paste** in Explorer, on the desktop, in Outlook or in a chat app
@@ -332,7 +332,7 @@ runs Wayland the app keeps the system's pointers, because Wayland only lets apps
 from the system's own set; under X11 it shows its own. Resize arrows at the window's
 edges stay the system's.
 
-## Drag and drop
+## Drag and Drop
 
 Drop files or folders from the computer onto the window: the Upload dialog opens with
 them listed, to check before they upload into the open folder (the root outside
@@ -342,7 +342,7 @@ them listed, to check before they upload into the open folder (the root outside
 
 The desktop app uses the same shortcuts as the browser. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation).
 
-## Desktop-only mode (optional)
+## Desktop-only Mode (Optional)
 
 - When the administrator enables **Desktop app only** in **Settings** → **Administration** → **Policies**,
   the server rejects browser access to the main app.

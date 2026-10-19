@@ -29,7 +29,7 @@ Learn how to upload and manage files in TMA Cloud.
 - While the Upload dialog is open, dropped files join its list
 - In the desktop app, dropped folders keep their structure, as with **Choose folder**
 
-### Paste from Explorer (Windows desktop app)
+### Paste from Explorer (Windows Desktop App)
 
 - Copy files or folders in Explorer (or any app that copies files), open the folder in **My Files**, and press **Ctrl+V** or right-click empty space in the list and choose **Paste**. They upload to the open folder
 - A pasted folder keeps its structure, as with a folder upload
@@ -38,7 +38,7 @@ Learn how to upload and manage files in TMA Cloud.
 - Paste uses whichever copy is newer: files copied in Explorer after a **Copy** or **Cut** in TMA Cloud are uploaded; otherwise the TMA Cloud items are pasted
 - Same size and quota limits apply as for **Upload**
 
-### Duplicate file names
+### Duplicate File Names
 
 When you upload into a folder that already has a file with the same name (compared without regard to case), the app asks before sending anything:
 

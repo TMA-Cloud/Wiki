@@ -1,9 +1,9 @@
 ---
 title: 'Storage Limits'
-description: 'Configure storage limits for users in TMA Cloud (admin only).'
+description: 'Configure storage limits for users in TMA Cloud (first user only).'
 ---
 
-Configure storage limits for users in TMA Cloud (admin only).
+Configure storage limits for users in TMA Cloud (first user only).
 
 ## Storage Limit Overview
 

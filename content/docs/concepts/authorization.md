@@ -89,7 +89,7 @@ Anything not granted is denied. There is no deny list, because there is nothing 
 ### API Access
 
 - Most endpoints require authentication
-- Admin-only endpoints check whether the caller is the first user
+- Endpoints reserved for the first user check whether the caller is the first user
 - Owner-only endpoints (sub-user management) reject sub-users with `403`
 - File endpoints check the caller's permission and reject with `403` when it is missing
 - Rate limits apply to every API and share-link request except the live event stream

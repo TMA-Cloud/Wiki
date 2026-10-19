@@ -3,7 +3,7 @@ title: 'Session Timeout and Recently Opened'
 description: 'Set how long idle sessions last and how access times are recorded.'
 ---
 
-Set how long an idle session lasts and how TMA Cloud records when files and folders were last opened (admin only). Both settings are stored in the database and apply without a restart.
+Set how long an idle session lasts and how TMA Cloud records when files and folders were last opened (first user only). Both settings are stored in the database and apply without a restart.
 
 ## Where to Find Them
 

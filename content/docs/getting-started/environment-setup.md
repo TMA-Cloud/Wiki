@@ -59,7 +59,7 @@ The S3-compatible bucket is not set in `.env`. After the first account is create
 
 Generate a key with `openssl rand -base64 32`, or `tma-server key generate`. Back it up outside the server: files cannot be decrypted without it.
 
-**Note:** Storage limits are configured per-user in Settings (admin only). See [Environment Variables](/docs/reference/environment-variables#file-storage) for key rotation.
+Storage limits are not environment variables; the first user sets them per account in **Settings** → **Administration**. See [Storage Limits](/docs/guides/admin/storage-limits).
 
 ## Logging Configuration
 

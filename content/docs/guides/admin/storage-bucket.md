@@ -3,7 +3,7 @@ title: 'Storage Bucket'
 description: 'Connect the S3-compatible bucket that stores file contents.'
 ---
 
-Connect the S3-compatible bucket that stores file contents (admin only).
+Connect the S3-compatible bucket that stores file contents (first user only).
 
 ## Why This Setting Is Required
 

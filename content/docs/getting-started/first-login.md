@@ -69,4 +69,4 @@ Now that you're logged in:
 - **[Upload Files](/docs/guides/user/upload-files)** - Learn how to upload and manage files
 - **[Manage Folders](/docs/guides/user/manage-folders)** - Organize your files
 - **[Share Files](/docs/guides/user/share-files)** - Share files with others
-- **[User Management](/docs/guides/admin/user-management)** - Manage users (admin only)
+- **[User Management](/docs/guides/admin/user-management)** - Manage users (first user only)

@@ -5,23 +5,23 @@ description: 'Short definitions for terms that appear throughout the TMA Cloud d
 
 Short definitions for terms that appear throughout the TMA Cloud docs.
 
-## Account owner
+## Account Owner
 
 A top-level login — one with no `parent_user_id`. Owns the files, folders and storage quota that its sub-users share, and is the only login that can manage those sub-users. See [Sub-users](/docs/guides/user/sub-users).
 
-## Admin / first user
+## Admin / First User
 
 The first account created on a fresh deployment. Permanently stored in `app_settings.first_user_id`. Sees the Administration page in Settings and controls the server-wide policies, the storage bucket and the integrations. Separate from account ownership: every account is an owner, but only one is the admin.
 
-## Audit log
+## Audit Log
 
 Append-only record of notable events (logins, uploads, shares, admin changes). See [Audit Events](/docs/reference/audit-events) for the full catalog.
 
-## Bulk operation
+## Bulk Operation
 
 Any endpoint that accepts an `ids` array and processes multiple files in one request (move, copy, delete, star, share, download).
 
-## Change feed
+## Change Feed
 
 The list of folders whose contents changed since a cursor, from `GET /api/files/changes`. Cloud Drive uses it to refresh only the folders that changed. See [Folder Changes](/docs/api/files#folder-changes).
 
@@ -33,11 +33,11 @@ A `TMA Cloud` folder the desktop app provides so files can be opened and saved f
 
 The Windows API that OneDrive and other sync apps use: files appear as placeholders that download when opened. The desktop app uses it for the [Cloud Drive](#cloud-drive) on Windows 10 (version 1709) and later.
 
-## Derived file
+## Derived File
 
 A new file exported from an existing one — e.g. saving a `.docx` as `.pdf` from the desktop app. Created as a sibling of the source via `POST /api/files/:id/derived`.
 
-## Edit lock
+## Edit Lock
 
 A two-minute lease a desktop app holds while a file is open for editing, renewed while the file stays open. Others get the file read-only until it is released. See [Edit Locks](/docs/api/files#edit-locks).
 
@@ -49,7 +49,7 @@ An OnlyOffice command that tells the document server to flush the current editor
 
 A presence signal sent by a signed-in browser tab (every two minutes) or desktop app (every minute). A session is shown as online when its latest heartbeat is less than three minutes old. Missing heartbeats change the displayed status to offline; they do not revoke the session.
 
-## Job queue
+## Job Queue
 
 The `job_queue` table in PostgreSQL, used for large file-tree operations, object cleanup, maintenance, orphan review, share linking, and OnlyOffice force-save commands. The API adds jobs and the worker (`tma-server worker`) runs them. See [Background Workers](/docs/guides/operations/background-workers).
 
@@ -57,15 +57,15 @@ The `job_queue` table in PostgreSQL, used for large file-tree operations, object
 
 The signed token used to authenticate API requests. Delivered as an httpOnly cookie, not a header.
 
-## Last opened (`accessed_at`)
+## Last Opened (`accessed_at`)
 
 When a file or folder was last read. Downloads, document opens and share-link reads update it; searching, renaming and viewing Get Info do not. Opening a folder marks the folder, not the files inside it. The value is written at most once per update window per item, one hour by default, so it can lag a read by that much. The [Cloud Drive](#cloud-drive) reports it as the NTFS last-access time. See [Last Access Time](/docs/concepts/file-system#last-access-time).
 
-## Key check value
+## Key Check Value
 
 An HMAC stored in the `kek_checks` table for each master key version. The API and worker compare it with the configured `FILE_ENCRYPTION_KEY` at startup and refuse to start on a mismatch. It does not reveal the key. See [Security Model](/docs/concepts/security-model#key-check).
 
-## Known proxy
+## Known Proxy
 
 A reverse proxy allowed to supply `X-Forwarded-For` and related headers. Entries are stored in `app_settings.known_proxies` as IP addresses, CIDR ranges, or hostnames and loaded when the server starts. See [Known Proxies](/docs/guides/admin/known-proxies).
 
@@ -73,7 +73,7 @@ A reverse proxy allowed to supply `X-Forwarded-For` and related headers. Entries
 
 Optional second factor (TOTP) on top of the password. Each user turns it on for their own login; the admin cannot turn it on or off for others. See [MFA Management](/docs/guides/admin/mfa-management).
 
-## MIME type / magic bytes
+## MIME Type / Magic Bytes
 
 The actual file format, read from the first few bytes of the file content (not the file extension). TMA Cloud does not reject an upload when this doesn't match the extension so the file is stored either way. OnlyOffice editing is the exception: a document is only opened when its content matches its extension.
 
@@ -89,11 +89,11 @@ Either a stored object that no `files` row points at, or a `files` row whose sto
 
 One capability a sub-user can be granted: `files.download`, `files.upload`, `files.edit`, `files.share`, `files.delete` (move to trash), `files.restore`, or `files.purge` (delete for good). Stored in `users.permissions`. Account owners hold all of them implicitly and are never checked against the list. Anything not granted is refused. See [Authorization](/docs/concepts/authorization).
 
-## Share domain
+## Share Domain
 
 An optional separate domain you can point at `/s/*` routes, so share links don't expose the main app's domain. It is an admin setting stored in the database (`app_settings.share_base_url`), set it under **Settings** → **Administration**. See [Share Base URL](/docs/guides/admin/share-base-url).
 
-## Share link / share token
+## Share Link / Share Token
 
 A public URL (e.g. `https://example.com/s/abc123`) that lets anyone with the link view or download a file or folder, without a TMA Cloud account.
 
@@ -101,15 +101,15 @@ A public URL (e.g. `https://example.com/s/abc123`) that lets anyone with the lin
 
 When a file or folder most recently joined a share. It is shown under **Shared** in Get Info. Re-sharing an active item keeps the value; unsharing clears it. Items inside a shared folder receive their own value when they join that share.
 
-## Signup control
+## Signup Control
 
 The admin toggle that decides whether new accounts can be created. See [Policies](/docs/guides/admin/signup-control).
 
-## Soft delete
+## Soft Delete
 
 Moving a file to trash rather than removing it from storage. Trashed files are auto-purged after 15 days.
 
-## Storage driver
+## Storage Driver
 
 Uploaded file contents stream to an S3-compatible bucket. The first user enters its provider, endpoint, bucket name, and credentials in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
@@ -117,10 +117,15 @@ Uploaded file contents stream to an S3-compatible bucket. The first user enters 
 
 An extra login created by an account owner. Has its own email, password, MFA and sessions, but reads and writes the owner's files and counts against the owner's quota. Holds only the permissions the owner grants, and cannot create sub-users of its own. See [Sub-users](/docs/guides/user/sub-users).
 
-## Token version (`token_version`)
+## Token Version (`token_version`)
 
 A per-user counter that increments when the user logs out of all devices or changes password. Existing JWTs are rejected if their embedded version is older than the current one — this is how "logout everywhere" works without a token denylist. The counter is per login, so a sub-user changing its password does not sign out the rest of the account.
 
 ## Trash
 
 The per-user soft-delete area. Deleting a file moves it here; files auto-purge after 15 days. Trash counts toward the user's storage quota.
+
+## Related Topics
+
+- [Architecture](/docs/concepts/architecture) - How the parts fit together
+- [Database Schema](/docs/reference/database-schema) - Tables and columns named here

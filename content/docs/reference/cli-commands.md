@@ -92,7 +92,7 @@ Run the desktop app.
 
 ## Admin Commands
 
-### S3 bucket
+### S3 Bucket
 
 Uses the bucket saved in **Settings** → **Storage**, read from the database; `.env` must hold the database connection and the app's `FILE_ENCRYPTION_KEY`. The commands stop with `Connect a storage bucket in Settings > Storage first` when no bucket is saved.
 
@@ -138,7 +138,7 @@ tma-server s3 check-lifecycle
 
 Print the bucket's current lifecycle rules.
 
-### Bulk import (drive to storage)
+### Bulk Import (Drive to Storage)
 
 Use when you have existing data on disk and want it in the app's S3 bucket with encryption and DB records. Copying files directly into the bucket would skip encryption and the `files` table. Requires a bucket saved in **Settings** → **Storage** and the app's `FILE_ENCRYPTION_KEY` (or `FILE_ENCRYPTION_KEY_FILE`).
 
@@ -163,7 +163,7 @@ tma-server import --source-dir "D:\MyDrive" --user-id YOUR_USER_ID --concurrency
 - Finalizes uploaded file metadata in batches of 250, with bounded upload concurrency.
 - Preserves file and folder modification times. Created rows and storage keys are recorded in `bulk_import_items`. On the first error, the run is rolled back: files and their objects first, then folders.
 
-### Generate an encryption key
+### Generate an Encryption Key
 
 ```bash
 tma-server key generate
@@ -171,7 +171,7 @@ tma-server key generate
 
 Print a new random 32-byte key in base64 for `FILE_ENCRYPTION_KEY`. In production the key must be a random 32-byte key in base64 or hex. To replace the key of a running install, use `tma-server rotate key` instead, which keeps the old key for existing data.
 
-### Rotate keys and passwords
+### Rotate Keys and Passwords
 
 ```bash
 tma-server rotate status         # Key versions and file keys per version

@@ -5,7 +5,7 @@ description: 'Choose a deployment method and install TMA Cloud.'
 
 Choose a deployment method and install TMA Cloud.
 
-## What is TMA Cloud?
+## What Is TMA Cloud?
 
 TMA Cloud is a self-hosted cloud storage platform that provides:
 

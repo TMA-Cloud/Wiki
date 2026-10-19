@@ -19,7 +19,7 @@ To check the database from outside the app, use `pg_isready -d "$DATABASE_URL"`;
 
 **Access:** restricted to the addresses in `METRICS_ALLOWED_IPS`. The default is loopback only (`127.0.0.1,::ffff:127.0.0.1,::1`); addresses are compared as addresses, and any loopback entry admits both `127.0.0.1` and `::1`, since a local scrape of `localhost` may arrive over IPv6. A request from anywhere else is answered `403 Forbidden` and logged as an unauthorized access attempt. Behind a reverse proxy, add that proxy under **Settings** → **Administration** → **Known proxies** or the check sees the proxy's address rather than the caller's.
 
-### What is exposed
+### What Is Exposed
 
 | Metric                              | Type      | Useful for                                                                                      |
 | ----------------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
@@ -37,7 +37,7 @@ The queue gauges are refreshed every 30 seconds from one aggregate query against
 `job_queue` table. Scraping `/metrics` returns the latest values without starting another
 database count.
 
-### What is not exposed
+### What Is Not Exposed
 
 There are no latency histograms, cache hit/miss counters, or storage-usage gauges.
 Per-request data lives in the structured logs, and storage figures are available through

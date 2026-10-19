@@ -69,14 +69,14 @@ The folder you upload or paste into is not a folder in your account, or it is in
 
 Cancelling an upload stops its request. The server aborts the unfinished upload in the bucket and saves no file, so nothing needs cleaning up. This is not an error
 
-### Folder uploads missing files
+### Folder Uploads Missing Files
 
 - Check that the selected folder actually contains the missing files (some apps create links or placeholders that are not real files)
 - Query the audit log for `file.upload.bulk` events to see how many files were processed. See [Audit Logs](/docs/guides/operations/audit-logs)
 - If only some files failed, check the `failed` entries returned by `POST /api/files/upload/bulk`
 - Empty subfolders are not created by an upload or a paste, because only files are sent
 
-### Pasted folder missing files (desktop app)
+### Pasted Folder Missing Files (Desktop App)
 
 The upload-issues dialog lists every file that was not pasted, with a reason:
 

@@ -25,3 +25,8 @@ Where to start when something goes wrong in TMA Cloud.
 ## Getting Help
 
 If none of the guides help, open **Settings** → **About**, click **Copy details**, and report the problem with **Report issue**. See [About and Support](/docs/guides/user/about).
+
+## Related Topics
+
+- [Logging](/docs/guides/operations/logging) - Log levels, formats and request IDs
+- [Error Codes](/docs/reference/error-codes) - Every error code the API returns

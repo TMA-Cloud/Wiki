@@ -1,9 +1,9 @@
 ---
 title: 'Orphan Review'
-description: 'Review and delete orphaned files and broken records in TMA Cloud (admin only).'
+description: 'Review and delete orphaned files and broken records in TMA Cloud (first user only).'
 ---
 
-Review and delete orphaned files and broken records in TMA Cloud (admin only).
+Review and delete orphaned files and broken records in TMA Cloud (first user only).
 
 ## What an Orphan Is
 

@@ -3,7 +3,7 @@ title: 'Known Proxies'
 description: 'Configure reverse proxies that may supply client IP headers.'
 ---
 
-Configure reverse proxies that may supply client IP headers (admin only).
+Configure reverse proxies that may supply client IP headers (first user only).
 
 ## Why This Setting Is Required
 

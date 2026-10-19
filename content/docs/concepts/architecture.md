@@ -43,7 +43,7 @@ program, `tma-server`, serves the web app and all APIs from the same origin.
 **Benefits:** No CORS issues, simplified deployment, cookie-based auth, no frontend
 environment variables.
 
-### One interface, two apps
+### One Interface, Two Apps
 
 The interface is written once with [egui](https://www.egui.rs). It runs in the browser
 as WebAssembly (the web app the server serves) and natively as the desktop app for
@@ -225,7 +225,7 @@ See [Database Schema](/docs/reference/database-schema) for details.
 - XSS protection (HTML escaping on server-rendered pages)
 - Path traversal protection
 - Rate limiting
-- Security headers (CSP with per-request nonces, X-Frame-Options, etc.). See [Security Model](/docs/concepts/security-model#security-headers)
+- Security headers, including a CSP with per-request nonces and `X-Frame-Options`. See [Security Model](/docs/concepts/security-model#security-headers)
 
 ## Logging & Audit
 
@@ -247,3 +247,9 @@ See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/ope
 **Cloud Drive:** Cloud Files (Windows), FUSE (Linux), NFS (macOS)
 
 **Integration:** OnlyOffice
+
+## Related Topics
+
+- [Storage Management](/docs/concepts/storage-management) - Buckets, encryption and limits
+- [Background Workers](/docs/guides/operations/background-workers) - The job queue and schedules
+- [Desktop App](/docs/getting-started/desktop-app) - The desktop app and Cloud Drive

@@ -128,7 +128,7 @@ docker run -d --rm --name tma-test-s3 -p 9100:9000 \
 - The API client's error messages and server-sent event parsing
 - Version comparison and other UI helpers
 
-### Server end to end
+### Server End to End
 
 The whole request path with nothing stubbed, against PostgreSQL, Redis and a bucket:
 
@@ -170,7 +170,7 @@ Hooks live in `.githooks/`. Turn them on once per clone from the repository root
 make hooks
 ```
 
-### pre-commit
+### `pre-commit`
 
 Checks staged files only:
 
@@ -178,7 +178,7 @@ Checks staged files only:
 - Prettier on staged Markdown, YAML, JSON, HTML and CSS files (skipped without Node.js)
 - Blocks `.env` files, conflict markers and files over 5 MB
 
-### commit-msg
+### `commit-msg`
 
 - Subject starts with a capital letter and is at most 72 characters
 - No trailing period and no `type:` prefix on the subject
@@ -186,7 +186,7 @@ Checks staged files only:
 - Body wrapped at 72 columns and at most 40 lines
 - A `Signed-off-by` line (`git commit -s`)
 
-### pre-push
+### `pre-push`
 
 When the push changes Rust code, runs `cargo xtask ci`.
 

@@ -11,7 +11,7 @@ User management endpoints for TMA Cloud.
 
 ### GET `/api/user/all`
 
-List users one account page at a time (admin only). Every returned owner is followed by all sub-users belonging to that account.
+List users one account page at a time (first user only). Every returned owner is followed by all sub-users belonging to that account.
 
 **Query Parameters:**
 
@@ -198,7 +198,7 @@ When S3 and no limit set: `total` and `free` may be `null` (Unlimited).
 
 ### PUT `/api/user/storage-limit`
 
-Update a user's storage limit (admin only).
+Update a user's storage limit (first user only).
 
 **Request Body:**
 
@@ -239,7 +239,7 @@ Whether a bucket is connected, and whether the caller may connect one. Accessibl
 
 ### GET `/api/user/storage-config`
 
-Get the saved bucket settings (admin only). The secret access key is never returned, and the access key ID is masked.
+Get the saved bucket settings (first user only). The secret access key is never returned, and the access key ID is masked.
 
 **Response:**
 
@@ -261,7 +261,7 @@ When no bucket is saved, the response is `{ "configured": false, "version": 0 }`
 
 ### PUT `/api/user/storage-config`
 
-Verify the settings against the live endpoint, then save them (admin only). Nothing is saved if a check fails.
+Verify the settings against the live endpoint, then save them (first user only). Nothing is saved if a check fails.
 
 **Request Body:**
 
@@ -309,7 +309,7 @@ The saved settings, in the same shape as `GET /api/user/storage-config`.
 
 ### POST `/api/user/storage-config/test`
 
-Run the same checks as the PUT without saving anything (admin only). Takes the same request body.
+Run the same checks as the PUT without saving anything (first user only). Takes the same request body.
 
 **Response:**
 
@@ -374,7 +374,7 @@ Requires authentication. Returns signup status, hide file extensions setting, an
 
 ### POST `/api/user/signup-toggle`
 
-Enable or disable public user signup (admin only).
+Enable or disable public user signup (first user only).
 
 **Request Body:**
 
@@ -412,7 +412,7 @@ Check if OnlyOffice is configured on the server. This endpoint is accessible to 
 
 ### GET `/api/user/onlyoffice-config`
 
-Get the current OnlyOffice configuration (admin only). This does not expose the JWT secret.
+Get the current OnlyOffice configuration (first user only). This does not expose the JWT secret.
 
 **Response:**
 
@@ -425,7 +425,7 @@ Get the current OnlyOffice configuration (admin only). This does not expose the 
 
 ### PUT `/api/user/onlyoffice-config`
 
-Update the OnlyOffice configuration (admin only).
+Update the OnlyOffice configuration (first user only).
 
 **Request Body:**
 
@@ -458,7 +458,7 @@ The updated OnlyOffice configuration status.
 
 ### GET `/api/user/share-base-url-config`
 
-Get the share base URL configuration (admin only).
+Get the share base URL configuration (first user only).
 
 **Response:**
 
@@ -470,7 +470,7 @@ Get the share base URL configuration (admin only).
 
 ### PUT `/api/user/share-base-url-config`
 
-Update the share base URL configuration (admin only).
+Update the share base URL configuration (first user only).
 
 **Request Body:**
 
@@ -512,7 +512,7 @@ Get the current max upload size. Accessible to any authenticated user (used by t
 
 ### PUT `/api/user/max-upload-size-config`
 
-Update the max upload size (admin only).
+Update the max upload size (first user only).
 
 **Request Body:**
 
@@ -538,7 +538,7 @@ Update the max upload size (admin only).
 
 ### GET `/api/user/known-proxies-config`
 
-Get the reverse proxies trusted to supply forwarded client IP headers (admin only).
+Get the reverse proxies trusted to supply forwarded client IP headers (first user only).
 
 **Response:**
 
@@ -550,7 +550,7 @@ Get the reverse proxies trusted to supply forwarded client IP headers (admin onl
 
 ### PUT `/api/user/known-proxies-config`
 
-Replace the known proxy list (admin only).
+Replace the known proxy list (first user only).
 
 **Request Body:**
 
@@ -580,7 +580,7 @@ The backend loads this list at startup. Restart every backend instance after an 
 
 ### GET `/api/user/activity-config`
 
-Get the session timeout and last-opened tracking settings (admin only).
+Get the session timeout and last-opened tracking settings (first user only).
 
 **Response:**
 
@@ -595,7 +595,7 @@ Get the session timeout and last-opened tracking settings (admin only).
 
 ### PUT `/api/user/session-timeout-config`
 
-Set the session timeout (admin only).
+Set the session timeout (first user only).
 
 **Request Body:**
 
@@ -615,7 +615,7 @@ The change applies to existing sessions. A session idle longer than a new, short
 
 ### PUT `/api/user/access-time-config`
 
-Set last-opened tracking (admin only).
+Set last-opened tracking (first user only).
 
 **Request Body:**
 
@@ -653,7 +653,7 @@ Get the current hide file extensions setting. Accessible to any authenticated us
 
 ### PUT `/api/user/hide-file-extensions-config`
 
-Update the hide file extensions setting (admin only). When true, file names are shown without extensions in the file manager and rename dialog.
+Update the hide file extensions setting (first user only). When true, file names are shown without extensions in the file manager and rename dialog.
 
 **Request Body:**
 
@@ -691,7 +691,7 @@ Get the desktop-only access setting. Accessible to any authenticated user.
 
 ### PUT `/api/user/desktop-only-config`
 
-Update the desktop-only access setting (admin only). When enabled, the backend blocks browser access to the main app. Share links, `/health`, `/metrics`, and the OnlyOffice file and callback endpoints (called by the Document Server) remain available.
+Update the desktop-only access setting (first user only). When enabled, the backend blocks browser access to the main app. Share links, `/health`, `/metrics`, and the OnlyOffice file and callback endpoints (called by the Document Server) remain available.
 
 **Request Body:**
 
@@ -733,7 +733,7 @@ Get the Cloud Drive access mode. Accessible to any authenticated user; the deskt
 
 ### PUT `/api/user/cloud-drive-config`
 
-Update the Cloud Drive access mode (admin only). Mounted drives apply the change within a minute.
+Update the Cloud Drive access mode (first user only). Mounted drives apply the change within a minute.
 
 **Request Body:**
 
@@ -772,7 +772,7 @@ Get the current password change setting. Accessible to any authenticated user (u
 
 ### PUT `/api/user/password-change-config`
 
-Update the password change setting (admin only). When enabled, users can change their password from **Settings** → **Security**.
+Update the password change setting (first user only). When enabled, users can change their password from **Settings** → **Security**.
 
 **Request Body:**
 
@@ -798,7 +798,7 @@ Update the password change setting (admin only). When enabled, users can change 
 
 ### GET `/api/user/active-clients`
 
-List active desktop app clients seen in the last 5 minutes (first user/admin only).
+List active desktop app clients seen in the last 5 minutes (first user only).
 
 **Response:**
 

@@ -11,9 +11,9 @@ Frequently encountered errors and step-by-step diagnosis.
   assume earlier ones passed.
 </Callout>
 
-## Database connection errors
+## Database Connection Errors
 
-### Symptom: "Database connection failed" on startup
+### Symptom: "Database connection failed" on Startup
 
 1. **Is Postgres actually up?**
 
@@ -39,9 +39,9 @@ Frequently encountered errors and step-by-step diagnosis.
 
 The backend and worker stop at startup. Set `DATABASE_URL` in `.env` with a database name after the last `/`, for example `postgresql://postgres:password@localhost:5432/tma_cloud_storage`. The same check applies to `REDIS_URL`.
 
-## Encryption key errors
+## Encryption Key Errors
 
-### Symptom: Backend or worker stops with "FILE_ENCRYPTION_KEY must be a random 32-byte key in production"
+### Symptom: Backend or Worker Stops with "FILE_ENCRYPTION_KEY must be a random 32-byte key in production"
 
 The key is a passphrase. Production accepts only a random 32-byte key in base64 or hex.
 
@@ -63,13 +63,13 @@ A key line that file keys or the bucket secret still use was removed, or an olde
 1. **Restore the key file** from the backup taken after the last rotation.
 2. **Check the version prefix** of each line against the versions in the message.
 
-## Storage bucket errors
+## Storage Bucket Errors
 
 ### Symptom: "Storage is not configured" (503 `STORAGE_NOT_CONFIGURED`)
 
 No bucket is saved. The first user connects one in **Settings** → **Storage**. See [Storage Bucket](/docs/guides/admin/storage-bucket).
 
-### Symptom: A connection check fails when saving the bucket
+### Symptom: A Connection Check Fails When Saving the Bucket
 
 The message names the failed check.
 
@@ -78,7 +78,7 @@ The message names the failed check.
 3. **"The bucket is in a different region"** — Set the bucket's region (Amazon S3).
 4. **"Find existing files failed"** — The new bucket does not contain the files already stored. Copy the objects first.
 
-## Redis connection errors
+## Redis Connection Errors
 
 ### Symptom: "Redis connection failed"
 
@@ -93,7 +93,7 @@ The message names the failed check.
 2. **Auth enabled?** If Redis requires a password, put it in `REDIS_URL`: `redis://:password@host:6379/0`.
 3. **Right host in Docker?** Use the compose service name (`redis`), not `localhost`, as the host in `REDIS_URL`.
 
-## Storage limit errors
+## Storage Limit Errors
 
 ### Symptom: "Storage limit exceeded"
 
@@ -101,7 +101,7 @@ The message names the failed check.
 2. **Check provider limits.** A full bucket quota or suspended provider account must be resolved with the storage provider.
 3. **Admin override.** An admin can raise the limit for a specific user in **Settings** → **Administration** → **Registered users**.
 
-### Symptom: "This file is too large" on a single upload
+### Symptom: "This file is too large" on a Single Upload
 
 The file exceeds the per-request max upload size (separate from storage quota).
 
@@ -109,9 +109,9 @@ The file exceeds the per-request max upload size (separate from storage quota).
 2. **Reverse proxy limits.** If you run nginx in front of the backend, `client_max_body_size` must also be raised — otherwise nginx rejects the request before it reaches the backend.
 3. **Split the file** if you can't change the limits.
 
-## Upload errors
+## Upload Errors
 
-### Symptom: "Upload failed" (generic)
+### Symptom: "Upload failed" (Generic)
 
 1. **Check bucket availability** and provider quotas.
 2. **Check bucket credentials and policies** — allow the backend to upload, read, list, and delete objects.
@@ -119,7 +119,7 @@ The file exceeds the per-request max upload size (separate from storage quota).
 
 See [Upload Issues](/docs/debugging/upload-issues) for upload-specific problems.
 
-## Authentication errors
+## Authentication Errors
 
 ### Symptom: "Invalid credentials"
 
