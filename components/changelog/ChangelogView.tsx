@@ -225,6 +225,9 @@ export function ChangelogMajor({ major }: { major: number }) {
       ) : null}
 
       {loadingIndex ? <p>Loading changelog index...</p> : null}
+      {index && !latest ? (
+        <p>No v{major}.x release notes are published yet.</p>
+      ) : null}
       {loadingRelease ? <p>Loading release...</p> : null}
 
       {release ? (
