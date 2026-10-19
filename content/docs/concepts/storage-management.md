@@ -95,7 +95,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 ### Upload Limits
 
-- **Max upload size:** Per-file size limit, configurable by admin in **Settings** → **Storage** (default 10 GB). Stored in `app_settings.max_upload_size_bytes`. Checked by the app before an upload starts and enforced by the server during the upload.
+- **Maximum upload size:** Per-file size limit, configurable by admin in **Settings** → **Storage** (default 10 GB). Stored in `app_settings.max_upload_size_bytes`. Checked by the app before an upload starts and enforced by the server during the upload.
 - Multipart upload sizing uses the maximum encrypted size derived from this setting. The default multipart part size is 16 MiB, parts are equal-sized except for the last, and the plan may not exceed 10,000 parts.
 - Pre-upload validation (Content-Length check)
 - Final safeguard check (actual file size)

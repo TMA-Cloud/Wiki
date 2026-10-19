@@ -69,7 +69,7 @@ If a request is made anyway, the server rejects it with `403` and a message nami
 
 1. Go to **Settings** → **Sub-users**
 2. Click the trash icon in the sub-user's row
-3. Click **Confirm remove**
+3. Click **Yes, remove**
 
 Removing a sub-user deletes only the login. Files stay in your account, because they were always stored under your account rather than the sub-user's. The sub-user's active sessions are ended immediately.
 

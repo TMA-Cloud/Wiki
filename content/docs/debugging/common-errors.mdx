@@ -105,7 +105,7 @@ The message names the failed check.
 
 The file exceeds the per-request max upload size (separate from storage quota).
 
-1. **Admin → Settings → Storage → Max upload size.** Raise it if appropriate.
+1. **Admin → Settings → Storage → Maximum upload size.** Raise it if appropriate.
 2. **Reverse proxy limits.** If you run nginx in front of the backend, `client_max_body_size` must also be raised — otherwise nginx rejects the request before it reaches the backend.
 3. **Split the file** if you can't change the limits.
 

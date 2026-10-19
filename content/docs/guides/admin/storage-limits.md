@@ -56,7 +56,7 @@ The maximum size for a single uploaded file. Applies to all users.
 ### Configuring
 
 1. Navigate to **Settings** → **Storage**
-2. Click **Max upload size** under **Limits** to open it
+2. Click **Maximum upload size** under **Limits** to open it
 3. Enter a value and select the unit (MB or GB)
 4. Click **Save**
 

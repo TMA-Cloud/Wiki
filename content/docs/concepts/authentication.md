@@ -47,7 +47,7 @@ The first user sets the window under **Settings** → **Administration** → **S
 - View every valid session with device, IP, creation time, and last activity
 - Refresh the list without its two-minute cache to read the latest reported IPs
 - See **Online** only when a visible page or desktop window sent a session heartbeat in the last three minutes; hidden pages pause heartbeats, and recent request activity alone does not count
-- Revoke individual sessions
+- Sign out individual devices
 - Logout from all devices
 - Browser and desktop clients report presence every two minutes while signed in
 
