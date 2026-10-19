@@ -13,7 +13,7 @@ Manage users in TMA Cloud (admin only).
 2. Click **Show all users** under **Registered users**
 3. View user details (name, email, storage usage)
 
-Sub-users appear in this list under the account they belong to. The list also reports `parentUserId` and, for sub-users, their granted permissions.
+Sub-users appear in this list under the account they belong to.
 
 Accounts load automatically in cursor batches as you scroll. Each batch keeps an owner and all of its sub-users together; there are no Previous/Next controls.
 
@@ -37,9 +37,9 @@ On a narrow screen, **Joined** and then **Two-factor** are hidden so names stay 
 
 ### Signup Control
 
-- **Enable Signup:** Allow public registration
-- **Disable Signup:** No one is allowed to signup
-- Toggle in **Settings** → **Administration** → **Allow sign-up**
+- **On:** anyone who can reach the server can create an account
+- **Off:** nobody can; account owners can still add sub-users
+- Toggle in **Settings** → **Administration** → **Policies** → **Allow sign-up**
 
 ### Sub-users
 
@@ -48,20 +48,18 @@ Any account, including yours, can add extra logins that share its files and quot
 ### Hide File Extensions
 
 - When enabled, file names are shown without extensions (applies to all users)
-- Toggle in **Settings** → **Administration** → **Hide file extensions**
+- Toggle in **Settings** → **Administration** → **Policies** → **Hide file extensions**
 
 ### Cloud Drive Save-only
 
 - When enabled, other apps can browse and save into the desktop app's Cloud Drive but cannot open files from it (applies to all desktop apps, on by default)
-- Toggle in **Settings** → **Administration** → **Cloud Drive save-only**
+- Toggle in **Settings** → **Administration** → **Policies** → **Cloud Drive save-only**
 
 ## Managing Users
 
 ### Storage Limits
 
-- Set per-user storage limits
-- Override default limits
-- Monitor usage
+- Set a limit per account in the **Registered users** list. See [Storage Limits](/docs/guides/admin/storage-limits)
 
 ### MFA Management
 
@@ -70,18 +68,11 @@ Any account, including yours, can add extra logins that share its files and quot
 
 ### Passwords
 
-- When **Allow password changes** is on in **Settings** → **Administration**, users can change their own password. There is no way for an admin to set another user's password from the interface.
-
-## Best Practices
-
-- Regularly review user list
-- Monitor storage usage
-- Set appropriate storage limits
-- Keep signup control appropriate for your use case
+- When **Allow password changes** is on in **Settings** → **Administration** → **Policies**, users can change their own password. There is no way for an admin to set another user's password from the interface.
 
 ## Related Topics
 
 - [Storage Limits](/docs/guides/admin/storage-limits) - Configure storage
-- [Signup Control](/docs/guides/admin/signup-control) - Manage registration
+- [Policies](/docs/guides/admin/signup-control) - Sign-up and the other server-wide switches
 - [Sub-users](/docs/guides/user/sub-users) - Extra logins on one account
 - [MFA Management](/docs/guides/admin/mfa-management) - Multi-factor authentication

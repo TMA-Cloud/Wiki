@@ -26,7 +26,7 @@ Sign-in, signup, and folder listings work without a bucket.
 
 1. Create a private bucket and an access key that is limited to that bucket. The key needs list, read, write, and delete permission on objects.
 2. Navigate to **Settings** → **Storage**
-3. Open **Storage bucket** under **Bucket**
+3. Open **Storage bucket** under **Server settings**
 4. Select the provider and enter its fields:
    - **Cloudflare R2:** account ID (32 characters, shown on the R2 overview page) and jurisdiction (Default, European Union, or FedRAMP)
    - **Amazon S3:** region, and an endpoint only if you use a non-standard one

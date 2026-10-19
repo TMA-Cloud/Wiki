@@ -10,55 +10,31 @@ Quick access to your favorite files and folders.
 ### How to Star
 
 1. Right-click on a file or folder
-2. Select **"Star"**
-3. File appears in Starred section
+2. Select **Add to Starred**
+3. The item appears in **Starred**
 
 ### Unstarring Files
 
-1. Right-click on starred file
-2. Select **"Unstar"**
-3. File removed from Starred section
+1. Right-click the starred item
+2. Select **Remove from Starred**
 
 ### Bulk Operations
 
-- Select multiple files
-- Star/unstar all at once
-- Quick organization
+Select several items, then right-click → **Add to Starred** or **Remove from Starred** to change them all at once. The toolbar's star button does the same.
 
 ## Accessing Starred Files
 
 ### Starred Section
 
-- Navigate to **"Starred"** in sidebar
-- View all starred files
-- Quick access from anywhere
+Open **Starred** in the sidebar to see every starred file and folder, wherever it is stored.
 
 ### Sorting
 
-- Sort by name, modified, last opened, or size
-- Maintains organization
-- Easy to find files
+Sort by name, modified, last opened, or size.
 
 ## Use Cases
 
-### Quick Access
-
-- Frequently used files
-- Important documents
-- Project files
-- Reference materials
-
-### Organization
-
-- Mark important files
-- Create virtual collections
-- Cross-folder organization
-
-## Best Practices
-
-- Star only truly important files
-- Regularly review and unstar unused files
-- Use for cross-folder organization
+Star files you open often, such as current projects or reference documents. Starring does not move or copy anything, so a file can stay in its folder and still be one click away.
 
 ## Related Topics
 

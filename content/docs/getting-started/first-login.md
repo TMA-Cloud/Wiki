@@ -30,15 +30,14 @@ In the browser the sign-in fields are ordinary form fields with the standard `au
 
 The first user to sign up automatically becomes the **administrator** with the following privileges:
 
-- **Storage Bucket** - Connect the S3-compatible bucket that stores files
-- **User Management** - Manage all users
-- **Storage Limits** - Set storage limits for users
-- **Signup Control** - Enable or disable user registration
-- **MFA Management** - Manage multi-factor authentication settings
-- **OnlyOffice Settings** - Configure OnlyOffice integration
-- **Share link address** - Configure custom domain for share links
-- **Hide File Extensions** - Show file names with or without extensions
-- **System Settings** - Access to all administrative features
+- **Storage bucket** - Connect the S3-compatible bucket that stores files, and set the maximum upload size
+- **Registered users** - See every account, its storage use and two-factor status, and set storage limits
+- **Policies** - Sign-up, password changes, desktop-app-only access, hidden file extensions and Cloud Drive save-only
+- **Sessions and activity** - The session timeout and recently opened tracking
+- **Network** - Known proxies
+- **Integrations** - OnlyOffice and the share link address
+- **Maintenance** - Review orphaned files
+- **Server updates** - The update guide link in **Settings** → **Updates**
 
 ## Connect Storage
 
@@ -54,11 +53,10 @@ See [Storage Bucket](/docs/guides/admin/storage-bucket) for each provider's fiel
 
 As the first user (admin), you can control whether new users can sign up:
 
-1. Go to **Settings** (admin section)
-2. Find **"User Signup"** section
-3. Toggle signup on/off as needed
+1. Go to **Settings** → **Administration** → **Policies**
+2. Turn **Allow sign-up** on or off
 
-When signup is disabled, only the first user (admin) can allow signup.
+Only the first user can change it. With sign-up off, nobody can create an account, but account owners can still add sub-users.
 
 ## Adding People to Your Account
 
@@ -72,7 +70,3 @@ Now that you're logged in:
 - **[Manage Folders](/docs/guides/user/manage-folders)** - Organize your files
 - **[Share Files](/docs/guides/user/share-files)** - Share files with others
 - **[User Management](/docs/guides/admin/user-management)** - Manage users (admin only)
-
----
-
-**Welcome to TMA Cloud!** 🎉

@@ -51,7 +51,7 @@ Windows, macOS and Linux. Both talk to the same `/api/*` endpoints.
 
 ### Custom Share Domain (Optional)
 
-Configure custom share base URL in Settings → Administration → Share link address (admin only). When
+Configure a share base URL in **Settings** → **Administration** → **Integrations** → **Share link address** (first user only). When
 configured, share links use the custom domain. The share domain blocks all routes
 except `/s/*`, `/health`, and `/metrics`.
 
@@ -84,7 +84,7 @@ apps/
 
 **Interface:** views draw the screen; background requests run off the frame and their
 results are applied on the next frame. The light and dark palettes follow the system
-setting until you switch with the sun or moon button in the header. Text is set in Inter,
+setting until you switch with the sun or moon button in the header. Text is set in Figtree,
 bundled with the app.
 
 ## Desktop App
@@ -102,7 +102,7 @@ Extras over the web app:
 - **System clipboard:** Copy also puts the files' Cloud Drive paths on the Windows
   clipboard, to paste into Explorer, mail or chat; files copied in Explorer paste in
   (Windows)
-- **Updates:** a newer release downloads and installs itself (Windows)
+- **Updates:** a newer release downloads and installs itself (Windows, the Linux AppImage and macOS)
 - **One copy at a time:** opening the app again brings the running window forward
 - **Cloud Drive:** see below
 
@@ -112,8 +112,8 @@ The desktop app shows TMA Cloud as a `TMA Cloud` folder so files can be opened a
 from any application's file dialogs, with no extra driver on any system:
 
 - **Windows:** the Cloud Files API (what OneDrive uses). Files are placeholders that
-  download when opened; a watcher uploads local changes, and server events refresh the
-  folders you have opened. Cloud Files is built into Windows 10 version 1709 and later.
+  download when opened; a watcher uploads local changes, and after a server event the app
+  asks which folders changed and lists again only those you have opened. Cloud Files is built into Windows 10 version 1709 and later.
 - **Linux:** FUSE.
 - **macOS:** a local NFS server inside the app, reachable only from `127.0.0.1`, mounted
   with the system's own NFS client.
@@ -129,8 +129,9 @@ Any app's Save As → %USERPROFILE%\TMA Cloud (Cloud Files) or ~/TMA Cloud (FUSE
 ```
 
 The app connects the drive after sign-in and disconnects it on sign-out or when it closes.
-Directory listings are cached for five seconds and dropped when the server's event
-stream reports a change. See [Desktop App — Cloud Drive](/docs/getting-started/desktop-app#cloud-drive).
+Directory listings are cached for five seconds. On Windows a server event makes the app ask
+[which folders changed](/docs/api/files#folder-changes) and drop only those; on Linux and
+macOS it drops every cached listing. See [Desktop App — Cloud Drive](/docs/getting-started/desktop-app#cloud-drive).
 
 **Names.** The server stores names that Windows cannot hold, such as `Q3: plan?.docx`. On
 Windows, each reserved character `"*:<>?|\`, and a trailing dot or space, maps to the
@@ -211,7 +212,8 @@ the uploaded object is queued for deletion.
 
 Key tables: `users`, `files`, `share_links`, `share_link_files`, `sessions`,
 `mfa_backup_codes`, `client_heartbeats`, `storage_reservations`,
-`file_operation_results`, `job_queue`, `job_schedules`, `app_settings`, `audit_log`
+`file_operation_results`, `file_locks`, `file_changes`, `job_queue`, `job_schedules`,
+`app_settings`, `audit_log`
 
 See [Database Schema](/docs/reference/database-schema) for details.
 
@@ -233,7 +235,6 @@ See [Database Schema](/docs/reference/database-schema) for details.
   maintenance schedules, admin-requested orphan work, share auto-linking, and OnlyOffice
   force-save commands from a job queue in PostgreSQL. Audit events are written in batches
   by each process
-- **Request Logging:** All requests logged with context
 
 See [Logging](/docs/guides/operations/logging) and [Audit Logs](/docs/guides/operations/audit-logs) for details.
 

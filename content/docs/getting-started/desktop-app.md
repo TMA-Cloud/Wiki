@@ -20,7 +20,7 @@ Download the installer for your system from the
 
 **Windows.** The installer puts the app in your user folder
 (`%LOCALAPPDATA%\TMA Cloud`), adds Start menu and desktop shortcuts, and registers an
-uninstaller in **Settings → Apps**. Nothing else is installed: Cloud Drive uses the Cloud
+uninstaller in **Settings** → **Apps**. Nothing else is installed: Cloud Drive uses the Cloud
 Files support built into Windows 10 (version 1709) and later. For unattended installs,
 run the installer with `/S`.
 
@@ -69,7 +69,7 @@ network drops or the computer wakes from sleep, fails with an error instead of w
 forever. Cloud Drive requests stop waiting the same way.
 
 A session ended elsewhere (a password change, **Sign out everywhere**, or a session
-revoked in **Settings → Security**) returns the app to the sign-in form within a minute,
+revoked in **Settings** → **Security**) returns the app to the sign-in form within a minute,
 even while it sits idle.
 
 Only one copy of the app runs at a time: opening it again brings the running window
@@ -82,8 +82,8 @@ a flash.
 
 ## Version and updates
 
-- **Settings → Updates** shows the server version and this app's version.
-- **When an update is available**, the sidebar says so, and **Settings → Updates** adds an
+- **Settings** → **Updates** shows the server version and this app's version.
+- **When an update is available**, the sidebar says so, and **Settings** → **Updates** adds an
   **Update to v…** section:
   - **Release notes** opens that version's entry in the [changelog](/docs/changelog/overview).
   - **Update guide** opens [Updating](/docs/guides/operations/updating). Only the
@@ -123,7 +123,7 @@ a flash.
 ## Active desktop clients (admin view)
 
 - Signed-in desktop apps send a heartbeat every minute.
-- The admin can view active clients in **Settings → Administration → Active desktop clients**.
+- The admin can view active clients in **Settings** → **Administration** → **Active desktop clients**.
 - Each row includes user, platform, app version, IP, and last seen time.
 - This admin list excludes browser-session presence rows.
 - Revoking sessions removes related heartbeat rows; stale rows are also purged automatically.
@@ -138,7 +138,7 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
   the system's default app. No other copy is made. When no app is set for the type,
   Windows asks which one to use.
 - Opening needs Cloud Drive. While it is not connected, the app says so and points to
-  **Settings → Desktop app**.
+  **Settings** → **Desktop app**.
 - **Blocked:** programs, scripts, installers and shortcuts (for example `.exe`, `.msi`,
   `.bat`, `.cmd`, `.ps1`, `.vbs`, `.js`, `.lnk`, `.reg`) are refused with "Programs and
   scripts can't be opened from the cloud. Download the file to run it."
@@ -149,7 +149,7 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
   (on Windows about two seconds after the app stops writing).
 - The same file entry is updated (the ID stays the same), also when the app saves to a
   temporary name and renames it over the original, as Word and Excel do.
-- **Save As** or **Export** into the same folder (for example, Word → Export to PDF)
+- **Save As** or **Export** into the same folder (for example, Word's Export to PDF)
   uploads the new file beside the original. Files saved anywhere else (Desktop,
   Documents) stay on your computer only.
 - Office's lock files (`~$…`) and temporary files stay on your computer.
@@ -221,7 +221,7 @@ extra driver is needed on any system.
 - **Connects automatically.** The folder connects after you sign in and stops syncing
   when you sign out or close the app. It uses the app's own session — no separate login.
   The header shows **TMA Cloud** while it is connected; click it to open the folder.
-- **Status.** **Settings → Desktop app → Cloud Drive** shows whether the drive is
+- **Status.** **Settings** → **Desktop app** → **Cloud Drive** shows whether the drive is
   connected, and what is missing when it cannot start.
 - **Save As anywhere.** In any app's Save dialog, choose the TMA Cloud folder as the
   destination. The file uploads through the same pipeline as a normal upload, so
@@ -271,7 +271,7 @@ The folder works like OneDrive's:
   `TMA Cloud` folder. Updating the app keeps the folder as it is.
 
 Cloud Drive needs Windows 10 version 1709 or later, where Cloud Files is built in. On
-older versions **Settings → Desktop app** says so and the rest of the app works as usual.
+older versions **Settings** → **Desktop app** says so and the rest of the app works as usual.
 
 ### On Linux and macOS
 
@@ -284,8 +284,8 @@ older versions **Settings → Desktop app** says so and the rest of the app work
 
 ### Save-only mode
 
-The first user sets this for every desktop app in **Settings → Administration → Policies
-→ Cloud Drive save-only**. **Settings → Desktop app → Access mode** shows the mode the
+The first user sets this for every desktop app in **Settings** → **Administration** → **Policies**
+→ **Cloud Drive save-only**. **Settings** → **Desktop app** → **Access mode** shows the mode the
 drive on this computer uses.
 
 - **On:** folders and files stay browsable and **Save As** still works, but opening or
@@ -340,22 +340,11 @@ them listed, to check before they upload into the open folder (the root outside
 
 ## Keyboard Shortcuts
 
-- **Arrow keys, Home, End, Page Up/Down:** Move the selection (with **Shift**: select a range).
-- **Type a name:** Select the next item whose name starts with the letters typed. Pressing the same letter again moves to the next item that starts with it.
-- **Ctrl+A / Cmd+A:** Select all items in the current view.
-- **Ctrl+C / Ctrl+X / Ctrl+V:** Copy, cut and paste within TMA Cloud.
-- **Delete:** Move the selection to the trash after you confirm (in the trash: delete forever).
-- **F2:** Rename the selected item.
-- **Enter:** Open the selected file or folder.
-- **Backspace:** Go back to the previous folder; **Alt+Up** goes to the parent folder.
-- **Escape:** Clear the selection.
-- **Ctrl+K:** Focus the search field.
-
-The same shortcuts work in the browser. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation) for details.
+The desktop app uses the same shortcuts as the browser. See [Keyboard Navigation](/docs/guides/user/upload-files#keyboard-navigation).
 
 ## Desktop-only mode (optional)
 
-- When the administrator enables **Desktop app only** in **Settings → Administration**,
+- When the administrator enables **Desktop app only** in **Settings** → **Administration** → **Policies**,
   the server rejects browser access to the main app.
 - The desktop app continues to work because it sends the required HTTP header on its
   requests.

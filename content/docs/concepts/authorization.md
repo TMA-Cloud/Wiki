@@ -20,15 +20,16 @@ Sub-users cannot create sub-users. This is enforced by the API and by a database
 
 ### Administrator
 
-The first user to sign up automatically becomes an administrator with:
+The first user to sign up becomes the administrator, the only login that can:
 
-- Full system access
-- User management
-- Storage limit configuration
-- Signup control
-- MFA management
-- OnlyOffice settings
-- System settings
+- Connect the storage bucket and set the maximum upload size
+- See every registered account and set storage limits
+- Set the policies: sign-up, password changes, desktop-app-only access, hidden file extensions, Cloud Drive save-only
+- Set the session timeout, recently opened tracking and known proxies
+- Configure OnlyOffice and the share link address
+- See active desktop clients and review orphaned files
+
+The administrator cannot read other accounts' files, change their passwords, or turn their two-factor authentication on or off.
 
 Administrator status belongs to that one account. A sub-user created by the admin account is not an administrator.
 
@@ -76,12 +77,6 @@ Anything not granted is denied. There is no deny list, because there is nothing 
 - **Sub-user:** Read and browse, plus whatever permissions are granted
 - **Public (via share link):** Read-only access
 
-### Administrative Permissions
-
-- **User Management:** View all users; set per-user storage limits
-- **Storage Limits:** Set per-user storage limits
-- **System Settings:** Configure global settings
-
 ## Access Control
 
 ### File Access
@@ -97,7 +92,7 @@ Anything not granted is denied. There is no deny list, because there is nothing 
 - Admin-only endpoints check whether the caller is the first user
 - Owner-only endpoints (sub-user management) reject sub-users with `403`
 - File endpoints check the caller's permission and reject with `403` when it is missing
-- Rate limiting applies to all endpoints
+- Rate limits apply to every API and share-link request except the live event stream
 
 ### Share Links
 
@@ -122,7 +117,6 @@ Two cases are worth noting:
 - Share links use cryptographically secure tokens
 - Admin operations are logged in audit trail
 - Denied permission checks are logged as `account.permission_denied`
-- Session-based authorization checks
 
 ## Related Topics
 

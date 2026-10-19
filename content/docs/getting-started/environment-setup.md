@@ -1,9 +1,9 @@
 ---
 title: 'Environment Setup'
-description: 'Environment variable reference for TMA Cloud.'
+description: 'The settings a new install needs in .env.'
 ---
 
-Environment variable reference for TMA Cloud.
+The settings a new install needs in `.env`. Every variable, with its full details, is in [Environment Variables](/docs/reference/environment-variables).
 
 ## Application Configuration
 
@@ -37,7 +37,7 @@ REDIS_URL=redis://:password@localhost:6379/0
 
 Use `rediss://` for TLS. The number after the last `/` is the Redis database.
 
-**Note:** The Redis server is optional. If the app cannot reach it, caching is disabled.
+The server does not start without `REDIS_URL`, but it keeps running while Redis is unreachable: caching is off, and live updates reach only clients of the same server process.
 
 ## Authentication
 
@@ -46,7 +46,7 @@ Use `rediss://` for TLS. The number after the last `/` is the Redis database.
 | `JWT_SECRET`             | Yes      | -       | Secret key for JWT tokens                       |
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, the auth cookie has no `Secure` flag |
 
-Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known proxies**. See [Known Proxies](/docs/guides/admin/known-proxies). The session timeout and last-opened tracking are set there too; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+Configure reverse proxy trust after the first login under **Settings** → **Administration** → **Known proxies**. See [Known Proxies](/docs/guides/admin/known-proxies). The session timeout and **Recently opened** tracking are set there too; see [Session Timeout and Recently Opened](/docs/guides/admin/sessions-and-activity).
 
 ## File Storage
 

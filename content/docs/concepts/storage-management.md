@@ -10,7 +10,7 @@ Storage limits and management in TMA Cloud.
 - **S3:** Files stored in S3-compatible object storage. Object keys stored in database.
 - The first user connects the bucket in **Settings** → **Storage** (see [Storage Bucket](/docs/guides/admin/storage-bucket)). The backend starts without one; until it is saved, file content requests return `503 STORAGE_NOT_CONFIGURED`.
 - Each API and worker process keeps the decrypted setting in memory only and re-reads it from the database every 15 seconds, so a change applies without a restart. A new setting gets a new S3 client; the previous client is closed after 5 minutes so transfers already running on it can finish.
-- Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage. Bulk deletion uses the S3 multi-object API in batches of up to 1,000 keys.
+- Uploads stream directly to the bucket with encryption. Downloads, copies, deletion, and sharing also use bucket storage. Bulk deletion uses the S3 multi-object API in batches of up to 1,000 keys, up to eight batches at once.
 - The driver uses operations supported by AWS S3 and Cloudflare R2: `PutObject`, `GetObject`, `HeadObject`, `ListObjectsV2`, `DeleteObject`, `DeleteObjects`, `CopyObject`, and multipart upload and copy operations.
 - A single upload or copy request is limited to 5,000,000,000 bytes. Larger objects use multipart operations, which is the lower portable boundary across AWS S3 and R2.
 
@@ -19,8 +19,8 @@ Storage limits and management in TMA Cloud.
 ### Per-User Limits
 
 - Configurable storage limits per user
-- **S3:** No disk; default is unlimited when no limit set. Display: "X used of Unlimited" or "X used of Y" (when limit set). Only per-user limit enforced.
-- Set by administrators; real-time usage tracking
+- Without a limit an account is unlimited, and Settings shows its usage with **No storage limit**. With one it shows how much of the limit is used, the percentage, and the space left
+- Set by the administrator; usage updates with every write
 
 ### Storage Calculation
 
@@ -34,24 +34,22 @@ Storage limits and management in TMA Cloud.
 
 - Reads are constant-time from `users.storage_used`; database triggers update the counter once per statement for inserts and deletes, and per row for the updates that change a file's size, type or owner
 - Upload and replacement transactions lock the account row before checking quota. Long object-store copies reserve their bytes first and release the reservation in the metadata transaction, so concurrent API instances cannot approve the same free space twice.
-- **S3:** Total = per-user limit or null (Unlimited). Free = limit − used or null. No disk.
-- Visual charts and indicators; per-user usage statistics
+- The storage API reports `total` as the account's limit and `free` as what is left, both `null` without a limit
 
 ### Monitoring
 
-- Usage warnings at thresholds
-- Limit enforcement on upload (per-user limit only)
-- Storage quota exceeded errors
+- The usage bar turns amber at 80% of the limit and red at 95%
+- Uploads and saves that would pass the limit are refused with the space used, the limit and what is left
 
 ## Per-User Access (Strict DB Permissions)
 
 File access is enforced with **strict database permissions** so that User A cannot download or access User B's files, even if they guess a file ID.
 
-- **Main file API:** All file operations (download, rename, move, etc.) use `getFile(id, userId)` or equivalent queries that require `id AND user_id` and `deleted_at IS NULL`. Only the owning user sees their files.
-- **OnlyOffice:** The file-serving and callback endpoints use a **per-user encryption context**: the JWT and document key include `userId`. The server only serves or saves a file when the database row matches both `id` and `user_id` from the token/key.
+- **Main file API:** Every file operation (download, rename, move, and so on) looks the row up by both its id and the caller's account (`user_id`), and skips trashed rows. Only the account that owns a file sees it.
+- **OnlyOffice:** The signed link and the document key name the account. The file-serving and callback endpoints only serve or save a file whose row matches both the file id and that account.
 - **Share links:** Shared-item download requires a valid share token and returns the file only if it is in that share (join with `share_link_files`), so access is scoped to the share.
 
-This ensures that guessing or enumerating file IDs does not grant access to another user's data.
+So guessing or enumerating file IDs does not give access to another user's data.
 
 ## File Encryption
 
@@ -61,7 +59,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 - **Scope:** File contents in the S3-compatible bucket are encrypted
 - **Transparent:** Encryption and decryption happen automatically
-- **Streaming:** Large files processed in streams to avoid memory issues
+- **Streaming:** Files pass through in streams. Upload buffers share a server-wide budget (`UPLOAD_MEMORY_MB`, 512 MB by default), so many large uploads at once wait their turn instead of exhausting memory
 - **Seekable:** Because segments are independent, a single-file download can serve an HTTP `Range` request by decrypting only the overlapping segments
 
 ### File Operations
@@ -70,7 +68,7 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 - **Upload:** Files stream from the client through encryption to storage. A known object over 5,000,000,000 bytes uses multipart upload. For an unknown-length encrypted stream, the part size is calculated from the configured maximum upload size.
 - **Download:** Files streamed from storage to client (S3: GetObject stream); supports HTTP `Range` for partial reads
 - **Copy:** Copy runs on the background worker. The object store copies ciphertext directly. Objects up to 5,000,000,000 bytes use one copy request; larger objects use multipart copy. Part size grows with object size so the copy stays within 10,000 parts. A logical copy reuses the source object's wrapped DEK because its ciphertext is unchanged.
-- **Deep copies:** The recursive plan is kept in a PostgreSQL temporary table. The application reads one cursor page at a time and copies at most four objects concurrently.
+- **Deep copies:** The recursive plan is kept in a PostgreSQL temporary table. The application reads one cursor page at a time and runs up to 24 server-side copies at once; no file data passes through TMA Cloud.
 - **Share:** Share link downloads use the same bucket object keys and streaming decryption
 - **Folder ZIP:** Authenticated and public-share folder archives read database cursor pages and append one decrypted file stream at a time.
 - **OnlyOffice save:** A callback writes to a new object key, rechecks replacement quota under row locks, and commits the metadata swap. The old object is then queued for deletion. A rejected or failed save leaves the old version intact and queues any unused new object for deletion.
@@ -97,16 +95,14 @@ Files are automatically encrypted. Encryption uses AES-256-GCM in Google Tink's 
 
 - **Maximum upload size:** Per-file size limit, configurable by admin in **Settings** → **Storage** (default 10 GB). Stored in `app_settings.max_upload_size_bytes`. Checked by the app before an upload starts and enforced by the server during the upload.
 - Multipart upload sizing uses the maximum encrypted size derived from this setting. The default multipart part size is 16 MiB, parts are equal-sized except for the last, and the plan may not exceed 10,000 parts.
-- Pre-upload validation (Content-Length check)
-- Final safeguard check (actual file size)
-- Prevents file upload if limit exceeded
-- Clear error messages with usage details
-- Files cleaned up if validation fails
+- Checked before the upload from its declared size, and again while the bytes arrive
+- A refused upload gets its reason (limit, quota, permission) rather than a dropped connection
+- Stored bytes of a refused upload are deleted
 
 ### Cleanup
 
 - Trash cleanup frees space
-- Automatic background processes handle trash, expired share links, audit logs, old sessions, expired quota reservations, expired file-operation results, leftover bulk-import manifests, and a weekly recheck of stored folder totals
+- Automatic background processes handle trash, expired share links, audit logs, old sessions, expired quota reservations, expired file-operation results, leftover bulk-import manifests, change-feed entries older than a week, and a weekly recheck of stored folder totals
 - Failed uploads, replacements, and OnlyOffice saves queue unused storage objects for retryable deletion
 - Orphaned files are **not** removed automatically; an admin reviews and deletes them from **Settings** → **Administration** → **Maintenance** → **Review orphans**
 - **S3:** Upload validation (e.g. `parentId`) runs after stream upload. Failed bulk-upload and abandoned stream objects are queued for deletion. A process crash can still leave an orphan; review them periodically.

@@ -30,7 +30,7 @@ An empty list disables forwarded client IP handling.
 ## Choosing Entries
 
 - Enter the address of nginx, Traefik, Cloudflare Tunnel, or the load balancer that connects to the backend. Do not enter client addresses.
-- If the session screen currently shows an address such as `::ffff:10.1.2.100` for every user, the proxy IPv4 address is `10.1.2.100`.
+- If **Sessions** shows the same address for every user, that address is the proxy's.
 - Add every proxy in a multi-proxy chain.
 - Prefer exact IP addresses. Use a CIDR range only when proxy addresses cannot be kept stable.
 - Hostnames are resolved when the backend starts. A hostname that cannot be resolved is not trusted.

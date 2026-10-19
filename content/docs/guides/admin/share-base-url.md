@@ -1,9 +1,9 @@
 ---
-title: 'Share Base URL'
-description: 'Configure custom domain for share links in TMA Cloud (admin only).'
+title: 'Share Link Address'
+description: 'Serve share links from their own domain (first user only).'
 ---
 
-Configure custom domain for share links in TMA Cloud (admin only).
+Serve share links from their own domain (first user only).
 
 ## Share Base URL Settings
 

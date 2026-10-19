@@ -20,9 +20,7 @@ A folder name can be up to 255 characters and cannot contain `/`, `\` or control
 
 ### Nested Folders
 
-- Create folders inside other folders
-- Unlimited nesting depth
-- Hierarchical organization
+Open a folder, then create the new folder inside it. Folders can be nested to any depth.
 
 ## Folder Operations
 
@@ -47,24 +45,16 @@ A move or copy fails if the folder or the destination was deleted or moved to th
 
 ### Renaming Folders
 
-- **Rename Option:** Right-click → Rename
-- **Inline Edit:** Click folder name to edit
+- **Rename Option:** Right-click → **Rename**, or select the folder and press **F2**
 - **Validation:** The same rule as creating a folder: up to 255 characters, with no `/`, `\` or control characters
 
 ### Deleting Folders
 
-- **Delete Option:** Right-click → Delete
+- **Delete Option:** Right-click → **Delete**
 - **Soft Delete:** Moves to trash (not permanent)
 - **Recursive:** All contents moved to trash
 
 ## Folder Organization
-
-### Best Practices
-
-- Use descriptive folder names
-- Organize by project or category
-- Keep folder structure shallow when possible
-- Use consistent naming conventions
 
 ### Navigation
 

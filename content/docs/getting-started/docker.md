@@ -26,7 +26,7 @@ bash setup.sh
 
 The script:
 
-1. Checks for Docker, Docker Compose v2, and `openssl` or `/dev/urandom`
+1. Checks for Docker, the `docker compose` command, and `openssl` or `/dev/urandom`
 2. Creates `./tma-cloud` and downloads `docker-compose.yml` as `compose.yml`, `.env.example` as `.env`, and `setup.sh`, `update.sh`, `rotate.sh`, and `db-backup-restore.sh` over HTTPS only
 3. Sets `DATABASE_URL` to `postgresql://postgres:<password>@postgres:5432/tma_cloud_storage` and `REDIS_URL` to `redis://:<password>@redis:6379/0`, each with 32 random bytes as hex for the password, and fills `JWT_SECRET` (64 random bytes, hex)
 4. Writes a random 32-byte `FILE_ENCRYPTION_KEY` to `secrets/file_encryption_key` as key version 1, instead of `.env`
@@ -84,7 +84,7 @@ Starts four services:
 - **App** (`tma-cloud-app`) - Main application
 - **PostgreSQL** (`tma-cloud-postgres`) - Database
 - **Redis** (`tma-cloud-redis`) - Caching layer
-- **Worker** (`tma-cloud-worker`) - File operations, maintenance, audit writes, and OnlyOffice saves
+- **Worker** (`tma-cloud-worker`) - File operations, maintenance, and OnlyOffice saves
 
 Access at `http://localhost:3000` (or the `PORT` in `.env`). Inside the container the app always listens on 3000; `PORT` only changes the host side of the mapping.
 
@@ -96,7 +96,7 @@ Prebuilt images are on GitHub Container Registry. To pin a version, or to use an
 
 ### Environment Variables
 
-All variables loaded from `.env` file.
+The app and worker read `.env`. See [Environment Variables](/docs/reference/environment-variables).
 
 ### Secrets
 

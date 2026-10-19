@@ -9,88 +9,58 @@ Recover deleted files and manage your trash in TMA Cloud.
 
 ### Soft Delete
 
-- Files moved to trash (not permanently deleted)
-- Restorable within retention period
-- Automatic cleanup after 15 days
-- Share links stop working for items in trash
+- Deleting moves items to the trash; nothing is removed for good yet
+- Items can be restored for 15 days, then the background worker deletes them
+- Share links stop working for items in the trash
 
 ## Accessing Trash
 
 ### Trash Section
 
-1. Navigate to **"Trash"** in sidebar
-2. View all deleted files
-3. See deletion dates
-
-### Trash Contents
-
-- Files and folders
-- Original location information
-- Deletion timestamps
-- Size information
+1. Open **Trash** in the sidebar
+2. The list shows each deleted item and when it was deleted, newest first
 
 ## Restoring Files
 
 ### Single File Restore
 
-1. Right-click on file in trash
-2. Select **"Restore"**
-3. File restored to original location
+1. Right-click the item in the trash
+2. Select **Restore**
 
 ### Bulk Restore
 
-- Select multiple files
-- Click **"Restore"**
-- All selected files restored
-- A progress bar shows while the items are restored
+Select several items and click **Restore**. A progress bar shows while they are restored.
 
 ### Restore Location
 
-- Files restored to original folder
-- If original folder deleted, restored to root
-- Path information preserved
+- Items go back to the folder they were deleted from
+- If that folder is no longer there (or is itself in the trash), the item is restored to the root
+- If the folder already holds an item with the same name, the restored item gets `(restored-…)` added to its name
 
 ## Permanent Deletion
 
 <Callout type="error" title="Irreversible">
-  Permanent deletion cannot be undone. Once a file is removed from trash
-  (manually or by the 15-day auto-cleanup), it is gone — there is no additional
-  recovery step.
+  Permanent deletion cannot be undone. Once a file is removed from trash (by you
+  or by the 15-day cleanup), it cannot be recovered.
 </Callout>
 
 ### Delete Permanently
 
-1. Right-click on file in trash
-2. Select **"Delete Permanently"**
+1. Right-click the item in the trash
+2. Select **Delete forever**
 3. The deletion is queued and reports when it finishes
 
 ### Automatic Cleanup
 
-- Files automatically deleted after 15 days
-- Background worker handles cleanup
-- No manual intervention needed
+Every day at 02:00 UTC, the background worker deletes items that have been in the trash for more than 15 days.
 
 ### Bulk Permanent Delete
 
-- Select multiple files
-- Click **"Delete Permanently"**
-- The background worker removes all selected files
-- A progress bar shows while the job runs
+Select several items and click **Delete forever**. The background worker removes them, and a progress bar shows while it runs.
 
-## Trash Management
+## Storage Impact
 
-### Best Practices
-
-- Regularly review trash
-- Restore accidentally deleted files
-- Permanently delete sensitive files
-- Let automatic cleanup handle old files
-
-### Storage Impact
-
-- Trash counts toward storage quota
-- Permanently delete to free space
-- Automatic cleanup frees space
+Items in the trash still count toward your storage limit until they are deleted for good.
 
 ## Related Topics
 

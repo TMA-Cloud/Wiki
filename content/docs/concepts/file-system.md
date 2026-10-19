@@ -39,7 +39,6 @@ Everything else is allowed, including spaces, accents, emoji, the narrow no-brea
 Where a name has to become a Windows file, it is translated rather than refused:
 
 - **Folder ZIP downloads** replace `: * ? " < > |` with `_` and drop trailing dots and spaces in each entry, as browsers do for single downloads.
-- **The desktop app** writes local copies (Open on Desktop, copy to Explorer, Save As) under names that follow Microsoft's naming rules: reserved and control characters become `_`, trailing dots and spaces are dropped, and device names such as `CON`, `NUL.txt` or `COM1.log` get a leading `_`. Copies to Explorer also add a `(n)` suffix to names that differ only in letter case and shorten long names so the staged path stays within 260 characters.
 - **The Cloud Drive** shows each reserved character, and a trailing dot or space, as the private-use character `U+F000` plus its code, the mapping Cygwin, WSL and Syncthing use. Renames and saves turn it back, so the stored name never changes. WSL and Git Bash show the original characters.
 
 ### Name Clashes
@@ -68,16 +67,14 @@ Copies, moves and pastes keep both instead, giving the new item a numbered name 
 - **Upload:** Files encrypted and streamed directly to the bucket
 - **Download:** Files streamed from storage to client; single-file downloads support HTTP `Range` (partial content) for seeking
 - **ZIP Archives:** Archive entries are read through a database cursor and streamed one at a time, keeping database pages and open storage streams bounded. Trees of up to 20,000 entries are read at the start so the database connection is released right away; larger trees are limited by `DB_HELD_CURSOR_LIMIT`. Each entry already carries its wrapped data key, so no per-file key lookup is made. The archive stops when the client disconnects
-- **Rename:** Change file/folder names
 
 ### Performance
 
 - Streaming prevents memory exhaustion for large files (>1GB)
 - Rename operations update database metadata without moving stored objects
-- Copy operations are queued on the background worker, use server-side object-store copy with four transfers at most, and read folder trees once before batched inserts
+- Copy operations are queued on the background worker, use server-side object-store copies (24 at once), and read folder trees once before batched inserts
 - File lists use stable cursor batches and load continuously as the user scrolls. Only visible grid/list rows plus a small overscan are rendered
 - Folder sizes and descendant counts are maintained by database triggers. Size sorting uses those stored totals and the matching page-order index instead of walking a folder tree during a listing. Nothing recomputes them on read; a weekly worker job recomputes them from the rows and reports any folder whose stored totals were wrong. See [Background Workers](/docs/guides/operations/background-workers#maintenance-schedule)
-- No file size limits imposed by memory constraints
 
 ### Path Management
 
@@ -113,7 +110,7 @@ Recording a read on every request would turn each read into a database write. Tw
 
 The effect is at most one write per item per window, batched. The number of statements is set by the flush interval rather than by how many users are reading, so it does not grow with traffic. Timestamps may lag by the flush interval plus the window, which is why the value is documented as approximate.
 
-The first user can turn tracking off and change the window and the write interval under **Settings** → **Administration** → **Recently opened**. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+The first user can turn tracking off and change the window and the write interval under **Settings** → **Administration** → **Recently opened**. See [Session Timeout and Recently Opened](/docs/guides/admin/sessions-and-activity).
 
 ### On the Cloud Drive
 
@@ -138,9 +135,7 @@ On Windows the drive reports this value as the NTFS `LastAccessTime`, so Explore
 
 ### Storage Limits
 
-- Per-user storage limits
-- Configurable by administrators
-- Real-time usage tracking
+See [Storage Management](/docs/concepts/storage-management#storage-limits).
 
 ## Trash System
 
@@ -153,10 +148,8 @@ On Windows the drive reports this value as the NTFS `LastAccessTime`, so Explore
 
 ### Automatic Cleanup
 
-- Trash items deleted after 15 days
-- Background worker handles cleanup
-- Permanent deletion after retention
-- Manual permanent deletion and Empty Trash run on background worker
+- Items in the trash for more than 15 days are deleted for good by the background worker
+- Delete forever and Empty Trash also run on the worker
 
 ## Search
 
@@ -166,7 +159,6 @@ On Windows the drive reports this value as the NTFS `LastAccessTime`, so Explore
 - GIN index on file names for fast searches
 - Prefix matching for short queries
 - Indexed trigram matching for longer queries
-- Real-time search results
 - User-scoped searches
 - `%` and `_` in a query match literally, not as wildcards
 

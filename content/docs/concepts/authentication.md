@@ -40,7 +40,7 @@ Sessions expire after a period of **inactivity**, not a fixed period after login
 - `sessions.last_activity` is updated on each authenticated request and is what the idle check reads
 - After the idle window passes with no requests, the session ends and the user logs in again
 
-The first user sets the window under **Settings** → **Administration** → **Session timeout**, from 1 to 365 days. A change applies to existing sessions without a restart. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+The first user sets the window under **Settings** → **Administration** → **Session timeout**, from 1 to 365 days. A change applies to existing sessions without a restart. See [Session Timeout and Recently Opened](/docs/guides/admin/sessions-and-activity).
 
 ### Active Sessions
 
@@ -57,7 +57,7 @@ The first user sets the window under **Settings** → **Administration** → **S
 - **Rate Limiting:** 25 login/signup attempts per 15 minutes per IP/email; failed logins also limited to 100 per 15 minutes per IP and 20 per 15 minutes per account; MFA verify/disable 5 attempts per minute; backup code regeneration 3 attempts per 10 minutes with 5-minute cooldown. See [Rate Limits](/docs/reference/rate-limits)
 - **Login Timing:** Unknown emails and accounts with no password still run a bcrypt comparison, so response time does not reveal which emails have accounts
 - **Audit Logging:** All authentication events logged
-- **Password Change:** When enabled by the admin, users change their own password from Settings → Security. Two gates apply before the change is accepted: the session must be less than 10 minutes old, and an MFA or backup code is required when MFA is on. On success every session and token for that login is invalidated
+- **Password Change:** When enabled by the admin, users change their own password from **Settings** → **Security**. Two gates apply before the change is accepted: the session must be less than 10 minutes old, and an MFA or backup code is required when MFA is on. On success every session and token for that login is invalidated
 
 ## Sub-user Logins
 
@@ -67,14 +67,14 @@ What differs is what the login can reach — see [Authorization](/docs/concepts/
 
 ## First User Privileges
 
-The first user to sign up becomes the administrator with full system access.
+The first user to sign up becomes the administrator. See [Authorization](/docs/concepts/authorization#administrator) for what that allows.
 
 ## Signup Control
 
-Administrators can enable/disable user registration:
+The administrator turns registration on or off with **Allow sign-up**:
 
-- When enabled: Anyone can create an account
-- When disabled: Only admins can create accounts
+- **On:** anyone who can reach the server can create an account
+- **Off:** nobody can create an account; account owners can still add sub-users
 
 ## Related Topics
 

@@ -17,12 +17,12 @@ TMA Cloud is a self-hosted cloud storage platform that provides:
 
 ## Prerequisites
 
-Before you begin, ensure you have:
+You need:
 
 - **Docker** with Docker Compose, for the standard install
 - Or, to build from source: **Rust** (stable) and **trunk** for the web app
 - **PostgreSQL** (v17+)
-- **Redis** (v6+) - Optional but recommended
+- **Redis** (v6+). `REDIS_URL` must be set, but the server keeps running while Redis is unreachable: caching is off and live updates reach only clients of the same server process
 
 ## Quick Installation
 

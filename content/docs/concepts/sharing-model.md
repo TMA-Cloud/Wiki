@@ -72,7 +72,7 @@ http://your-domain.com/s/{token}
 
 ### Custom Share Domain
 
-Configure a custom share base URL in Settings → Administration → Share link address (admin only).
+Configure a custom share base URL in **Settings** → **Administration** → **Integrations** → **Share link address** (first user only).
 
 When configured:
 
@@ -96,13 +96,13 @@ Re-sharing an existing link updates its expiry to the newly selected value.
 
 ### Expired Link Behavior
 
-- Expired links return **410 Gone** on the public page with an "Link expired" message
+- Expired links return **410 Gone** on the public page with a "Link expired" message
 - The **Shared** page in the file manager still lists expired files with a red clock icon and "Link expired" label
 - Downloads and ZIP exports for expired links are blocked with the same 410 response
 
 ### Auto-Cleanup
 
-A worker job removes expired share links every Sunday at 03:00 UTC. Cleanup deletes the `share_links` and `share_link_files` rows and sets `shared = false` on files that no longer have an active share link.
+A worker job removes expired share links every Sunday at 06:10 UTC. Cleanup deletes the `share_links` and `share_link_files` rows and sets `shared = false` on files that no longer have an active share link.
 
 ## Share Management
 
@@ -119,15 +119,14 @@ The shared time is set when an item joins a share. Re-sharing an active item kee
 
 ### Revoking Shares
 
-- Unshare via context menu or toolbar
-- Immediate access revocation
-- Link becomes invalid
+- Unshare from the context menu or the toolbar
+- The link stops working at once
 
 ## Security Considerations
 
 - Tokens are cryptographically secure
 - No authentication required (by design)
-- Expiration enforced on every access (not just cleanup)
+- Expiry is checked on every request, not only by the cleanup job
 - Redis cache TTL is capped at the link's remaining lifetime to prevent stale access
 - Moving an item to Trash clears the cached lookups of every share that contains it, so it stops resolving immediately
 - The public lookup requires the link's owner to match the file's owner

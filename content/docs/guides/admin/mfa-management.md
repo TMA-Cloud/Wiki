@@ -1,9 +1,9 @@
 ---
 title: 'MFA Management'
-description: 'Manage multi-factor authentication in TMA Cloud (admin only).'
+description: 'What the administrator sees of two-factor authentication, and how users set it up.'
 ---
 
-Manage multi-factor authentication in TMA Cloud (admin only).
+What the administrator sees of two-factor authentication, and how users set it up.
 
 ## MFA Overview
 
@@ -21,9 +21,7 @@ Manage multi-factor authentication in TMA Cloud (admin only).
 
 ### MFA Configuration
 
-- Cannot enable MFA for users (user must do it)
-- Cannot disable user MFA (user must do it)
-- Monitor MFA usage
+- The administrator cannot turn MFA on or off for another user; each user does it themselves
 
 ## User MFA Setup
 
@@ -52,20 +50,6 @@ Manage multi-factor authentication in TMA Cloud (admin only).
 - Regenerate to replace all existing codes. The app asks for confirmation first
 - Cooldown: 5 minutes between regenerations; the button shows the time left
 - Rate limit: 3 attempts per 10 minutes
-
-## Best Practices
-
-- Encourage MFA adoption
-- Monitor MFA usage
-- Provide support for setup
-- Document MFA benefits
-
-## Security Considerations
-
-- MFA significantly improves security
-- Recommended for all users
-- Especially important for admins
-- Protects against password theft
 
 ## Related Topics
 

@@ -17,16 +17,16 @@ Overall security architecture and practices in TMA Cloud.
 ### Token Security
 
 - **JWT Tokens:** Signed and verified
-- **httpOnly Cookies:** Prevents XSS attacks
-- **Expiration:** Automatic token expiration
-- **Versioning:** Token revocation support
+- **httpOnly Cookies:** Page scripts cannot read the session token, so an injected script cannot steal it
+- **Expiration:** Tokens expire after the idle window and are reissued while in use
+- **Versioning:** Signing out everywhere or changing the password invalidates every older token
 
 ### Session Security
 
 - **Active Session Management:** View device, current reported IP, heartbeat-based online status, and revoke sessions
 - **Logout All:** Invalidate all tokens
 - **Idle Expiry:** Sessions end after an inactivity window (30 days by default)
-- **CSRF:** State-changing requests must carry `X-Requested-With: XMLHttpRequest`, Checkout [API Overview](/docs/api/overview#csrf-header)
+- **CSRF:** State-changing requests must carry `X-Requested-With: XMLHttpRequest`. See [API Overview](/docs/api/overview#csrf-header)
 
 ## Authorization Security
 
@@ -51,9 +51,8 @@ Request bodies are read into typed Rust structs, so a field with the wrong type 
 
 ### File Storage
 
-- **User Isolation:** Files stored per-user
-- **Path Validation:** Prevents directory traversal
-- **Access Control:** Database-level checks
+- **Account Isolation:** Every file row belongs to one account, and every query filters by it
+- **Path Validation:** Storage keys reject separators and traversal sequences
 - **MIME Type Detection:** Stored type is detected from content (magic bytes), not the filename; a content/extension mismatch is never used to reject an upload
 - **Safe Serving:** Downloads use `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`, so a disguised file downloads instead of running in the browser. Stored files also get their own `sandbox` Content Security Policy, so an uploaded HTML or SVG file cannot run script on the site even if it is opened directly
 
@@ -105,22 +104,22 @@ The bucket is configured in **Settings** → **Storage** by the first user. See 
 
 ### Database Security
 
-- **Parameterized Queries:** SQL injection prevention
-- **Connection Security:** SSL support
-- **Credential Protection:** Environment variables
+- **Parameterized Queries:** Values never become part of the SQL text
+- **Connection Security:** TLS with `?sslmode=require` in `DATABASE_URL`
+- **Credentials:** In `.env` or `*_FILE` secret files, never in the database
 
 ## Network Security
 
 ### HTTPS
 
-- **Recommended:** Use HTTPS in production
-- **Cookie Security:** Secure flag for cookies
-- **Headers:** Security headers configured
+- **Recommended:** Serve TMA Cloud over HTTPS through a reverse proxy in production
+- **Cookie Security:** In production the session cookie carries the `Secure` flag unless `FORCE_INSECURE_COOKIES` is set
+- **Headers:** See [Security Headers](#security-headers)
 - **S3:** Bucket policy can enforce HTTPS-only access; run `tma-server s3 policy-https` or `tma-server s3 protect-all` (see [Storage Management](/docs/concepts/storage-management)).
 
 ### Rate Limiting
 
-The API employs rate limiting to prevent abuse and ensure service stability. Different limits are applied to authentication, file uploads, and general API endpoints. For detailed information, see the [Rate Limits](/docs/reference/rate-limits) reference.
+Separate limits apply to sign-in, uploads and the general API. See [Rate Limits](/docs/reference/rate-limits).
 
 ### Forwarded Client IPs
 
@@ -145,10 +144,9 @@ The backend ignores forwarded client IP headers unless the connecting reverse pr
 
 ### Logging Security
 
-- **Secret Masking:** Automatic redaction
-- **Structured Logs:** JSON format for analysis
-- **Request Tracking:** Request ID propagation
-- **Error Logging:** Detailed error information
+- **Secret Masking:** Passwords, tokens and keys are redacted from request logs and audit metadata
+- **Structured Logs:** One JSON object per line with `LOG_FORMAT=json`
+- **Request Tracking:** Every log line carries the request ID, which is echoed in `X-Request-ID`
 
 ## Security Headers
 
@@ -174,26 +172,17 @@ The policy also sets `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 's
 
 Values placed into server-rendered HTML are HTML-escaped. JSON embedded in an inline script has `<`, `>`, `&`, U+2028, and U+2029 escaped, so a value such as a display name containing `</script>` cannot close the script element.
 
-## Best Practices
+## Before Going to Production
 
-### For Administrators
-
-- Use strong passwords
-- Enable MFA
-- Regularly review audit logs
-- Keep software updated
-- Use HTTPS in production
-
-### For Users
-
-- Use strong passwords
-- Enable MFA for additional security
-- Review active sessions regularly
-- Be cautious with share links
+- Serve the app over HTTPS, and add the reverse proxy under **Settings** → **Administration** → **Known proxies**
+- Back up the encryption key apart from database backups. See [Backups](/docs/guides/operations/backups#encryption-key)
+- Run `tma-server s3 protect-all` against the bucket. See [Storage Management](/docs/concepts/storage-management#s3-bucket-protection)
+- Create your own account first, then turn **Allow sign-up** off unless others should register
+- Turn on two-factor authentication for the administrator account
 
 ## Related Topics
 
 - [Authentication](/docs/concepts/authentication) - Authentication system
 - [Authorization](/docs/concepts/authorization) - Access control
 - [Audit Logs](/docs/guides/operations/audit-logs) - Audit system
-- [Security Features](/docs/reference/error-codes) - Error handling
+- [Error Codes](/docs/reference/error-codes) - Error responses

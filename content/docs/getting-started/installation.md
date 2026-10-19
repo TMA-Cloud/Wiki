@@ -29,7 +29,7 @@ No need to clone the repo. The setup script downloads `docker-compose.yml` and `
 curl -fsSL https://raw.githubusercontent.com/TMA-Cloud/TMA/main/setup.sh | bash
 ```
 
-This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, audit writes, and OnlyOffice saves) from `./tma-cloud`. Access it at `http://localhost:3000` or the `PORT` in `.env`.
+This starts **app** (main API), **postgres**, **redis**, and **worker** (file operations, maintenance, and OnlyOffice saves) from `./tma-cloud`. Access it at `http://localhost:3000` or the `PORT` in `.env`.
 
 Verify
 
@@ -50,7 +50,7 @@ To set up without the script, or to change its options, see [Docker Deployment](
 - Rust (stable, from [rustup](https://rustup.rs)) with the `wasm32-unknown-unknown` target
 - [trunk](https://trunkrs.dev), to build the web app
 - PostgreSQL (v17+)
-- Redis (v6+) - Optional but recommended
+- Redis (v6+). `REDIS_URL` must be set, but the server keeps running while Redis is unreachable: caching is off and live updates reach only clients of the same server process
 
 ```bash
 rustup target add wasm32-unknown-unknown
@@ -78,7 +78,7 @@ cp .env.example .env
 - `JWT_SECRET` - Secret key for JWT tokens
 - `FILE_ENCRYPTION_KEY` - Random 32-byte key used to encrypt stored files (generate with `openssl rand -base64 32`)
 - `DATABASE_URL` - Database connection, e.g. `postgresql://postgres:password@localhost:5432/tma_cloud_storage`
-- `REDIS_URL` - Redis connection, e.g. `redis://:password@localhost:6379/0` (the server is optional)
+- `REDIS_URL` - Redis connection, e.g. `redis://:password@localhost:6379/0`
 - `PORT` - Port the app listens on (default: 3000)
 
 **Optional:**
@@ -93,7 +93,7 @@ CREATE DATABASE tma_cloud_storage;
 
 Migrations run automatically on startup, or by hand with `tma-server migrate`.
 
-#### 4. Setup Redis (Optional)
+#### 4. Set Up Redis
 
 **Linux/macOS:**
 
@@ -161,13 +161,13 @@ This runs the API, the web app and the worker in one process. After changing the
 
 **Encryption key:** In production the server stops if `FILE_ENCRYPTION_KEY` is missing, is a passphrase, or does not match the key the data was encrypted with. The log names the cause
 
-**Redis:** Verify with `redis-cli ping`. App works without Redis but caching is disabled.
+**Redis:** Verify with `redis-cli ping`. While Redis is unreachable the app keeps working without caching, and live updates reach only clients of the same server process.
 
 **Port:** Change `PORT` in `.env` if port is in use
 
 **Web app missing:** A `FRONTEND_NOT_BUILT` error means the server did not find the web app. Run `trunk build --release` in `apps/tma-cloud-web`, or set `WEB_DIST_DIR`.
 
-**OnlyOffice:** Configure via Settings page (admin-only). Requires `BACKEND_URL` environment variable.
+**OnlyOffice:** Configure it in **Settings** → **Administration** → **Integrations** (first user only). It needs `BACKEND_URL`.
 
 **Background Worker:** Must run `tma-server worker` in production. See [Background Workers](/docs/guides/operations/background-workers).
 

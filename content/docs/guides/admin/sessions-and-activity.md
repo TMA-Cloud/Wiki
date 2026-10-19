@@ -1,5 +1,5 @@
 ---
-title: 'Session Timeout and Last Opened'
+title: 'Session Timeout and Recently Opened'
 description: 'Set how long idle sessions last and how access times are recorded.'
 ---
 

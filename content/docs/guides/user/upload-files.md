@@ -27,7 +27,7 @@ Learn how to upload and manage files in TMA Cloud.
 
 - Drop files from your computer onto the window: the Upload dialog opens with them listed, so you can check them before anything is sent. They go into the open folder (the root outside **My Files**)
 - While the Upload dialog is open, dropped files join its list
-- In the desktop app, dropped folders keep their structure, as with **Folder**
+- In the desktop app, dropped folders keep their structure, as with **Choose folder**
 
 ### Paste from Explorer (Windows desktop app)
 
@@ -158,13 +158,6 @@ None of these keys act while you type in a text field such as search, or while a
 - **Preview (desktop app):** Right-click an image → **Preview** to see it in the built-in viewer instead of its desktop app
 - **Image Viewing:** In the browser, opening an image shows it in the built-in viewer; the Left and Right arrow keys move to the previous and next image. Scroll (or pinch) to zoom at the pointer, drag to move around a zoomed image, double-click to zoom in or back out, and press **+**, **-** or **0** to zoom in, out or back to fit
 - **Other files:** In the browser, opening a file that has no viewer (a `.zip`, for example) shows the notice "No preview for .zip files. Use Download." instead of downloading it. Opening it again while the notice is up does not repeat it
-
-## Best Practices
-
-- Organize files in folders
-- Use descriptive file names
-- Star important files for quick access
-- Regularly clean up trash
 
 ## Related Topics
 

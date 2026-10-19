@@ -10,16 +10,16 @@ Create shareable links for files and folders in TMA Cloud.
 ### Single File Share
 
 1. Right-click on a file
-2. Select **"Share"**
+2. Select **Share**
 3. Choose an expiry option (7 days, 30 days, or no expiration)
 4. Click **Copy** at the end of the link. It turns green and says **Copied**, and a **Link copied** notice appears
 
 ### Folder Share
 
 1. Right-click on a folder
-2. Select **"Share"**
+2. Select **Share**
 3. Choose an expiry option
-4. All folder contents accessible via link
+4. Everything in the folder, including subfolders, is reachable through the link
 
 Anything you add to the folder later by upload, new folder, copy, or move is
 included in the share automatically, including items in subfolders.
@@ -31,7 +31,7 @@ the folder's link. No new link is made.
 ### Bulk Share
 
 1. Select multiple files/folders
-2. Click **"Share"** button in the toolbar
+2. Click **Share** in the toolbar
 3. Choose an expiry option
 4. A share link is created for each selected item
 
@@ -51,7 +51,7 @@ Re-sharing an already-shared file lets you change the expiry.
 
 - Expired links remain visible in the **Shared** section with a red clock icon and **"Link expired"** label
 - Anyone visiting an expired link sees a "Link expired" page
-- A background job automatically cleans up expired share links every 7 days
+- A background job removes expired share links every Sunday at 06:10 UTC
 
 ## Share Link Management
 
@@ -68,15 +68,13 @@ The **Share** dialog of a shared item says how long its link has left, for examp
 
 - Right-click a shared item → **Copy link** (with several selected, every shared item's link is copied, one per line)
 - Or open **Share** on it and use **Copy** at the end of its link
-- Share via email, messaging, etc.
 
 A shared item shows a link icon beside its name, in the list and on grid tiles. Hover the icon to see when it was shared and how long the link lasts. Once a link expires the icon goes away.
 
 ### Revoking Shares
 
 - Open **Share** on the item and click **Stop sharing**, at the bottom left, away from **Done**
-- Immediate access revocation
-- Link becomes invalid
+- The link stops working at once
 
 Moving a shared item to trash also stops the link from serving it. Unlike unsharing, the link is kept, so restoring the item makes it reachable again.
 
@@ -92,7 +90,7 @@ Moving a shared item to trash also stops the link from serving it. Unlike unshar
 
 - Optional custom share domain
 - Isolated from main application
-- Configure in Settings → Administration → Share link address (admin only)
+- Configure in **Settings** → **Administration** → **Integrations** → **Share link address** (first user only)
 
 ## Accessing Shared Files
 
@@ -111,12 +109,11 @@ Moving a shared item to trash also stops the link from serving it. Unlike unshar
 ## Security Considerations
 
 - Share links are public (no authentication)
-- Use expiration dates for sensitive files
-- Revoke shares when no longer needed
-- Be cautious with sensitive information
+- Use an expiry for sensitive files
+- Stop sharing when the link is no longer needed
 
 ## Related Topics
 
 - [Sharing Model](/docs/concepts/sharing-model) - How sharing works
 - [API: Sharing](/docs/api/sharing) - API endpoints
-- [Security Model](/docs/concepts/security-model) - Security best practices
+- [Security Model](/docs/concepts/security-model) - How share links are protected
