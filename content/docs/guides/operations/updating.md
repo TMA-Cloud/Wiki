@@ -5,7 +5,7 @@ description: 'Update a Docker install to a new version with update.sh.'
 
 Update a Docker install to a new version with `update.sh`.
 
-When a new version is published, **Settings → Updates** in the web and desktop apps shows it to the administrator, with a link to its release notes and to this page.
+When a new version is published, **Settings** → **Updates** in the web and desktop apps shows it to the administrator, with a link to its release notes and to this page.
 
 ## Run an Update
 
@@ -53,9 +53,9 @@ Put local changes to the stack in `compose.override.yml` instead of `compose.yml
 ```yaml
 services:
   app:
-    image: ghcr.io/tma-cloud/tma:3.1.5
+    image: ghcr.io/tma-cloud/tma:4.0.0
   worker:
-    image: ghcr.io/tma-cloud/tma:3.1.5
+    image: ghcr.io/tma-cloud/tma:4.0.0
 ```
 
 ## New Settings
@@ -79,7 +79,7 @@ A copy of the current `.env.example` is kept in the install directory for its co
 | `TMA_NO_PULL=1`        | Use the image already on the machine, for example one built from source |
 | `TMA_FORCE=1`          | Replace files you edited too                                            |
 
-Example: `TMA_REF=v3.2.0 ./update.sh`
+Example: `TMA_REF=v4.0.0 ./update.sh`
 
 ## Kept Backups
 

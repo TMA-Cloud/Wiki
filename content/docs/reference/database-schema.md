@@ -319,32 +319,6 @@ Audit trail events.
 
 **Retention:** rows older than 30 days are removed by the daily 03:40 UTC worker job. `cleanup_old_audit_logs(30)` deletes at most 10,000 rows per call, and one job processes at most 20 batches.
 
-## Views
-
-### `audit_activity`
-
-Read-only view over `audit_log` that resolves user IDs to names and emails, so the trail can be read without writing joins.
-
-| Column              | Description                                          |
-| ------------------- | ---------------------------------------------------- |
-| `actor_id`          | `audit_log.user_id`                                  |
-| `actor_name`        | Name of the login that acted                         |
-| `actor_email`       | Email of the login that acted                        |
-| `account_owner_id`  | Account the action happened under                    |
-| `account_email`     | Email of the account owner                           |
-| `acted_as_sub_user` | `true` when the actor differs from the account owner |
-| `actor_role`        | `owner` or `sub_user`                                |
-
-All other columns are passed through from `audit_log`.
-
-```sql
-SELECT created_at, actor_email, actor_role, action, resource_id
-FROM audit_activity
-WHERE account_email = 'owner@example.com'
-ORDER BY created_at DESC
-LIMIT 100;
-```
-
 ### `job_queue`
 
 Background jobs (migration 055). Workers claim rows with `FOR UPDATE SKIP LOCKED` and are woken by `NOTIFY tma_jobs`. See [Background Workers](/docs/guides/operations/background-workers).
@@ -402,6 +376,32 @@ Migration tracking.
 Applied versions are not run again. Changes needed by an existing installation must be shipped in a new forward migration rather than only editing an older file.
 
 Each migration and its `migrations` row are committed in one transaction, so a crash cannot leave a migration applied but unrecorded. An advisory lock keeps two instances from applying migrations at the same time.
+
+## Views
+
+### `audit_activity`
+
+Read-only view over `audit_log` that resolves user IDs to names and emails, so the trail can be read without writing joins.
+
+| Column              | Description                                          |
+| ------------------- | ---------------------------------------------------- |
+| `actor_id`          | `audit_log.user_id`                                  |
+| `actor_name`        | Name of the login that acted                         |
+| `actor_email`       | Email of the login that acted                        |
+| `account_owner_id`  | Account the action happened under                    |
+| `account_email`     | Email of the account owner                           |
+| `acted_as_sub_user` | `true` when the actor differs from the account owner |
+| `actor_role`        | `owner` or `sub_user`                                |
+
+All other columns are passed through from `audit_log`.
+
+```sql
+SELECT created_at, actor_email, actor_role, action, resource_id
+FROM audit_activity
+WHERE account_email = 'owner@example.com'
+ORDER BY created_at DESC
+LIMIT 100;
+```
 
 ## Relationships
 

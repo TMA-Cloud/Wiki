@@ -1,9 +1,9 @@
 ---
 title: 'Redis Issues'
-description: 'Troubleshooting Redis connection problems.'
+description: 'Fix Redis connection problems, and what still works while Redis is down.'
 ---
 
-Troubleshooting Redis connection problems.
+Fix Redis connection problems, and what still works while Redis is down.
 
 ## Connection Errors
 
@@ -23,9 +23,9 @@ Troubleshooting Redis connection problems.
 3. Test connection: `redis-cli -u "$REDIS_URL" ping`
 4. If Redis has a password, check that `REDIS_URL` contains it: `redis://:password@host:6379/0`
 
-## Redis Not Required
+## While Redis Is Unreachable
 
-TMA Cloud keeps working while Redis is unreachable:
+`REDIS_URL` must be set, but TMA Cloud keeps working while Redis is unreachable:
 
 - Caching is off, so every lookup goes to PostgreSQL and requests are slower
 - Live file updates reach only the apps connected to the server process that made the change; changes made by a separate worker process show up on the next refresh
@@ -37,7 +37,7 @@ TMA Cloud keeps working while Redis is unreachable:
 
 **Check:**
 
-1. Docker compose logs: `docker compose logs redis`
+1. The logs: `docker compose logs redis`
 2. Port conflicts
 3. Volume mounts
 

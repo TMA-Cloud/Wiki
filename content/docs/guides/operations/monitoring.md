@@ -1,9 +1,9 @@
 ---
 title: 'Monitoring'
-description: 'System monitoring and health checks in TMA Cloud.'
+description: 'Health checks, Prometheus metrics and suggested alerts for TMA Cloud.'
 ---
 
-System monitoring and health checks in TMA Cloud.
+Health checks, Prometheus metrics and suggested alerts for TMA Cloud.
 
 ## Health Check
 
@@ -56,7 +56,7 @@ Per-request data lives in the structured logs, and storage figures are available
 
 - **Logs:** structured JSON on stdout, with a request ID on every line. See [Logging](/docs/guides/operations/logging).
 - **Database:** standard PostgreSQL monitoring. Migration state is the `migrations` table.
-- **Redis:** `redis-cli INFO`. Redis is optional — the app degrades to no caching rather than failing.
+- **Redis:** `redis-cli INFO`. `REDIS_URL` must be set, but while Redis is unreachable the app keeps serving requests without its cache.
 
 ## Related Topics
 

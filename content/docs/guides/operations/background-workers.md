@@ -1,9 +1,9 @@
 ---
 title: 'Background Workers'
-description: 'Background services and workers in TMA Cloud.'
+description: 'The job queue, the worker process and its maintenance schedule.'
 ---
 
-Background services and workers in TMA Cloud.
+The job queue, the worker process and its maintenance schedule.
 
 ## Overview
 
@@ -99,7 +99,7 @@ See [OnlyOffice API](/docs/api/onlyoffice#auto-save).
 
 These remain in the main application because they own HTTP-process state:
 
-- Access times are buffered from requests and flushed in one statement per write interval, 10 seconds by default. See [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+- Access times are buffered from requests and flushed in one statement per write interval, 10 seconds by default. See [Session Timeout and Recently Opened](/docs/guides/admin/sessions-and-activity).
 - Audit events are batched and written by the process that recorded them.
 - Queue depth gauges are refreshed for the Prometheus registry exposed by that process.
 - Redis pub/sub, SSE keepalives, and rate-limit timers stay with the web process.

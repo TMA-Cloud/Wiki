@@ -5,7 +5,7 @@ description: 'User management endpoints for TMA Cloud.'
 
 User management endpoints for TMA Cloud.
 
-**Note:** All endpoints in this section use the general API rate limit (10000 requests per 15 minutes, per user when authenticated). Most also require admin privileges (first user). The sub-user endpoints require an account owner instead — see [Sub-users](#sub-users).
+**Note:** All endpoints in this section use the general API rate limit (30,000 requests per 15 minutes per user). Most also require admin privileges (first user). The sub-user endpoints require an account owner instead — see [Sub-users](#sub-users).
 
 ## List Users
 

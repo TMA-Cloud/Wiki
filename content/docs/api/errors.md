@@ -1,13 +1,13 @@
 ---
 title: 'Error Handling'
-description: 'This page describes the error response format for the TMA Cloud API.'
+description: 'The shape of API error responses and the status codes the server uses.'
 ---
 
-This page describes the error response format for the TMA Cloud API.
+The shape of API error responses and the status codes the server uses.
 
 ## Error Response Format
 
-Error responses use a standard format with a `message` field describing the error.
+Every error response has a `message`. Some also have an `error` code; see [Error Codes](/docs/reference/error-codes).
 
 ```json
 {
@@ -49,16 +49,15 @@ Validation errors (HTTP status `422`) provide additional detail in a `details` a
 - `401 Unauthorized`: Authentication is required and has failed or has not been provided.
 - `403 Forbidden`: The authenticated user does not have permission to perform the action, or a state-changing request arrived without the `X-Requested-With: XMLHttpRequest` CSRF header (see [API Overview](/docs/api/overview#csrf-header)).
 - `404 Not Found`: The requested resource could not be found.
-- `422 Unprocessable Entity`: The request was well-formed but could not be processed due to validation errors. Check the `details` field for more information.
-- `429 Too Many Requests`: The user has sent too many requests in a given amount of time.
-- `409 Conflict`: The resource already exists — e.g. a sub-user email already in use.
+- `409 Conflict`: The resource already exists, for example a sub-user email already in use, or someone else holds the file's edit lock.
 - `410 Gone`: The share link has expired.
-- `413 Payload Too Large`: The upload would exceed the account's storage quota.
-- `499 Client Closed Request`: The client cancelled the upload. Non-standard status, borrowed from nginx.
+- `413 Payload Too Large`: The file is larger than the maximum upload size, or the upload would take the account past its storage limit (`STORAGE_LIMIT_EXCEEDED`).
+- `422 Unprocessable Entity`: The request was well-formed but could not be processed due to validation errors. Check the `details` field for more information.
+- `429 Too Many Requests`: A rate limit was reached. See [Rate Limits](/docs/reference/rate-limits).
 - `500 Internal Server Error`: An unexpected condition was encountered on the server.
 - `503 Service Unavailable`: The server is not ready to handle the request. File content requests return `503` with `STORAGE_NOT_CONFIGURED` until a bucket is saved in **Settings** → **Storage**.
 
-### Desktop-only instances
+### Desktop-Only Instances
 
 When an instance is configured for desktop app access only, browser requests to main app routes return `403 Forbidden` with:
 
@@ -71,12 +70,11 @@ When an instance is configured for desktop app access only, browser requests to 
 
 Share links (`/s/*`), `/health`, `/metrics`, `/api/onlyoffice/file/*`, and `/api/onlyoffice/callback` are not affected. The two OnlyOffice endpoints are called by the Document Server, which does not send the desktop header.
 
-## Error Handling Best Practices
+## Handling Errors
 
-- Rely on the HTTP status code to determine the general nature of the error.
-- For `422` validation errors, parse the `details` array to provide specific feedback to the user.
-- Display a user-friendly message based on the `message` field.
-- Log the full error response for debugging purposes.
+- Branch on the HTTP status, and on `error` where one is sent.
+- Show `message` to the user; it is written for people.
+- For `422`, show each entry of `details` next to its field.
 
 ## Related Topics
 

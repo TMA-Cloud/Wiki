@@ -1,9 +1,9 @@
 ---
 title: 'Debugging Overview'
-description: 'Troubleshooting guide for TMA Cloud.'
+description: 'Where to start when something goes wrong in TMA Cloud.'
 ---
 
-Troubleshooting guide for TMA Cloud.
+Where to start when something goes wrong in TMA Cloud.
 
 ## Common Issues
 
@@ -17,16 +17,11 @@ Troubleshooting guide for TMA Cloud.
 
 ## Debugging Steps
 
-1. Check application logs
-2. Verify environment variables
-3. Check database connection
-4. Verify Redis connection (if enabled)
-5. Review error messages
-6. Check system resources
+1. Read the app and worker logs: `docker compose logs app worker`. Every request line has a request ID, which is also in the `X-Request-ID` response header
+2. Check `.env` against [Environment Variables](/docs/reference/environment-variables)
+3. Check PostgreSQL with `pg_isready -d "$DATABASE_URL"` and Redis with `redis-cli -u "$REDIS_URL" ping`
+4. Find the error code in [Error Codes](/docs/reference/error-codes)
 
 ## Getting Help
 
-- Review relevant debugging guide
-- Check [API Errors](/docs/api/errors) for error codes
-- Review [Logging Guide](/docs/guides/operations/logging)
-- Check [Common Errors](/docs/debugging/common-errors)
+If none of the guides help, open **Settings** → **About**, click **Copy details**, and report the problem with **Report issue**. See [About and Support](/docs/guides/user/about).

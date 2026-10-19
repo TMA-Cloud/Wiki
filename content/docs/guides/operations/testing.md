@@ -1,9 +1,9 @@
 ---
 title: 'Testing'
-description: 'Running the TMA Cloud test suites.'
+description: 'Run the unit and end-to-end tests, the house rules and the git hooks.'
 ---
 
-Running the TMA Cloud test suites.
+Run the unit and end-to-end tests, the house rules and the git hooks.
 
 ## Overview
 
@@ -197,13 +197,16 @@ you have a reason to.
 
 ## Continuous Integration
 
-`.github/workflows/test.yml` runs on each push and pull request:
+`.github/workflows/test.yml` runs on each push to `main` and on each pull request:
 
-- Format (rustfmt and Prettier), house rules, Clippy and unit tests on Linux, plus the
-  WebAssembly build
-- The end-to-end suite, with PostgreSQL and Redis service containers and a RustFS bucket
-- The desktop app and Cloud Drive on Windows, macOS and Linux, each on its own runner,
-  since every system has its own drive adapter
+- Format (rustfmt and Prettier), house rules, Clippy and the WebAssembly build on Linux
+- Unit tests and the end-to-end suite on Linux, with PostgreSQL and Redis service
+  containers and a RustFS bucket
+- Clippy and tests for the desktop app and Cloud Drive on Windows and macOS, since each
+  system has its own drive adapter
+
+A newer push to a pull request cancels its older run; runs on `main` always finish.
+
 - `shellcheck` on the install scripts and git hooks
 
 ## Related Topics

@@ -72,7 +72,7 @@ Background jobs are stored in the `job_queue` and `job_schedules` tables of the 
 | `FORCE_INSECURE_COOKIES` | No       | `false` | If `true`, auth cookie has no `Secure` flag in production |
 | `JWT_SECRET_FILE`        | No       | -       | Path to a file holding `JWT_SECRET`                       |
 
-The session timeout is not an environment variable. The first user sets it in **Settings** → **Administration**; see [Session Timeout and Last Opened](/docs/guides/admin/sessions-and-activity).
+The session timeout is not an environment variable. The first user sets it in **Settings** → **Administration**; see [Session Timeout and Recently Opened](/docs/guides/admin/sessions-and-activity).
 
 ## File Storage
 

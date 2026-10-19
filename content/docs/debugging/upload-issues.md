@@ -1,9 +1,9 @@
 ---
 title: 'Upload Issues'
-description: 'Troubleshooting file upload problems.'
+description: 'Fix uploads that are refused, fail, or leave files out.'
 ---
 
-Troubleshooting file upload problems.
+Fix uploads that are refused, fail, or leave files out.
 
 ## Upload Failures
 
@@ -15,15 +15,6 @@ Troubleshooting file upload problems.
 2. File size within max upload size (admin-configurable in **Settings** → **Storage**)
 3. Network connection stable
 4. Bucket available and within provider limits
-
-### Storage Limit
-
-**Solutions:**
-
-1. Check current storage usage
-2. Delete unnecessary files
-3. Empty trash
-4. Admin: Increase storage limit
 
 ### File Too Large
 
@@ -41,17 +32,17 @@ The file exceeds the max upload size setting.
 
 **Solutions:**
 
-1. Free up storage space
-2. Delete old files
-3. Empty trash permanently
-4. Admin: Increase storage limit (if custom limit set)
-5. Check the bucket provider quota and account status
+The message says how much is used, the limit and what is left.
+
+1. Delete files you no longer need, then empty the trash: items in the trash still count
+2. Ask the admin to raise the account's limit
+3. Check the bucket provider's quota and account status
 
 ### "Upload failed"
 
 **Check:**
 
-1. File size limits
+1. The file is within the maximum upload size
 2. A bucket is saved in **Settings** → **Storage** (`503 STORAGE_NOT_CONFIGURED` otherwise); use **Test connection** there to check the endpoint and credentials
 3. Bucket access permissions
 4. Network connectivity
@@ -74,15 +65,14 @@ The folder you upload or paste into is not a folder in your account, or it is in
 1. Refresh the page; the folder may have been deleted, moved to the trash or moved by another session
 2. Upload into a folder that is open in **My Files**
 
-### "Upload cancelled by client" (499 REQUEST_ABORTED)
+### Upload Cancelled
 
-Returned when the user cancels an upload. The request is aborted before completion. The upload middleware aborts incomplete multipart uploads and cleans up uncommitted bucket objects. This is expected behavior, not an error
+Cancelling an upload stops its request. The server aborts the unfinished upload in the bucket and saves no file, so nothing needs cleaning up. This is not an error
 
 ### Folder uploads missing files
 
-- Confirm the browser supports folder upload (Chrome, Edge, and other Chromium-based browsers)
 - Check that the selected folder actually contains the missing files (some apps create links or placeholders that are not real files)
-- Look in **Audit Logs** for `file.upload.bulk` events to see how many files were processed.
+- Query the audit log for `file.upload.bulk` events to see how many files were processed. See [Audit Logs](/docs/guides/operations/audit-logs)
 - If only some files failed, check the `failed` entries returned by `POST /api/files/upload/bulk`
 - Empty subfolders are not created by an upload or a paste, because only files are sent
 
@@ -93,7 +83,7 @@ The upload-issues dialog lists every file that was not pasted, with a reason:
 - **Links are not uploaded:** The item is a symbolic link or a junction. It is not followed, so a link back to a parent folder cannot repeat the tree forever. Copy the target folder itself instead
 - **Access denied** or **Could not be read:** Windows did not let the app read the file, for example a workbook that Excel has open. Close the file and paste it again
 
-A paste with more than 50,000 files is refused before anything uploads. Paste a smaller folder or upload it in parts with **Upload** → **Folder**.
+A paste with more than 50,000 files is refused before anything uploads. Paste a smaller folder or upload it in parts with **Upload** → **Choose folder**.
 
 ## File Permissions
 
@@ -101,10 +91,9 @@ A paste with more than 50,000 files is refused before anything uploads. Paste a 
 
 **Solutions:**
 
-1. Check that the configured bucket credentials allow uploads and deletion
-2. Verify the user has upload permission
-3. Check bucket policies and endpoint reachability
-4. Review backend logs for the provider error
+1. A sub-user needs the **Upload & create** permission
+2. The bucket credentials must allow uploads, reads, listing and deletion
+3. The backend log shows the provider's error
 
 ## Related Topics
 

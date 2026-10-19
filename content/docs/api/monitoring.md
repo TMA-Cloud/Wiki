@@ -62,7 +62,7 @@ see [Logging](/docs/guides/operations/logging).
 
 Get the versions running here. Requires authentication.
 
-**Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user; 10,000 per IP without a session).
 
 **Response:**
 
@@ -81,7 +81,7 @@ report the same version.
 
 Fetch latest versions from the update feed (`VERSIONS_URL`, by default the feed published from the [TMA-Cloud/updates](https://github.com/TMA-Cloud/updates) repository). The answer is cached for ten minutes.
 
-**Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user; 10,000 per IP without a session).
 
 **Response:**
 

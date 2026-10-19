@@ -260,8 +260,6 @@ Upload a file.
 
 The uploaded file object.
 
-**Client abort:** If the client cancels the request, the server returns HTTP 499 with `error: "REQUEST_ABORTED"` and `message: "Upload cancelled by client"`
-
 ```json
 {
   "id": "file_123",
@@ -302,8 +300,6 @@ Upload multiple files at once using `multipart/form-data`.
 **Response:**
 
 On success, returns a summary object. `files` contains created file records; `failed` contains per-file errors (if any).
-
-**Client abort:** If the client cancels the request (e.g. user clicks Cancel upload), the server returns HTTP 499 with `error: "REQUEST_ABORTED"` and `message: "Upload cancelled by client"`
 
 ```json
 {
@@ -1009,7 +1005,7 @@ The cursor is the oldest database transaction still running when the answer was 
 
 While a file is open for editing in the desktop app, the app holds an edit lock on it. Others see who is editing, Cloud Drive gives them the file read-only, and the server refuses their saves until the lock is gone.
 
-A lock is a two-minute lease that the app renews about every 40 seconds. If the app stops renewing it (it crashed, or the computer went offline), the lock simply runs out, so a file is never stuck locked.
+A lock is a two-minute lease that the app renews about every 40 seconds. If the app stops renewing it (it crashed, or the computer went offline), the lock runs out, so a file is never stuck locked.
 
 A lock belongs to a user on one desktop install. The desktop app sends its install id in the `X-TMA-Device` header with every request, and the lock records it as `deviceId`. The same user signed in on another computer, or in the browser, is kept out like anyone else: they cannot take the lock, and their saves are refused.
 

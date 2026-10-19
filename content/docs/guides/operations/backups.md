@@ -1,11 +1,11 @@
 ---
 title: 'Backups'
-description: 'Backup and restore procedures for TMA Cloud.'
+description: 'Back up and restore the database, the encryption key and the bucket.'
 ---
 
-Backup and restore procedures for TMA Cloud.
+Back up and restore the database, the encryption key and the bucket.
 
-## What to Backup
+## What to Back Up
 
 - **Database:** PostgreSQL database, including the job queue tables (`job_queue`, `job_schedules`). It includes the bucket settings with their encrypted secret
 - **Files:** S3 bucket contents

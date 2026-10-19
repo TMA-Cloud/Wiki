@@ -1,9 +1,9 @@
 ---
 title: 'Audit Logs'
-description: 'Audit events recorded by TMA Cloud.'
+description: 'How TMA Cloud records audit events and how to query them.'
 ---
 
-Audit events recorded by TMA Cloud.
+How TMA Cloud records audit events and how to query them.
 
 ## Overview
 
@@ -33,9 +33,10 @@ There is nothing to configure and no separate process to run: audit writing is p
 - `file.upload`, `file.upload.bulk`
 - `file.download`, `file.download.bulk`
 - `file.update` - contents replaced in place
-- `file.delete`, `file.delete.permanent`, `file.restore`
-- `file.rename`, `file.move`, `file.copy`
+- `file.delete`, `file.restore`, and `.queued` variants for work handed to the worker
+- `file.rename`, `file.move`, `file.copy.queued`, `file.delete.permanent.queued`
 - `file.star`, `file.unstar`
+- `file.lock`, `file.unlock` - editing locks
 
 ### Folder Events
 
@@ -55,7 +56,7 @@ There is nothing to configure and no separate process to run: audit writing is p
 
 - `admin.settings.update`, `admin.settings.read`
 - `admin.user.list`, `admin.user.update`
-- `admin.orphans.scan`, `admin.orphans.delete`, `admin.orphans.access`
+- `admin.orphans.scan`, `admin.orphans.delete`
 
 ### Account Events
 

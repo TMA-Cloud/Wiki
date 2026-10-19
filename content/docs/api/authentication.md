@@ -108,7 +108,7 @@ Log out the current user by clearing the authentication token cookie.
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10,000 per 15 minutes per IP).
 
 ### POST `/api/logout-all`
 
@@ -123,7 +123,7 @@ Log out from all devices by invalidating all of the user's active sessions and t
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per user).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user).
 
 ## Change Password
 
@@ -213,7 +213,7 @@ Get the current authenticated user's profile, including what this login is allow
 - `isSubUser`: `true` when this login belongs to another account.
 - `permissions`: What this login may do. Owners receive the full set; sub-users receive only what was granted. See [Authorization](/docs/concepts/authorization).
 
-**Rate limiting:** General API limit (10000 per 15 minutes, per user when authenticated).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user; 10,000 per IP without a session).
 
 ## Multi-Factor Authentication
 
@@ -229,7 +229,7 @@ Get the MFA status for the current authenticated user.
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per user).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user).
 
 ### POST `/api/mfa/setup`
 
@@ -244,7 +244,7 @@ Generate an MFA secret and a corresponding QR code for setup in an authenticator
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per user).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user).
 
 ### POST `/api/mfa/verify`
 
@@ -340,7 +340,7 @@ When the cooldown is active or the rate limit is exceeded:
 
 **Cooldown:** A 5-minute cooldown period is enforced between regeneration attempts.
 
-**Note:** Backup codes are automatically downloaded on the client after regeneration.
+The apps offer to save the new codes as a file right after regeneration; the server never shows them again.
 
 ### GET `/api/mfa/backup-codes/count`
 
@@ -354,7 +354,7 @@ Get the number of remaining unused backup codes for the user.
 }
 ```
 
-**Rate limiting:** General API limit (10000 per 15 minutes per user).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user).
 
 ## Related Topics
 

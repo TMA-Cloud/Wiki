@@ -1,13 +1,13 @@
 ---
 title: 'Rate Limits'
-description: 'Rate limiting configuration and limits for TMA Cloud API.'
+description: 'Every request limit the TMA Cloud API applies, and what a refused request looks like.'
 ---
 
-Rate limiting configuration and limits for TMA Cloud API.
+Every request limit the TMA Cloud API applies, and what a refused request looks like.
 
 ## Rate Limit Configuration
 
-Rate limits are enforced per IP address and/or user for different endpoint types to prevent abuse and ensure service stability.
+Each limiter counts requests per IP address, per user, or both, in a fixed window. Counters live in the memory of each server process.
 
 **Behind a reverse proxy:** add every proxy under **Settings** → **Administration** → **Known proxies** and restart the server. If the connecting proxy is not trusted, every request looks like it came from that proxy and all users share one bucket. See [Known Proxies](/docs/guides/admin/known-proxies). Sub-users count separately from their account owner, since keys use the individual login.
 
@@ -16,7 +16,6 @@ Rate limits are enforced per IP address and/or user for different endpoint types
 ### Authentication Limiter
 
 - **Limit:** 25 requests per 15 minutes per IP/email combination.
-- **Purpose:** Limits login/signup attempts per IP and email.
 - **Endpoints:**
   - `POST /api/login`
   - `POST /api/signup`
@@ -35,8 +34,8 @@ The per-account limit applies to anyone who knows the email, so repeated failed 
 
 ### General API Limiter
 
-- **Limit:** 30000 requests per 15 minutes per signed-in user; 10000 per 15 minutes per IP address for requests without a session.
-- **Purpose:** Limits general API usage. Keying on the user means colleagues sharing an office IP do not share a bucket. A desktop app keeping a large drive in sync, or copying a folder of thousands of files into Cloud Drive, legitimately makes many requests, so signed-in users get the larger budget.
+- **Limit:** 30,000 requests per 15 minutes per signed-in user; 10,000 per 15 minutes per IP address for requests without a session.
+- **Why per user:** Keying on the user means colleagues sharing an office IP do not share a bucket. A desktop app keeping a large drive in sync, or copying a folder of thousands of files into Cloud Drive, legitimately makes many requests, so signed-in users get the larger budget.
 - **Not counted:** the live event stream, `GET /api/files/events`. It is one long request with its own cap per user, and cutting it would leave apps unaware of changes.
 - **Refusals are heard:** a refused request's body (an upload's, mostly) is read, up to 32 MB within 30 seconds, before the `429` is sent. A client sends the whole body before it reads the reply, so answering mid-body made it report the server unreachable instead.
 - **Endpoints:**
@@ -52,15 +51,14 @@ The per-account limit applies to anyone who knows the email, so repeated failed 
 
 There is no share-specific limiter. Routes under `/s/` use the General API Limiter above.
 
-- **Limit:** 10000 requests per 15 minutes. Share links are unauthenticated, so the key is the IP address.
+- **Limit:** 10,000 requests per 15 minutes. Share links are unauthenticated, so the key is the IP address.
 - **Endpoints:** All endpoints under `/s/`.
 
 Because share links are the only routes reachable without a session, this budget is the one most exposed to anonymous traffic. If you publish links widely, put a lower limit in front of `/s/` at your reverse proxy.
 
 ### Upload Limiter
 
-- **Limit:** 20000 uploads per 30 minutes per user (or per IP if unauthenticated).
-- **Purpose:** Limits upload volume per user.
+- **Limit:** 20,000 uploads per 30 minutes per user (or per IP if unauthenticated).
 - **Endpoints:**
   - `POST /api/files/upload`
   - `POST /api/files/upload/bulk`
@@ -88,17 +86,16 @@ Because share links are the only routes reachable without a session, this budget
 ### SSE Connection Limiter
 
 - **Limit:** 20 concurrent Server-Sent Events connections per user.
-- **Purpose:** Limits real-time event streams per user.
 - **Endpoint:** `GET /api/files/events`
 
 ## Rate Limit Headers
 
-Responses for rate-limited requests include the following headers:
+A refused (`429`) response carries these headers:
 
-- `RateLimit-Limit`: The maximum number of requests allowed in the current window.
-- `RateLimit-Remaining`: The number of requests remaining in the current window.
-- `RateLimit-Reset`: The time when the limit resets, in UTC seconds.
-- `Retry-After`: The number of seconds to wait before making a new request (sent with 429 responses).
+- `RateLimit-Limit`: The number of requests the window allows
+- `RateLimit-Remaining`: Always `0`
+- `RateLimit-Reset`: Seconds until the window resets
+- `Retry-After`: The same number of seconds
 
 ## Rate Limit Errors
 
@@ -110,11 +107,12 @@ When a rate limit is exceeded:
 
 ```json
 {
+  "message": "Too many requests, please try again later",
   "error": "Too many requests, please try again later"
 }
 ```
 
-Note that the limiters put the sentence in an `error` field rather than a `message` field, unlike the rest of the API. The failed login limiters use their own sentences: `Too many failed sign-in attempts from this network, please try again later` (per IP) and `Too many failed sign-in attempts for this account, please try again later` (per account).
+The sentence is in both fields; `error` is not a code here. The failed login limiters use their own sentences: `Too many failed sign-in attempts from this network, please try again later` (per IP) and `Too many failed sign-in attempts for this account, please try again later` (per account).
 
 The backup-code cooldown is separate from the limiter above it and answers in the normal shape, with the remaining wait included:
 
@@ -127,12 +125,10 @@ The backup-code cooldown is separate from the limiter above it and answers in th
 
 A regeneration request therefore hits `429` for either of two reasons: the 3-per-10-minutes limiter, or the 5-minute cooldown between successful regenerations.
 
-## Best Practices
+## Handling a 429
 
-- Implement exponential backoff for retries.
-- Use the `Retry-After` header to time subsequent requests.
-- Cache API responses when possible to reduce unnecessary requests.
-- Use bulk endpoints where available to consolidate operations.
+- Wait for the number of seconds in `Retry-After` before trying again
+- Upload and download many files with the bulk endpoints, and send several `ids` in one move, copy, delete or share request instead of one request per file
 
 ## Related Topics
 

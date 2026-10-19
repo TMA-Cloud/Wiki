@@ -1,9 +1,9 @@
 ---
 title: 'API Overview'
-description: 'REST API reference for TMA Cloud backend.'
+description: 'How the TMA Cloud REST API authenticates, protects and answers requests.'
 ---
 
-REST API reference for TMA Cloud backend.
+How the TMA Cloud REST API authenticates, protects and answers requests.
 
 ## Base URL
 
@@ -11,11 +11,11 @@ All API endpoints are prefixed with `/api` unless otherwise specified.
 
 ## Authentication
 
-Most endpoints require JWT token sent as httpOnly cookie. Rate limiting: 25 attempts per 15 minutes for login/signup.
+Most endpoints need a signed-in session: the `token` cookie that `POST /api/login` sets. It is httpOnly, so page scripts cannot read it. See [Authentication API](/docs/api/authentication).
 
 ## CSRF Header
 
-Every state-changing request under `/api` — `POST`, `PUT`, `PATCH`, `DELETE` those must carry the header:
+Every state-changing request under `/api` (`POST`, `PUT`, `PATCH`, `DELETE`) must carry the header:
 
 ```bash
 X-Requested-With: XMLHttpRequest
@@ -49,47 +49,14 @@ Endpoints act on the caller's account rather than the individual login, so an ac
 
 ## Rate Limiting
 
-The API employs rate limiting to prevent abuse and ensure service stability. Different limits are applied to authentication, file uploads, and general API endpoints. For detailed information, see the [Rate Limits](/docs/reference/rate-limits) reference.
+Separate limits apply to sign-in, uploads and the general API. See [Rate Limits](/docs/reference/rate-limits).
 
-## Response Format
+## Responses
 
-Success responses return the requested data directly as a JSON object or array.
-
-### Error Response
-
-```json
-{
-  "message": "Error message"
-}
-```
-
-For validation errors, the response includes a `details` field:
-
-```json
-{
-  "message": "Validation failed",
-  "details": [{ "field_name": "Specific error message" }]
-}
-```
-
-## HTTP Status Codes
-
-- `200` - Success
-- `201` - Created (sub-user creation)
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden (also: missing CSRF header, missing permission, desktop-only mode)
-- `404` - Not Found
-- `409` - Conflict (email already in use, unique constraint violation)
-- `410` - Gone (expired share link)
-- `413` - Payload Too Large (storage limit exceeded)
-- `422` - Unprocessable Entity (Validation Error)
-- `429` - Too Many Requests (rate limit or backup-code cooldown)
-- `499` - Client Closed Request (upload cancelled by the client)
-- `500` - Server Error
+A success returns the data as JSON. A queued file operation returns `202` with a `jobId` to poll. An error returns a status and a `message`; see [Error Handling](/docs/api/errors) and [Error Codes](/docs/reference/error-codes).
 
 ## Related Topics
 
 - [Authentication](/docs/concepts/authentication) - Authentication concepts
 - [API Examples](/docs/api/examples) - Code examples
-- [Error Codes](/docs/api/errors) - Error reference
+- [Error Codes](/docs/reference/error-codes) - Error reference

@@ -1,9 +1,9 @@
 ---
 title: 'Docker Issues'
-description: 'Troubleshooting Docker deployment problems.'
+description: 'Fix containers that do not start, fail their health check or cannot be reached.'
 ---
 
-Troubleshooting Docker deployment problems.
+Fix containers that do not start, fail their health check or cannot be reached.
 
 ## Container Issues
 
@@ -45,10 +45,10 @@ docker inspect --format='{{.State.Health.Status}}' tma-cloud-app
 
 **Solutions:**
 
-1. Check application logs
-2. Verify database connection
-3. Check Redis connection (if enabled)
-4. Review health check configuration
+The health check asks `/health`, which answers as soon as the server accepts requests. A failing check means the app is not running or not listening:
+
+1. Read `docker compose logs app` for the startup error
+2. Check that the database is reachable; the app stops at startup when it is not
 
 ## Network Issues
 
@@ -65,7 +65,7 @@ docker inspect --format='{{.State.Health.Status}}' tma-cloud-app
 
 1. Verify port mapping: `docker compose ps`
 2. Check `PORT` in `.env`; it sets the host port, and the container listens on 3000
-3. Access via `http://localhost:3000` (or configured port)
+3. Open `http://localhost:<PORT>`, using the `PORT` from `.env` (3000 by default)
 
 ## Related Topics
 

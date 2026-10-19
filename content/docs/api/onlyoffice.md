@@ -1,9 +1,9 @@
 ---
 title: 'OnlyOffice API'
-description: 'OnlyOffice integration endpoints for TMA Cloud.'
+description: 'Endpoints for opening, serving and saving documents through OnlyOffice.'
 ---
 
-OnlyOffice integration endpoints for TMA Cloud.
+Endpoints for opening, serving and saving documents through OnlyOffice.
 
 ## Editor Configuration
 
@@ -15,7 +15,7 @@ Get OnlyOffice editor configuration for a file.
 
 **Edit locks:** a config in `edit` mode takes the file's [edit lock](/docs/api/files#edit-locks) for its document session. While anyone holds the lock (another browser session or a desktop app), the config comes back in `view` mode. Every open gets its own document key, so two browser sessions would otherwise save over each other instead of co-editing.
 
-**Rate limiting:** General API limit (10000 per 15 minutes per user).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user).
 
 **Validation:**
 
@@ -53,7 +53,7 @@ Get standalone viewer page for a file.
 
 **Permission:** `files.download`, as for the config endpoint.
 
-**Rate limiting:** General API limit (10000 per 15 minutes per user).
+**Rate limiting:** General API limit (30,000 per 15 minutes per user).
 
 **Validation:**
 
@@ -65,13 +65,42 @@ Get standalone viewer page for a file.
 **Response:**
 HTML page with OnlyOffice viewer. Its inline script carries the request's CSP nonce, and the editor config embedded in it is escaped for use inside a `<script>` element. See [Security Model](/docs/concepts/security-model#content-security-policy).
 
+## Open in a Browser Tab
+
+The desktop app opens documents in the user's browser, which has no session cookie for TMA Cloud. It asks for a one-minute link instead.
+
+### POST `/api/onlyoffice/ticket/:id`
+
+Create a link that opens the document without signing in.
+
+**Permission:** `files.download`. The link opens in edit mode only when the caller also has `files.edit`.
+
+**Query:** `theme` (optional) - `light` or `dark`, passed on to the editor.
+
+**Response:**
+
+```json
+{
+  "url": "https://example.com/api/onlyoffice/open/123?ticket=signed_token",
+  "expiresIn": 60
+}
+```
+
+**Errors:** `404` when the file is not in the account; `424` when OnlyOffice is not configured.
+
+### GET `/api/onlyoffice/open/:id?ticket=...`
+
+Serve the same page as the viewer endpoint for the user named in the ticket. No session is needed. A ticket is signed with `JWT_SECRET`, names one file, and expires 60 seconds after it was made. An expired or altered ticket gets a "This link has expired" page with status `401`.
+
+These links are allowed in desktop-app-only mode, since the browser opening them sends no desktop header.
+
 ## File Serving
 
 ### GET `/api/onlyoffice/file/:id`
 
 Serve file to OnlyOffice server (requires signed token).
 
-**Rate limiting:** General API limit (10000 per 15 minutes per IP).
+**Rate limiting:** General API limit (10,000 per 15 minutes per IP).
 
 **Response:**
 File content
@@ -116,7 +145,7 @@ OnlyOffice callback data including `status`, `key`, `url`, and `forcesavetype`.
 
 ## Auto-Save
 
-Documents are saved to storage periodically while being edited, not just on close.
+Documents are saved to storage periodically while being edited, not only when the editor closes.
 
 **How it works:**
 

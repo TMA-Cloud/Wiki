@@ -97,15 +97,15 @@ The message names the failed check.
 
 ### Symptom: "Storage limit exceeded"
 
-1. **Check the user's quota in Settings → Storage.** If it's close to full, delete files or empty trash — trash counts toward quota.
+1. **Check the account's usage** in **Settings** → **Storage**. If it's close to full, delete files or empty trash — trash counts toward quota.
 2. **Check provider limits.** A full bucket quota or suspended provider account must be resolved with the storage provider.
-3. **Admin override.** An admin can raise the limit for a specific user in **Settings → Administration → Registered users**.
+3. **Admin override.** An admin can raise the limit for a specific user in **Settings** → **Administration** → **Registered users**.
 
 ### Symptom: "This file is too large" on a single upload
 
 The file exceeds the per-request max upload size (separate from storage quota).
 
-1. **Admin → Settings → Storage → Maximum upload size.** Raise it if appropriate.
+1. **Raise the limit** in **Settings** → **Storage** → **Maximum upload size** (first user only).
 2. **Reverse proxy limits.** If you run nginx in front of the backend, `client_max_body_size` must also be raised — otherwise nginx rejects the request before it reaches the backend.
 3. **Split the file** if you can't change the limits.
 
@@ -124,8 +124,7 @@ See [Upload Issues](/docs/debugging/upload-issues) for upload-specific problems.
 ### Symptom: "Invalid credentials"
 
 1. **Confirm email + password** — passwords are case-sensitive.
-2. **Is MFA enabled?** If yes, the login flow needs a TOTP code; a missing code surfaces as this error.
-3. **Rate limit.** After 25 attempts in 15 minutes from the same IP and email, further attempts are rejected until the window expires. Wait, or try from another network.
+2. **Rate limit.** After 25 attempts in 15 minutes from the same IP and email, further attempts are rejected until the window expires. Wait, or try from another network.
 
 See [Auth Issues](/docs/debugging/auth-issues) for deeper auth troubleshooting.
 

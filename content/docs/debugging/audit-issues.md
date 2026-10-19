@@ -1,9 +1,9 @@
 ---
 title: 'Audit Issues'
-description: 'Troubleshooting audit logging problems.'
+description: 'Fix audit events that are missing or only in the application log.'
 ---
 
-Troubleshooting audit logging problems.
+Fix audit events that are missing or only in the application log.
 
 ## Audit Events Not Logging
 

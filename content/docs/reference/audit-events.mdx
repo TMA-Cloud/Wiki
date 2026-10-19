@@ -1,9 +1,9 @@
 ---
 title: 'Audit Events'
-description: 'Complete list of audit event types in TMA Cloud.'
+description: 'Every audit event type TMA Cloud records, with its metadata.'
 ---
 
-Complete list of audit event types in TMA Cloud.
+Every audit event type TMA Cloud records, with its metadata.
 
 ## Authentication Events
 
@@ -25,16 +25,18 @@ Complete list of audit event types in TMA Cloud.
 - `file.update` - File contents replaced in place, via `POST /api/files/:id/replace` (metadata: `fileName`, `size`)
 - `file.delete` - File moved to trash
 - `file.delete.queued` - Large move-to-trash operation queued
-- `file.delete.permanent` - File permanently deleted by the earlier synchronous flow
 - `file.delete.permanent.queued` - Permanent deletion or Empty Trash operation queued
 - `file.restore` - File restored from trash
 - `file.restore.queued` - Large restore operation queued
 - `file.rename` - File/folder renamed
 - `file.move` - Files/folders moved
-- `file.copy` - Files/folders copied by the earlier synchronous flow
 - `file.copy.queued` - File/folder copy operation queued
 - `file.star` - File starred
 - `file.unstar` - File unstarred
+- `file.lock` - Someone started editing a file, so others get it read-only
+- `file.unlock` - The editing lock was released
+
+Rows written by older versions may also hold `file.copy` and `file.delete.permanent`, which the queued events replaced.
 
 ## Folder Events
 
@@ -62,13 +64,12 @@ Complete list of audit event types in TMA Cloud.
 ## Admin Events
 
 - `admin.settings.update` - Admin setting changed (metadata: `setting`, e.g. `signup_enabled`, `hide_file_extensions`; `newValue` or `hidden`)
-- `admin.settings.read` - Admin viewed protected settings (failure when unauthorized)
+- `admin.settings.read` - Admin viewed protected settings. A failure means someone other than the first user tried (metadata: `action`)
 - `admin.settings.update` with `setting: "storage_config"` - Bucket saved (metadata: `provider`, `endpoint`, `bucket`, `region`, `targetChanged`, `credentialsChanged`, `version`). A failed save is logged with `status: failure`, `action: update_storage_config`, and the failed `step`. Credentials are never logged
 - `admin.user.list` - Admin listed all users
 - `admin.user.update` - Admin updated user (e.g. storage limit)
 - `admin.orphans.scan` - Admin scanned for orphans (metadata: `graceMinutes`, `storageOrphans`, `databaseOrphans`)
 - `admin.orphans.delete` - Admin deleted selected orphans (metadata: `graceMinutes`, `requestedStorage`, `requestedDatabase`, `storageDeleted`, `databaseDeleted`, `storageSkipped`, `databaseSkipped`)
-- `admin.orphans.access` - Non-admin attempted an orphan endpoint (metadata: `action`, `reason`); always `failure`
 
 ## Account Events
 
@@ -90,7 +91,7 @@ The `audit_activity` view joins these back to names and emails. See [Database Sc
 
 ## Event Metadata
 
-Each event includes metadata with relevant information:
+The main metadata fields by event group:
 
 - **File Events:** `fileId`, `fileName`, `fileSize`, `fileType`. For `file.upload.bulk` and `file.download.bulk`, metadata also includes `fileIds` and `fileCount`.
 - **User Events:** `userId`, `email`, `ipAddress`

@@ -1,9 +1,9 @@
 ---
 title: 'Logging'
-description: 'Logging system documentation for TMA Cloud.'
+description: 'Log levels, formats and request IDs in TMA Cloud.'
 ---
 
-Logging system documentation for TMA Cloud.
+Log levels, formats and request IDs in TMA Cloud.
 
 ## Overview
 

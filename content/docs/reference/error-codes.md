@@ -1,55 +1,44 @@
 ---
 title: 'Error Codes'
-description: 'Complete reference for all error codes in TMA Cloud API.'
+description: 'Every machine-readable error code the TMA Cloud API returns.'
 ---
 
-Complete reference for all error codes in TMA Cloud API.
+Every machine-readable error code the TMA Cloud API returns.
 
 ## How Errors Are Returned
 
-Every error response carries a `message`. Only some carry a machine-readable `error` code as well:
+Every error response carries a `message`. Some also carry a machine-readable `error` code:
 
 ```json
 {
-  "message": "Upload cancelled by client",
-  "error": "REQUEST_ABORTED"
+  "message": "Storage limit exceeded",
+  "error": "STORAGE_LIMIT_EXCEEDED"
 }
 ```
 
-The list below is the complete set of `error` values the backend emits. Anything not listed here returns `message` alone, so clients should branch on the HTTP status code and fall back to `message` rather than expecting a code for every failure.
+The tables below list every `error` code the server sends. Any other error has a `message` only, so branch on the HTTP status and show `message` rather than expecting a code.
 
 ## Upload and Storage
 
-| Code                     | Status | When                                                                          |
-| ------------------------ | ------ | ----------------------------------------------------------------------------- |
-| `STORAGE_LIMIT_EXCEEDED` | 413    | The upload would push the account past its quota                              |
-| `STORAGE_CHECK_FAILED`   | 500    | The quota could not be read, so the upload is refused rather than let through |
-| `REQUEST_ABORTED`        | 499    | Client cancelled the upload mid-request                                       |
-| `STORAGE_NOT_CONFIGURED` | 503    | No bucket is saved yet; returned by any file requests                         |
-| `STORAGE_PROBE_FAILED`   | 422    | A bucket connection check failed; the body includes the failed `step`         |
+| Code                     | Status | When                                                                  |
+| ------------------------ | ------ | --------------------------------------------------------------------- |
+| `STORAGE_LIMIT_EXCEEDED` | 413    | The upload or save would take the account past its storage limit      |
+| `STORAGE_NOT_CONFIGURED` | 503    | No bucket is saved yet; returned by any request for file contents     |
+| `STORAGE_PROBE_FAILED`   | 422    | A bucket connection check failed; the body includes the failed `step` |
 
-## Files and Documents
+## Documents
 
-| Code                 | Status | When                                                                                                                                                        |
-| -------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FILE_NOT_FOUND`     | 404    | Filesystem `ENOENT` reached the error handler                                                                                                               |
-| `MIME_TYPE_MISMATCH` | 400    | OnlyOffice viewer: stored MIME type contradicts the extension. Returned as JSON for XHR requests; direct browser navigation gets an HTML error page instead |
-
-## Authentication
-
-| Code            | Status | When                    |
-| --------------- | ------ | ----------------------- |
-| `INVALID_TOKEN` | 401    | JWT failed verification |
-| `TOKEN_EXPIRED` | 401    | JWT is past its expiry  |
-
-Login failures, missing MFA codes and permission denials return a `message` only — there is no `INVALID_CREDENTIALS` or `FORBIDDEN` code to match on. Use the status code.
+| Code                 | Status | When                                                                                                                                                      |
+| -------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MIME_TYPE_MISMATCH` | 400    | OnlyOffice: the file content does not match its extension. Returned as JSON for API requests; a browser opening the link directly gets an HTML error page |
 
 ## Access Restrictions
 
 | Code                  | Status | When                                                                   |
 | --------------------- | ------ | ---------------------------------------------------------------------- |
 | `DESKTOP_ONLY_ACCESS` | 403    | Instance is in desktop-app-only mode and the request is from a browser |
-| `PERMISSION_DENIED`   | 403    | Filesystem `EACCES` reached the error handler                          |
+
+Failed sign-ins, missing two-factor codes, expired sessions and permission denials have no code. Use the status: `401` for sign-in and session problems, `403` for a missing permission.
 
 ## Database
 
@@ -60,12 +49,10 @@ Login failures, missing MFA codes and permission denials return a `message` only
 
 ## System
 
-| Code                 | Status | When                                                           |
-| -------------------- | ------ | -------------------------------------------------------------- |
-| `INTERNAL_ERROR`     | 500    | Anything that reaches the error handler unmatched              |
-| `FRONTEND_NOT_BUILT` | 404    | A non-API route was requested but the web app build is missing |
-
-An error raised with its own status keeps that status and still carries `INTERNAL_ERROR`. For example, an upload or a new folder whose `parentId` is not a folder in the account returns `404` with `{ "message": "Target folder not found", "error": "INTERNAL_ERROR" }`. Branch on the status, not on this code.
+| Code                 | Status | When                                                                      |
+| -------------------- | ------ | ------------------------------------------------------------------------- |
+| `INTERNAL_ERROR`     | 500    | An unexpected failure. The full error is in the server log, not the reply |
+| `FRONTEND_NOT_BUILT` | 404    | A non-API route was requested but the web app build is missing            |
 
 ## Validation Errors
 
@@ -80,13 +67,16 @@ Validation failures return `422` with a `details` array rather than an `error` c
 
 ## Rate Limit Errors
 
-The rate limiters return `429` with an `error` field holding a **human-readable sentence**, not a code:
+The rate limiters return `429` with the same sentence in `message` and in `error`; it is not a code:
 
 ```json
-{ "error": "Too many requests, please try again later" }
+{
+  "message": "Too many requests, please try again later",
+  "error": "Too many requests, please try again later"
+}
 ```
 
-The backup-code cooldown is the exception — it returns `message` plus `retryAfterMs`. See [Rate Limits](/docs/reference/rate-limits).
+The backup-code cooldown returns `message` plus `retryAfterMs` instead. See [Rate Limits](/docs/reference/rate-limits).
 
 ## Related Topics
 
