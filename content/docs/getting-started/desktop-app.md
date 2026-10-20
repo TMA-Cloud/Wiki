@@ -29,6 +29,15 @@ saved sign-in).
 
 **macOS.** Nothing else to install: Cloud Drive uses the NFS client built into macOS.
 
+### If the App Does Not Open
+
+On Windows the app draws with DirectX 12. A PC without a graphics card uses the software
+renderer built into Windows instead, which works but draws more slowly. If the window
+cannot open, a message says why.
+
+Only one copy runs at a time, and a new start brings the running window forward. If
+nothing happens when you start the app, end `tma-cloud` in Task Manager and start it again.
+
 ### Build from Source
 
 ```bash
