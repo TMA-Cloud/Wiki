@@ -9,14 +9,14 @@ const features = [
   },
   {
     icon: '💽',
-    title: 'Windows Cloud Drive',
-    desc: 'Open and save cloud files from Windows applications.',
-    href: '/docs/getting-started/desktop-app#cloud-drive-mounted-windows-drive',
+    title: 'Cloud Drive',
+    desc: 'Open and save cloud files from any app on Windows, macOS and Linux.',
+    href: '/docs/getting-started/desktop-app#cloud-drive',
   },
   {
     icon: '📝',
     title: 'Document Editing',
-    desc: 'Edit with OnlyOffice or desktop applications and sync changes back.',
+    desc: 'Edit in OnlyOffice or desktop apps; a lock keeps others from saving over you.',
     href: '/docs/guides/user/upload-files#document-editing-and-viewers',
   },
   {
@@ -53,7 +53,7 @@ const steps = [
   {
     n: 3,
     title: 'Sign up',
-    desc: 'Create the first account — it becomes the admin.',
+    desc: 'Create the first account; it becomes the administrator.',
   },
 ];
 
@@ -77,8 +77,9 @@ export default function HomePage() {
             TMA Cloud
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-fd-muted-foreground">
-            Store encrypted files in S3-compatible storage, open them through
-            the web or a Windows drive, and control how they are shared.
+            Keep your files encrypted in your own S3-compatible bucket. Open
+            them in the browser, the desktop app or a Cloud Drive folder on
+            Windows, macOS and Linux, and share them by link.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link

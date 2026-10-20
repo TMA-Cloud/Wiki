@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     default: 'TMA Cloud',
     template: '%s | TMA Cloud',
   },
-  description: 'Self-hosted cloud storage platform — official documentation.',
+  description:
+    'Documentation for TMA Cloud: self-hosted, encrypted cloud storage with a web app, a desktop app and Cloud Drive.',
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {

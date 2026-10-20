@@ -213,6 +213,41 @@ for (const [id, { text }] of pages) {
   }
 }
 
+// The site's own pages and components link into the docs too (the home page
+// cards, for one); those links must resolve like any other.
+const SITE = join(ROOT, '../..');
+const code = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory()
+      ? code(join(dir, e.name))
+      : /\.(tsx?|mjs)$/.test(e.name)
+        ? [join(dir, e.name)]
+        : [],
+  );
+for (const file of ['app', 'components', 'lib'].flatMap((d) =>
+  existsSync(join(SITE, d)) ? code(join(SITE, d)) : [],
+)) {
+  readFileSync(file, 'utf8')
+    .split('\n')
+    .forEach((line, i) => {
+      for (const m of line.matchAll(
+        /['"`](\/docs\/[^'"`\s#?]*)(#[^'"`\s]+)?['"`]/g,
+      )) {
+        if (m[1].includes('[')) continue; // a route pattern, not a link
+        const target = m[1].replace(/^\/docs\/?/, '').replace(/\/$/, '');
+        const anchor = m[2]?.slice(1);
+        const page = pages.get(target);
+        if (!page)
+          problems.push(`${file}:${i + 1}: link to a missing page: ${m[1]}`);
+        else if (anchor && !page.anchors.has(anchor)) {
+          problems.push(
+            `${file}:${i + 1}: link to a missing heading: ${m[1]}#${anchor}`,
+          );
+        }
+      }
+    });
+}
+
 // Every page is listed in its folder's meta.json, and every listed page exists.
 const metas = readdirSync(ROOT, { recursive: true }).filter((f) =>
   /(^|[\\/])meta\.json$/.test(f),
