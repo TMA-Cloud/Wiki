@@ -639,6 +639,29 @@ html > body[data-scroll-locked] {
   padding-left: 1.25rem;
 }
 
+.changelogDate {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-fd-muted-foreground);
+}
+
+.changelogNotice {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.9rem;
+  border-left: 3px solid var(--color-fd-primary);
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--color-fd-primary) 8%, transparent);
+}
+
+.changelogGroup {
+  margin: 1.25rem 0 0;
+  font-weight: 600;
+}
+
+.changelogBreaking {
+  color: var(--color-fd-error, #dc2626);
+}
+
 .changelogDropdownWrapper {
   position: relative;
   width: 100%;

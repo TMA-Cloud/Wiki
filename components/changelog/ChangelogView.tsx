@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { chooseLatestByMajor, semverCompare } from './changelogRepo';
 import { useChangelogIndex, useChangelogRelease } from './changelogHooks';
+import { ReleaseNotes } from './ReleaseNotes';
 
 export function ChangelogOverview() {
   const DEFAULT_CHANGELOG_BASE_URL = 'https://tma-cloud.github.io/changelog/';
@@ -155,35 +156,7 @@ export function ChangelogOverview() {
 
           {loadingRelease ? <p>Loading release...</p> : null}
 
-          {release ? (
-            <div>
-              <h3 style={{ marginBottom: 10 }}>
-                {release.tag}{' '}
-                {release.channel ? (
-                  <span style={{ opacity: 0.8 }}>{`(${release.channel})`}</span>
-                ) : null}
-              </h3>
-
-              {release.intro ? (
-                <p style={{ marginTop: 0 }}>{release.intro}</p>
-              ) : null}
-
-              <ul className="changelogList">
-                {release.items.map((item, idx) => (
-                  <li key={`${release.tag}-${idx}`}>{item}</li>
-                ))}
-              </ul>
-
-              {release.spatialNotes ? (
-                <div style={{ marginTop: 18 }}>
-                  <h4 style={{ marginBottom: 6 }}>Notes</h4>
-                  <div style={{ whiteSpace: 'pre-wrap', opacity: 0.95 }}>
-                    {release.spatialNotes}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          {release ? <ReleaseNotes release={release} /> : null}
         </>
       ) : null}
     </div>
@@ -230,35 +203,7 @@ export function ChangelogMajor({ major }: { major: number }) {
       ) : null}
       {loadingRelease ? <p>Loading release...</p> : null}
 
-      {release ? (
-        <div>
-          <h3 style={{ marginBottom: 10 }}>
-            {release.tag}{' '}
-            {release.channel ? (
-              <span style={{ opacity: 0.8 }}>{`(${release.channel})`}</span>
-            ) : null}
-          </h3>
-
-          {release.intro ? (
-            <p style={{ marginTop: 0 }}>{release.intro}</p>
-          ) : null}
-
-          <ul className="changelogList">
-            {release.items.map((item, idx) => (
-              <li key={`${release.tag}-${idx}`}>{item}</li>
-            ))}
-          </ul>
-
-          {release.spatialNotes ? (
-            <div style={{ marginTop: 18 }}>
-              <h4 style={{ marginBottom: 6 }}>Notes</h4>
-              <div style={{ whiteSpace: 'pre-wrap', opacity: 0.95 }}>
-                {release.spatialNotes}
-              </div>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+      {release ? <ReleaseNotes release={release} /> : null}
     </div>
   );
 }
