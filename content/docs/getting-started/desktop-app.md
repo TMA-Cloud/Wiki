@@ -69,6 +69,7 @@ so it does not ask for the password again after the first one expires.
 
 If the server cannot be reached when the app starts (it is restarting, or the network is
 not up yet), the app keeps the sign-in and shows **Can't reach** with the server address.
+The small line below it gives the reason, such as `tcp connect error: connection refused`.
 It tries again after 2, 4, 8 and 16 seconds, then every 30 seconds. **Try now** retries at
 once; **Sign in again** opens the sign-in form. The password is asked for only when the
 server refuses the session.
