@@ -87,7 +87,9 @@ to the front.
 
 The window opens where you left it: at the same size and position, or maximized if it
 was maximized. **Restore** after a maximized start returns it to the size it had before.
-On Windows the window appears only once it has drawn at that size, so it opens without
+The first time, it opens at 1280 × 820 in the middle of the screen. A window too big for
+the screen it opens on, such as a small or scaled laptop screen, shrinks to fit above the
+taskbar and moves to the middle. On Windows the window appears only once it has drawn at that size, so it opens without
 a flash.
 
 ## Version and Updates
