@@ -234,7 +234,7 @@ An array of file objects, same shape as [List Files](#list-files), plus `openedB
 "openedBy": { "id": "user_123", "name": "Sam Rivera" }
 ```
 
-`openedBy` is the account owner or one of its sub-users, and `name` falls back to the email when the user has no name. It is left out for share-link visitors, deleted users and reads from before the server recorded it. The dashboard's **Recent files** shows it as "Opened 2:18 AM by Sam Rivera", or "by you".
+`openedBy` is the account owner or one of its sub-users, and `name` falls back to the email when the user has no name. A new upload names the person who uploaded it. It is left out for share-link visitors, deleted users and reads from before the server recorded it. The dashboard's **Recent files** shows it as "Opened 2:18 AM by Sam Rivera", or "by you".
 
 ## Upload File
 

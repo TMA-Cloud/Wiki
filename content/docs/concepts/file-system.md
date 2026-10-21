@@ -83,7 +83,7 @@ Copies, moves and pastes keep both instead, giving the new item a numbered name 
 
 ## Last Access Time
 
-Every file and folder carries an `accessed_at` timestamp, surfaced in the UI as **Last opened** in Get Info and as a sort option in the file list. It answers "when was this last read", which `modified` cannot, since `modified` only moves when the contents change. The server also keeps who read it, the owner or one of their sub-users, so the dashboard's **Recent files** can say "Opened 2:18 AM by Sam Rivera". Each person has their own update window, so a sub-user opening a file the owner just opened still counts.
+Every file and folder carries an `accessed_at` timestamp, surfaced in the UI as **Last opened** in Get Info and as a sort option in the file list. It answers "when was this last read", which `modified` cannot, since `modified` only moves when the contents change. The server also keeps who read it, the owner or one of their sub-users, so the dashboard's **Recent files** can say "Opened 2:18 AM by Sam Rivera". A new upload counts as opened by whoever uploaded it. Each person has their own update window, so a sub-user opening a file the owner just opened still counts.
 
 ### What Counts as Reading
 
