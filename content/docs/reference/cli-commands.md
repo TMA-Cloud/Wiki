@@ -195,7 +195,7 @@ Prebuilt Docker images are available on GitHub Container Registry:
 
 ```bash
 docker pull ghcr.io/tma-cloud/tma:latest
-docker pull ghcr.io/tma-cloud/tma:4.0.0
+docker pull ghcr.io/tma-cloud/tma:<tag>
 ```
 
 ### Build Image from Source
@@ -207,7 +207,7 @@ make build
 Build Docker image with default tag.
 
 ```bash
-make build IMAGE_TAG=4.0.0
+make build IMAGE_TAG=<tag>
 ```
 
 Build Docker image with custom tag. The `version` image label is read from the workspace `Cargo.toml` regardless of the tag you pass.

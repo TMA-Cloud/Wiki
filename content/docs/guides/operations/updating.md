@@ -53,9 +53,9 @@ Put local changes to the stack in `compose.override.yml` instead of `compose.yml
 ```yaml
 services:
   app:
-    image: ghcr.io/tma-cloud/tma:4.0.0
+    image: ghcr.io/tma-cloud/tma:<tag>
   worker:
-    image: ghcr.io/tma-cloud/tma:4.0.0
+    image: ghcr.io/tma-cloud/tma:<tag>
 ```
 
 ## New Settings
@@ -79,7 +79,7 @@ A copy of the current `.env.example` is kept in the install directory for its co
 | `TMA_NO_PULL=1`        | Use the image already on the machine, for example one built from source |
 | `TMA_FORCE=1`          | Replace files you edited too                                            |
 
-Example: `TMA_REF=v4.0.0 ./update.sh`
+Example: `TMA_REF=v<tag> ./update.sh`
 
 ## Kept Backups
 

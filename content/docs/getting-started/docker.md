@@ -138,7 +138,7 @@ PostgreSQL and Redis use the `postgres-data` and `redis-data` volumes. File cont
 make build
 
 # Build with custom tag
-make build IMAGE_TAG=4.0.0
+make build IMAGE_TAG=<tag>
 
 # Build without cache
 make build-no-cache
