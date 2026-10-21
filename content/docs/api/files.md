@@ -893,7 +893,9 @@ Get basic metadata for a single file or folder.
   "shared": true,
   "sharedAt": "2024-01-03T10:30:00Z",
   "expiresAt": "2024-01-10T10:30:00Z",
-  "parentId": "folder_456"
+  "parentId": "folder_456",
+  "locationPath": ["Projects", "Reports"],
+  "locationIds": ["folder_789", "folder_456"]
 }
 ```
 
@@ -908,6 +910,8 @@ Get basic metadata for a single file or folder.
   "modified": "2024-01-01T00:00:00Z",
   "accessedAt": "2024-01-02T09:15:00Z",
   "parentId": null,
+  "locationPath": [],
+  "locationIds": [],
   "folderInfo": {
     "totalSize": 1048576,
     "fileCount": 25,
@@ -918,6 +922,7 @@ Get basic metadata for a single file or folder.
 
 - `size` and `folderInfo.totalSize` are in bytes.
 - For folders, `size` may be `null`; use `folderInfo.totalSize` for the recursive size.
+- `locationPath` names the folders from the top of **My Files** down to the item's parent, and `locationIds` holds their IDs in the same order. Both are empty for an item at the top. **Get info** shows the path as **Location**, and **Show in folder** uses the IDs to open the folder with its full breadcrumb.
 - `accessedAt` is the last read time. Calling this endpoint does not update it.
 - `sharedAt` is when the item joined a share.
 - `expiresAt` is the effective share expiration, or `null` when the item is unshared or at least one associated link has no expiration.
