@@ -61,7 +61,7 @@ The check covers the items loaded in the open folder. In a very large folder, a 
 - When everything finishes without an error, the panel closes after five seconds (it stays open while the pointer is over it). After a failure it stays until you close it
 - Notifications appear above the panel
 - Three uploads run at a time; the rest wait in the queue
-- Each running or waiting transfer has a **Cancel** button
+- Each running or waiting transfer has a **Cancel** button, and while any upload or download is running the panel's heading has **Cancel all**, which stops every one of them at once (work the server does keeps going)
 - A failed upload stays in the list with the reason below its name (hover to see all of a long reason), and the other files still upload
 - When a batch finishes with failures, a dialog lists the files that were not uploaded, grouped by reason (up to 50 names per reason). **Copy details** copies every file and its reason. Uploads you cancelled are not listed
 - Files that finished before a cancel stay in the folder

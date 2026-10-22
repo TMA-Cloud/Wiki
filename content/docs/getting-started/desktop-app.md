@@ -149,6 +149,9 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
 - The file opens from the [Cloud Drive](#cloud-drive) folder, where it already is, with
   the system's default app. No other copy is made. When no app is set for the type,
   Windows asks which one to use.
+- On Windows a ring turns round the file's icon until a window shows the file, for up to 15
+  seconds, since a program can take a while to start. Opening the file again meanwhile does
+  nothing more.
 - Opening needs Cloud Drive. While it is not connected, the app says so and points to
   **Settings** → **Desktop app**.
 - **Blocked:** programs, scripts, installers and shortcuts (for example `.exe`, `.msi`,
