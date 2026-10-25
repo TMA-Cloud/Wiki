@@ -169,7 +169,9 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
   Documents) stay on your computer only.
 - Office's lock files (`~$…`) and temporary files stay on your computer.
 
-If you open a document and close it without saving, nothing is uploaded.
+If you open a document and close it without saving, nothing is uploaded. The exception is
+an Excel 97-2003 workbook (`.xls`): Excel writes your name into the file when it opens
+it, so closing it uploads once even without a save.
 
 ### Who Is Editing
 
@@ -186,6 +188,9 @@ Drive folder, TMA Cloud marks it as yours for editing:
   browser, it is read-only in everyone's Cloud Drive and in other browsers, and the row
   says who is editing.
 - When you close the document, the file is free again within a few seconds.
+- Excel 97-2003 workbooks (`.xls`, `.xlt`) leave no `~$` lock file, so TMA Cloud
+  notices them by Excel holding the file open instead, within about 10 seconds of
+  opening and closing.
 
 This also holds for you on another computer. If you left a document open on your
 work PC, your laptop shows **You are editing on another computer** and opens it
