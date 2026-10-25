@@ -84,7 +84,8 @@ apps/
 
 **Interface:** views draw the screen; background requests run off the frame and their
 results are applied on the next frame. The light and dark palettes follow the system
-setting until you switch with the sun or moon button in the header. Text is set in Figtree,
+setting until you switch with the sun or moon button in the header or in **Settings** →
+**Appearance**, where **Text size** zooms the whole interface. Text is set in Inter,
 bundled with the app.
 
 ## Desktop App
