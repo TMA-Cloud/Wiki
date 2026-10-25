@@ -107,10 +107,12 @@ a flash.
 - **When it checks.** After sign-in, and then every 6 hours while the app stays signed
   in, the app reads the published release list (`/api/version/latest`). **Check now** in
   **Settings** → **Updates** checks at once.
-- **Updates install themselves.** When a newer release exists, it downloads in the
-  background (shown in the transfers panel). Once no upload or download is running, the
-  app closes and the new version opens a few seconds later. A download that fails is
-  tried again at the next check.
+- **Updates install themselves.** When a newer release exists, the app waits until no
+  upload or download is running. Then a card in the middle of the window shows
+  **Updating TMA Cloud** with the download's progress, then **Installing**, over a
+  blurred picture of the app, which cannot be used until the update is done. The app
+  closes and the new version opens a few seconds later. If the download or the install
+  fails, the card goes away, a message says why, and the next check tries again.
 
   | Install                                       | How the update is applied                                                                                     |
   | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
