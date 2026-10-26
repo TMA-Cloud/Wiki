@@ -197,17 +197,31 @@ you have a reason to.
 
 ## Continuous Integration
 
-`.github/workflows/test.yml` runs on each push to `main` and on each pull request:
+`.github/workflows/ci.yml` runs on each push to `main` and on each pull request:
 
 - Format (rustfmt and Prettier), house rules, Clippy and the WebAssembly build on Linux
 - Unit tests and the end-to-end suite on Linux, with PostgreSQL and Redis service
   containers and a RustFS bucket
 - Clippy and tests for the desktop app and Cloud Drive on Windows and macOS, since each
   system has its own drive adapter
+- `shellcheck` on the install scripts and git hooks
 
 A newer push to a pull request cancels its older run; runs on `main` always finish.
 
-- `shellcheck` on the install scripts and git hooks
+## Releases
+
+`.github/workflows/release.yml` makes a release. Start it by pushing a `vX.Y.Z` tag, or
+run it from the Actions tab: with the tag field empty it releases the version in
+`Cargo.toml` and creates its tag on the commit it built. The tag must match
+`Cargo.toml`, and a run without a tag stops if that version is already released.
+
+1. The desktop installers for Windows, macOS and Linux and the Docker image are built,
+   and the CI checks run on the same commit.
+2. Only when all of them pass, the image gets its version tags (for `4.1.2`: `4.1.2`,
+   `4.1`, `4` and `latest`; a pre-release such as `4.2.0-rc.1` gets only its own) and the
+   GitHub release is published with the installers attached.
+
+A failed build or check publishes nothing.
 
 ## Related Topics
 
