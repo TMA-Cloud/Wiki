@@ -215,8 +215,9 @@ run it from the Actions tab: with the tag field empty it releases the version in
 `Cargo.toml` and creates its tag on the commit it built. The tag must match
 `Cargo.toml`, and a run without a tag stops if that version is already released.
 
-1. The desktop installers for Windows, macOS and Linux and the Docker image are built,
-   and the CI checks run on the same commit.
+1. The desktop installers for Windows, macOS and Linux and the Docker image are built.
+   Meanwhile the release waits for the CI run that the push to `main` started on the same
+   commit; a commit CI never ran on, or one it failed, is not released.
 2. Only when all of them pass, the image gets its version tags (for `4.1.2`: `4.1.2`,
    `4.1`, `4` and `latest`; a pre-release such as `4.2.0-rc.1` gets only its own) and the
    GitHub release is published with the installers attached.
