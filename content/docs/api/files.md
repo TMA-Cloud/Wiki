@@ -976,7 +976,7 @@ Every file object carries `contentVersion`, which every replace and OnlyOffice s
 - `404` - File not found or not owned by the user
 - `400` - No file in request or invalid file type
 - `409` - `baseVersion` is not the file's current `contentVersion`: someone else saved after this copy was opened. The refusal is recorded in the audit log as a failed `file.update` with reason `stale_version`.
-- `409` - Someone else holds the file's [edit lock](#edit-locks): "Name is editing this file".
+- `409` - Someone else holds the file's [edit lock](#edit-locks): "Name is editing this file". The refusal is recorded in the audit log as a failed `file.update` with reason `locked` and this message as its error.
 
 ## Folder Changes
 

@@ -310,7 +310,7 @@ Audit trail events.
 | `user_agent`         | TEXT        | Browser user agent                                  |
 | `metadata`           | JSONB       | Event-specific data                                 |
 | `error_message`      | TEXT        | Error details when status is 'error'                |
-| `processing_time_ms` | INTEGER     | Operation duration                                  |
+| `processing_time_ms` | INTEGER     | Milliseconds from the request arriving to the event |
 | `created_at`         | TIMESTAMPTZ | Default now()                                       |
 
 `user_id` is always the login that acted. For a sub-user, `account_owner_id` is the owner whose files were touched; for an owner the two match.

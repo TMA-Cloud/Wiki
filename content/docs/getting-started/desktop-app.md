@@ -156,6 +156,8 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
   nothing more.
 - Opening needs Cloud Drive. While it is not connected, the app says so and points to
   **Settings** → **Desktop app**.
+- If the file is not in the Cloud Drive folder yet, the app says "Cannot open _name_:
+  Cloud Drive has not caught up with it yet. Try again in a moment."
 - **Blocked:** programs, scripts, installers and shortcuts (for example `.exe`, `.msi`,
   `.bat`, `.cmd`, `.ps1`, `.vbs`, `.js`, `.lnk`, `.reg`) are refused with "Programs and
   scripts can't be opened from the cloud. Download the file to run it."
@@ -170,6 +172,12 @@ Excel, Photos, a PDF reader — never in the browser, and every save uploads bac
   uploads the new file beside the original. Files saved anywhere else (Desktop,
   Documents) stay on your computer only.
 - Office's lock files (`~$…`) and temporary files stay on your computer.
+- **Renamed while open (Windows).** Windows cannot rename a file a program has open, so
+  when the file is renamed in TMA Cloud meanwhile (in the app, the browser or on another
+  computer), the copy in the Cloud Drive folder keeps its old name until the program
+  closes it. Saves still go to the renamed file, with no second file under the old name,
+  and it stays marked as yours for editing. Opening the renamed file from the desktop app
+  meanwhile opens the copy the program has.
 
 If you open a document and close it without saving, nothing is uploaded. The exception is
 an Excel 97-2003 workbook (`.xls`): Excel writes your name into the file when it opens
