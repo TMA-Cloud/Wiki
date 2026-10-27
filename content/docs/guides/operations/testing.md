@@ -205,6 +205,9 @@ you have a reason to.
 - Clippy and tests for the desktop app and Cloud Drive on Windows and macOS, since each
   system has its own drive adapter
 - `shellcheck` on the install scripts and git hooks
+- `cargo deny check` with `deny.toml`: known vulnerabilities and yanked releases from the
+  RustSec advisory database, licenses, and that every crate comes from crates.io. The
+  advisory database is read fresh on every run, so a new advisory fails `main` too
 
 A newer push to a pull request cancels its older run; runs on `main` always finish.
 
