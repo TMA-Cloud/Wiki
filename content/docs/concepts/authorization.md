@@ -60,7 +60,7 @@ Owners hold every permission over their own account and are never checked agains
 | Permission         | Key              | Covers                                                   |
 | ------------------ | ---------------- | -------------------------------------------------------- |
 | Download           | `files.download` | Single and bulk download, opening files in the viewer    |
-| Upload & create    | `files.upload`   | Upload, folder creation, copy, derived files             |
+| Upload & create    | `files.upload`   | Upload, folder creation, copy                            |
 | Modify             | `files.edit`     | Rename, move, star, replace contents, document editing   |
 | Share              | `files.share`    | Create and revoke share links, read existing share links |
 | Move to trash      | `files.delete`   | Soft delete                                              |

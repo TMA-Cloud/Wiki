@@ -13,15 +13,15 @@ File endpoints operate on the caller's **account**, not on the individual login.
 
 Listing, searching, and reading file details are available to every member of an account. The remaining endpoints require a permission, which owners always hold and sub-users are granted individually:
 
-| Permission       | Endpoints                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `files.download` | `GET /:id/download`, `POST /download/bulk`, `POST /download/bulk/ticket`, `POST /download/bulk/form`         |
-| `files.upload`   | `POST /folder`, `POST /upload`, `POST /upload/bulk`, `POST /upload/check`, `POST /copy`, `POST /:id/derived` |
-| `files.edit`     | `POST /move`, `POST /rename`, `POST /star`, `POST /:id/replace`                                              |
-| `files.share`    | `POST /share`, `POST /share/links`, `POST /link-parent-share`                                                |
-| `files.delete`   | `POST /delete`                                                                                               |
-| `files.restore`  | `POST /trash/restore`                                                                                        |
-| `files.purge`    | `POST /trash/delete`, `POST /trash/empty`                                                                    |
+| Permission       | Endpoints                                                                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `files.download` | `GET /:id/download`, `POST /download/bulk`, `POST /download/bulk/ticket`, `POST /download/bulk/form` |
+| `files.upload`   | `POST /folder`, `POST /upload`, `POST /upload/bulk`, `POST /upload/check`, `POST /copy`              |
+| `files.edit`     | `POST /move`, `POST /rename`, `POST /star`, `POST /:id/replace`                                      |
+| `files.share`    | `POST /share`, `POST /share/links`, `POST /link-parent-share`                                        |
+| `files.delete`   | `POST /delete`                                                                                       |
+| `files.restore`  | `POST /trash/restore`                                                                                |
+| `files.purge`    | `POST /trash/delete`, `POST /trash/empty`                                                            |
 
 A request without the required permission returns `403` with a message naming it:
 
@@ -1066,54 +1066,6 @@ Release your edit lock, taken from the same install. Releasing a lock you do not
 ```json
 { "released": true }
 ```
-
-## Upload Derived File (e.g. Exported Document/PDF)
-
-### POST `/api/files/:id/derived`
-
-Upload a new file that is derived from an existing one while keeping the original file unchanged. This is used by the desktop app when a user opens a document in its desktop app and then uses **Save As** or **Export** (for example, exporting a Word document to PDF or saving a copy as `.docx`, `.xlsx`, or `.pptx`).
-
-The new file is created as a separate entry in the same folder as the original file.
-
-**Path Parameters:**
-
-- `id` - Source file ID (required). The new file is created as a sibling of this file.
-
-**Form Data:**
-
-- `file` - Derived file content (required). Single file in `multipart/form-data`.
-
-The server streams and encrypts the multipart upload directly to the configured bucket, then creates the file metadata.
-
-**Validation:**
-
-- The source file must exist and belong to the authenticated user.
-- The derived file name must be a valid file name.
-- MIME type is detected from file content and stored accordingly.
-- Storage quota and max upload size checks apply in the same way as for normal uploads.
-
-**Response:**
-
-The created file object for the derived file. Common use cases include exported PDFs and alternate Office document formats saved from Word, Excel, or PowerPoint.
-
-```json
-{
-  "id": "file_derived_123",
-  "name": "document.pdf",
-  "type": "file",
-  "size": 4096,
-  "mimeType": "application/pdf",
-  "parentId": "folder_456",
-  "starred": false,
-  "modified": "2024-01-01T12:05:00Z"
-}
-```
-
-**Errors:**
-
-- `404` - Source file not found or not owned by the user
-- `400` - No file in request or invalid file type
-- `413` - Storage limit exceeded
 
 ## Bulk Download Files
 
