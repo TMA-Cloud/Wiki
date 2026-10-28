@@ -276,6 +276,9 @@ extra driver is needed on any system.
 - **Deleting** a file or folder in the drive moves it to the trash, as in the app.
 - **Timestamps.** The access time shows the server's last-read time; created, modified
   and change times show the modification time.
+- **Size on Linux.** `df` and file managers show the account's storage limit as the
+  drive's size and what is left of it as free space, checked at most every 30 seconds.
+  An account without a limit shows 1 PiB.
 
 ### On Windows
 
