@@ -97,7 +97,7 @@ Every file and folder carries an `accessed_at` timestamp, surfaced in the UI as 
 | Opening a folder in the file list   | The folder only, not its contents |
 | Uploading or replacing a file       | That file                         |
 
-Listing a folder marks the folder and leaves its children alone. This matches how Windows treats directory enumeration, and it keeps the value meaningful: if browsing past a file counted as opening it, every file in a folder you visit would look recently used.
+Listing a folder marks the folder and leaves its children alone. This matches how Windows treats directory enumeration, and it keeps the value meaningful: if browsing past a file counted as opening it, every file in a folder you visit would look recently used. Cloud Drive's listings do not count either, since it lists every folder it keeps current on each resync whether or not anyone looks; files opened from it still count, through the download.
 
 Searching, viewing Get Info, renaming, moving, starring and sharing do not count as reads.
 

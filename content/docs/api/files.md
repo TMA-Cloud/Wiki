@@ -48,6 +48,7 @@ List files and folders.
 - `order` - Sort order: `asc`, `desc` (optional, defaults to `desc`)
 - `limit` - Page size from 1 to 500 (optional, defaults to 200)
 - `cursor` - Opaque value from the previous response's `X-Next-Cursor` header
+- `background` - `true` for a listing the client makes on its own rather than for a person; the folder's last access time is left alone. Cloud Drive sends it on every listing.
 
 Any other `sortBy` value is ignored and the default is used. `deletedAt` is only meaningful on `/api/files/trash`.
 
