@@ -2,11 +2,9 @@
 // Run with `npm run check:docs` (part of `npm run lint`). Exits 1 on any problem.
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('../content/docs/', import.meta.url).pathname.replace(
-  /^\/(\w:)/,
-  '$1',
-);
+const ROOT = fileURLToPath(new URL('../content/docs/', import.meta.url));
 
 // Phrases that add nothing or oversell. Say what happens instead.
 const BANNED = [

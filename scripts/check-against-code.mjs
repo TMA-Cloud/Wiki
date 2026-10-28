@@ -3,11 +3,9 @@
 // Without a path it uses $TMA_REPO, or the folder next to the wiki that holds the app.
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const DOCS = new URL('../content/docs/', import.meta.url).pathname.replace(
-  /^\/(\w:)/,
-  '$1',
-);
+const DOCS = fileURLToPath(new URL('../content/docs/', import.meta.url));
 const isApp = (dir) => existsSync(join(dir, 'crates/tma-server/src'));
 const sibling = () => {
   const parent = join(DOCS, '../../..');
