@@ -127,6 +127,10 @@ These containers read the password as written, without percent-decoding. `setup.
 
 **Database access from host:** To run `tma-server` commands that need the database (e.g. bulk import) from the host, the DB port must be reachable. In `docker-compose.yml`, uncomment the postgres `ports` entry (e.g. `127.0.0.1:5432:5432`).
 
+### PostgreSQL Settings
+
+The `postgres` service starts with `shared_buffers=512MB`, `work_mem=8MB`, `maintenance_work_mem=128MB`, `max_connections=100` and `wal_compression=zstd`. The last one compresses the full page images PostgreSQL writes to its write-ahead log the first time a page changes after each checkpoint. Most of TMA Cloud's writes are small and spread out, so those images are most of what it writes; with zstd, a production-shaped load wrote about half as much. Put different values in `compose.override.yml`.
+
 ### Persistent Data
 
 PostgreSQL and Redis use the `postgres-data` and `redis-data` volumes. File contents are stored in the configured S3-compatible bucket.
