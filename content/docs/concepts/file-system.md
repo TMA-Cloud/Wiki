@@ -74,7 +74,7 @@ Copies, moves and pastes keep both instead, giving the new item a numbered name 
 - Rename operations update database metadata without moving stored objects
 - Copy operations are queued on the background worker, use server-side object-store copies (24 at once), and read folder trees once before batched inserts
 - File lists use stable cursor batches and load continuously as the user scrolls. Only visible grid/list rows plus a small overscan are rendered
-- Folder sizes and descendant counts are maintained by database triggers. Size sorting uses those stored totals and the matching page-order index instead of walking a folder tree during a listing. Nothing recomputes them on read; a weekly worker job recomputes them from the rows and reports any folder whose stored totals were wrong. See [Background Workers](/docs/guides/operations/background-workers#maintenance-schedule)
+- Folder sizes and descendant counts are maintained by database triggers. Size sorting reads the folder's rows and orders them by those stored totals instead of walking a folder tree during a listing. Nothing recomputes them on read; a weekly worker job recomputes them from the rows and reports any folder whose stored totals were wrong. See [Background Workers](/docs/guides/operations/background-workers#maintenance-schedule)
 
 ### Path Management
 
