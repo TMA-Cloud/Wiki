@@ -39,7 +39,15 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
 
 // Renders `llms.txt`, `llms-full.txt` and the per-page Markdown routes.
 export const docsLlms = llms(source, {
-  renderPage: async (page) => `# ${page.data.title} (${page.url})
+  renderPage: async (page) => {
+    // MDX components reach the processed Markdown as page props.
+    const rendered =
+      source.getPage(page.slugs, {
+        language: page.locale,
+        props: { components: getMDXComponents() },
+      }) ?? page;
+    return `# ${page.data.title} (${page.url})
 
-${await page.data.getText('processed', { components: getMDXComponents() })}`,
+${await rendered.data.getText('processed')}`;
+  },
 });
