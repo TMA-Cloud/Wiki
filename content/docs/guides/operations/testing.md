@@ -34,7 +34,7 @@ Node.js the Prettier half is skipped with a note; CI always runs it.
 cargo xtask fmt
 ```
 
-Format everything: `cargo fmt` and Prettier 3.9.9 through `npx`. Add `--check` to only
+Format everything: `cargo fmt` and Prettier 3.10.1 through `npx`. Add `--check` to only
 report.
 
 ```bash
