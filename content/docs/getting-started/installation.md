@@ -47,7 +47,7 @@ To set up without the script, or to change its options, see [Docker Deployment](
 
 ### Manual-Installation Prerequisites
 
-- Rust (stable, from [rustup](https://rustup.rs)) with the `wasm32-unknown-unknown` target
+- Rust 1.100 or newer (stable, from [rustup](https://rustup.rs); `rustup update` brings an older one up) with the `wasm32-unknown-unknown` target
 - [trunk](https://trunkrs.dev), to build the web app
 - PostgreSQL (v17+)
 - Redis (v6+). `REDIS_URL` must be set, but the server keeps running while Redis is unreachable: caching is off and live updates reach only clients of the same server process
